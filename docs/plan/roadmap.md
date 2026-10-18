@@ -25,7 +25,9 @@
 | sd/stage0-probe 실행 (정보 수집, 설정 백업, 셔터 횟수) | 완료. docs/research/2026-10-18-probe-result.md |
 | 진단 결과 분석 후 단계 1 설계 확정 | 완료. docs/plan/stage1-design.md |
 
-단계 1 패키지: sd/stage1-install, sd/stage1-uninstall, sd/stage1-test (각 README 참고). PC 가짜 루트에서 설치/재설치/제거/거부 시뮬레이션 통과.
+단계 1 완료 (2026-10-19): v2 래퍼(bt-stack-up.sh) 실기 검증, 블루투스 = 모드 스위치 동작 확인. 패키지는 sd/stage1-install, sd/stage1-uninstall, sd/stage1-test.
+
+단계 2 첫 판: sd/nx500ex (메뉴, A 순위 기능). 실기 확인 대기.
 
 ### 단계 1. 기반
 

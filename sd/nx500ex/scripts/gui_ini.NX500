@@ -1,0 +1,14 @@
+checkbox|무음 셔터|silent.sh
+checkbox|렌즈없이 촬영|nolens.sh
+
+button|프로필|@/mnt/mmc/nx500ex/scripts/gui_profile
+button|셔터 횟수|info.sh
+
+checkbox|텔넷/FTP|telnet.sh
+button|IP|
+
+checkbox|내 체크박스|user_check.sh
+button|내 버튼|user_button.sh
+
+checkbox|진단 기록|debug.sh
+button|닫기|close.sh

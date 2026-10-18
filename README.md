@@ -14,3 +14,4 @@ Samsung NX500 기능 확장 프로젝트. SD 카드에 넣으면 실행되고 �
 - sd/stage1-install/, sd/stage1-uninstall/, sd/stage1-test/ : 래퍼 설치, 완전 제거, 검증용 SD 구성
 - docs/research/2026-10-18-stage1-test.md : 단계 1 실기 검증 기록
 - docs/research/2026-10-19-firmware-bt-analysis.md : 공식 펌웨어 분석 (블루투스 켜기/끄기, SD 언마운트 실제 동작)
+- sd/nx500ex/ : 실사용 SD 패키지 (메뉴, 키 조합, 기능)
