@@ -18,7 +18,7 @@ popup "스태킹 ${F}장<br>(EV 두번=중단)" 2
   jlog "fstack start near=$NEAR far=$FAR frames=$F"
   drive_save; drive_single
   st cap capt mf on > /dev/null 2>&1
-  sleep $POPUP_CLEAR
+  sleep 1
   k=0
   while [ $k -lt "$F" ]; do
     T=$((NEAR + (FAR - NEAR) * k / (F - 1)))

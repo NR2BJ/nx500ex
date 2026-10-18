@@ -19,7 +19,7 @@ fi
 (
   trap 'keys_release; lcd_restore; drive_restore; rm -f $JOBPID; jlog "interval stopped after $k"; exit 0' TERM
   k=0
-  sleep $POPUP_CLEAR
+  sleep 3
   jlog "interval start every ${G}s count ${C} dial=$(dial)"
   drive_save; drive_single
   s1_hold; sleep 1
