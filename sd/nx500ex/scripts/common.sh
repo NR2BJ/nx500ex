@@ -54,8 +54,9 @@ now_cs() { read _u _r < /proc/uptime; echo "${_u%.*}${_u#*.}"; }
 shutter_idx() { _s=$(prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'); [ -n "$_s" ] && [ "$_s" -gt 32767 ] && _s=$((_s - 65536)); echo "$_s"; }
 shutter_set() { _s=$1; [ "$_s" -lt 0 ] && _s=$((_s + 65536)); prefman set 0 0xa340 l $_s > /dev/null 2>&1; st app mode m > /dev/null 2>&1; }
 BULB_IDX=-96
-# 무음 셔터: 1/4 초(셔터 값 32)보다 긴 노출은 막히거나(1/4 초 근처에서 멈춤) 깨진다 (2026-10-19 RAW 실측)
-SILENT_MIN_IDX=32
+# 무음 셔터: 실제 노출이 약 0.2 초에서 멈춘다. 1/5 까지는 맞고, 1/4 는 약 0.2 스톱 모자라고, 그보다 느리면 모두 약 0.2 초,
+# 수 초 이상은 사진이 깨진다 (2026-10-19 RAW 실측, ISO 100 F22 1/10 ~ 2초 14장). 1/5 (셔터 값 37) 보다 느리면 거부
+SILENT_MIN_IDX=37
 silent_on() { [ -f "$D/scripts/auto/silent.sh" ]; }
 iso_now() { st cap capdtm getusr ISO 2>/dev/null | tr -d '\000\r' | sed -n 's/.*is \([A-Z_0-9]*\).*/\1/p'; }
 dial() { set -- $(st cap capdtm getusr DIALMODE 2>/dev/null); echo "$3"; }

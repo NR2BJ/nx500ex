@@ -13,10 +13,11 @@ IDX=$(shutter_idx)
 case "$IDX" in ''|*[!0-9-]*) popup "셔터 값을 읽지 못함" 3; exit 0 ;; esac
 # ISO 자동이면 카메라가 셔터에 맞춰 ISO 를 바꿔 밝기가 같아진다 (2026-10-19 실기: 1/160 ISO1250, 1/40 ISO320, 1/10 ISO100)
 ISO=$(iso_now)
-[ "$ISO" = ISO_AUTO ] && { popup "ISO 자동이면 HDR 이 안 됨. ISO 를 고정하고 사용" 4; exit 0; }
-# 무음 셔터는 1/4 초보다 긴 노출이 막힌다. 가장 긴 장(IDX - 2 x 간격)이 그보다 길면 거부
+jlog "hdr check iso=$ISO silent=$(silent_on && echo on || echo off) idx=$IDX"
+case "$ISO" in *AUTO*) false ;; *) true ;; esac || { popup "ISO 자동이면 HDR 이 안 됨. ISO 를 고정하고 사용" 4; exit 0; }
+# 무음 셔터는 1/5 초보다 긴 노출이 막힌다. 가장 긴 장(IDX - 2 x 간격)이 그보다 길면 거부
 if silent_on && [ $((IDX - 2 * 16 * E)) -lt $SILENT_MIN_IDX ]; then
-  popup "무음 셔터는 1/4초보다 긴 노출 불가. 가운데 셔터를 빠르게 하거나 간격을 줄이세요" 4; exit 0
+  popup "무음 셔터는 1/5초보다 긴 노출 불가. 가운데 셔터를 빠르게 하거나 간격을 줄이세요" 4; exit 0
 fi
 popup "HDR 5장 ±$((2*E))EV 시작 (EV 두 번 = 중단)" 2
 (
