@@ -12,3 +12,4 @@ Samsung NX500 기능 확장 프로젝트. SD 카드에 넣으면 실행되고 �
 - docs/research/2026-10-18-probe-result.md : 진단 결과
 - docs/plan/stage1-design.md : 단계 1 설계
 - sd/stage1-install/, sd/stage1-uninstall/, sd/stage1-test/ : 래퍼 설치, 완전 제거, 검증용 SD 구성
+- docs/research/2026-10-18-stage1-test.md : 단계 1 실기 검증 기록
