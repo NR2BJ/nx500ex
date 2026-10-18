@@ -35,139 +35,139 @@ NX-KS 2.88 원본, ge0rg 수정본(nx-ks-mod), ge0rg 저장소에 올라온 미�
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | 무음 전자셔터 | KS | 설정 > Silent Shutter (체크박스, 부팅마다 재적용) | rolling_shutter.sh: st cap capdtm setusr ADJUSTSHUTTERTYPE 0x750001 | 낮음 | NX500 전용. 단사만, 1/30 보다 느린 셔터 불가, ISO 6400 이상 화질 저하 |
-| | HDR 5장 브라케팅 | KS | Custom Func. > HDR | 1HDR.sh: M 모드, MF 고정 후 셔터 속도 5단계(약 1/15~1/6000) prefman 로 바꿔가며 촬영 | 낮음 | 카메라 내장 브라케팅보다 범위가 넓음 |
-| | 벌브 타이머 | G | Time-Lapse > Bulb | bulb_menu.sh 로 초 입력, bulb.sh 가 S1+S2 누른 상태 유지, LCD 블랙아웃, /tmp/stop.flag 로 중단 | 낮음 | 원본 2.88 의 Coming soon 자리. NXWA 에는 없음 |
-| | 렌즈 미인식 상태 촬영 | KS | 설정 > No Lens Release | nolens.sh: prefman 0xc2dd(NX500) / 0x3071(NX1) = 1 | 낮음 | 접점 불량 렌즈, 어댑터 렌즈용 |
-| | ZoomZoom (줌 버스트) | KS | Custom Func. > ZoomZoom | zoomzoom.sh: 지연 입력 후 촬영 시작과 동시에 파워줌을 wide 로 | 낮음 | 파워줌 렌즈 필요 |
-| | 촬영 지연 셀프타이머 | U | 초기 sd.zip 의 EV+반셔터 | 약 10초 뒤 LED 깜빡이며 촬영, 브라케팅/연사 그대로 | 낮음 | NX-KS 에는 없음. 스크립트 몇 줄 |
-| | AF-S/단사 와 AF-C/고속연사 토글 | U | 초기 sd.zip 의 EV 더블클릭 | st app nx capture 계열 | 낮음 | NX-KS 에는 없음 |
-| | JPEG SuperFine 과 RAW 토글 | U | 초기 sd.zip 의 EV+AEL | capdtm 설정 | 낮음 | NX-KS 에는 없음 |
-| | 진짜 백버튼 AF (BBAF) | U | keyscan bbaf 옵션 | keymask 로 반셔터 AF 차단 | 낮음 | 상류 문서에 "아직 제대로 안 됨". NX-KS 1.48~1.79 에 TBBAF 로 있다가 제거됨 |
+|1 | 무음 전자셔터 | KS | 설정 > Silent Shutter (체크박스, 부팅마다 재적용) | rolling_shutter.sh: st cap capdtm setusr ADJUSTSHUTTERTYPE 0x750001 | 낮음 | NX500 전용. 단사만, 1/30 보다 느린 셔터 불가, ISO 6400 이상 화질 저하 |
+|2 | HDR 5장 브라케팅 | KS | Custom Func. > HDR | 1HDR.sh: M 모드, MF 고정 후 셔터 속도 5단계(약 1/15~1/6000) prefman 로 바꿔가며 촬영 | 낮음 | 카메라 내장 브라케팅보다 범위가 넓음 |
+|1 | 벌브 타이머 | G | Time-Lapse > Bulb | bulb_menu.sh 로 초 입력, bulb.sh 가 S1+S2 누른 상태 유지, LCD 블랙아웃, /tmp/stop.flag 로 중단 | 낮음 | 원본 2.88 의 Coming soon 자리. NXWA 에는 없음 |
+|1 | 렌즈 미인식 상태 촬영 | KS | 설정 > No Lens Release | nolens.sh: prefman 0xc2dd(NX500) / 0x3071(NX1) = 1 | 낮음 | 접점 불량 렌즈, 어댑터 렌즈용 |
+|2 | ZoomZoom (줌 버스트) | KS | Custom Func. > ZoomZoom | zoomzoom.sh: 지연 입력 후 촬영 시작과 동시에 파워줌을 wide 로 | 낮음 | 파워줌 렌즈 필요 |
+|2 | 촬영 지연 셀프타이머 | U | 초기 sd.zip 의 EV+반셔터 | 약 10초 뒤 LED 깜빡이며 촬영, 브라케팅/연사 그대로 | 낮음 | NX-KS 에는 없음. 스크립트 몇 줄 |
+|1 | AF-S/단사 와 AF-C/고속연사 토글 | U | 초기 sd.zip 의 EV 더블클릭 | st app nx capture 계열 | 낮음 | NX-KS 에는 없음 |
+|3 | JPEG SuperFine 과 RAW 토글 | U | 초기 sd.zip 의 EV+AEL | capdtm 설정 | 낮음 | NX-KS 에는 없음 |
+|1 | 진짜 백버튼 AF (BBAF) | U | keyscan bbaf 옵션 | keymask 로 반셔터 AF 차단 | 낮음 | 상류 문서에 "아직 제대로 안 됨". NX-KS 1.48~1.79 에 TBBAF 로 있다가 제거됨 |
 
 ### 1.2 포커스
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | 포커스 풀 (두 지점 왕복) | KS | EV+반셔터 | EV_S1.sh: 저장 위치와 현재 위치 차이만큼 st cap iq af mv | 낮음 | 영상용. 속도는 Focus-Pull Speed |
-| | 포커스 풀 속도 | KS | Focus+Profiles > Focus-Pull Speed | fpspeed.sh: 1~255 를 systemctl 환경변수 fps 에 저장 | 낮음 | |
-| | 포커스 스태킹 | KS | Focus+Profiles > Focus Stacking | fstack.sh -> focus_stack 바이너리 (Near/Far 지정 후 Stack) | 낮음 | G 는 stapp 사용으로 교체, U 원본에 sweep 모드와 명령행 인자 있음 |
-| | 포커스 위치 버튼 | KS | Focus+Profiles > Focus Buttons | focus_buttons 바이너리: 길게 눌러 저장, 짧게 눌러 복원 | 낮음 | 저장 파일이 /mnt/mmc/scripts/af_positions.txt 로 바이너리에 하드코딩. W 가 fbuttons.sh 로 폴더 생성 버그 수정 |
-| | 부팅 시 마지막 포커스 복원 | KS | 설정 > Refocus on Boot | refocus.sh: /sdcard/presets/hib 값으로 이동 | 낮음 | Hibernate, Sleep, Wake Lapse 가 위치를 저장 |
-| | 지속 피킹 (반셔터 놓으면 MF 어시스트 유지) | KS/U | keyscan peaking 옵션 + peak.sh | /tmp/peaking_on 플래그 | 낮음 | 2.88 에서는 메뉴에 없고 스크립트만 남음 |
+|2 | 포커스 풀 (두 지점 왕복) | KS | EV+반셔터 | EV_S1.sh: 저장 위치와 현재 위치 차이만큼 st cap iq af mv | 낮음 | 영상용. 속도는 Focus-Pull Speed |
+|2 | 포커스 풀 속도 | KS | Focus+Profiles > Focus-Pull Speed | fpspeed.sh: 1~255 를 systemctl 환경변수 fps 에 저장 | 낮음 | |
+|2 | 포커스 스태킹 | KS | Focus+Profiles > Focus Stacking | fstack.sh -> focus_stack 바이너리 (Near/Far 지정 후 Stack) | 낮음 | G 는 stapp 사용으로 교체, U 원본에 sweep 모드와 명령행 인자 있음 |
+|3 | 포커스 위치 버튼 | KS | Focus+Profiles > Focus Buttons | focus_buttons 바이너리: 길게 눌러 저장, 짧게 눌러 복원 | 낮음 | 저장 파일이 /mnt/mmc/scripts/af_positions.txt 로 바이너리에 하드코딩. W 가 fbuttons.sh 로 폴더 생성 버그 수정 |
+|3 | 부팅 시 마지막 포커스 복원 | KS | 설정 > Refocus on Boot | refocus.sh: /sdcard/presets/hib 값으로 이동 | 낮음 | Hibernate, Sleep, Wake Lapse 가 위치를 저장 |
+|2 | 지속 피킹 (반셔터 놓으면 MF 어시스트 유지) | KS/U | keyscan peaking 옵션 + peak.sh | /tmp/peaking_on 플래그 | 낮음 | 2.88 에서는 메뉴에 없고 스크립트만 남음 |
 
 ### 1.3 동영상
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | 비트레이트 변경 | KS | Custom Func. > Video Bitrates | br_set.sh, pokemon, pokemonche, gbr, poker: di-camera-app 메모리의 비트레이트 상수 패치. 슬롯 4K Pro/HQ, HD Pro/HQ, VGA HQ, 35~400 Mbps | 중간 | 부팅 기본값 Pro4K 160, ProHD 180, Hq4K 90, HqHD 90, HqVGA 180 (auto/a_init.sh). 펌웨어 1.12/1.41 고정 오프셋 |
-| | 해상도 슬롯 바꿔치기 | KS | Custom Func. > Mod Resolutions | res_*.sh 와 resup: di-camera-app 코드의 해상도 상수 패치. DC/UHD/VGA 슬롯을 UHD/DC/2.5K/1080p 로 | 중간 | NX500 8종, NX1 6종(2.5K 없음). 이전 문서의 "NX500 전용"은 오류 |
-| | 4K 15분 제한 우회 | KS | VGA 슬롯을 UHD 로 바꿔 촬영 | res_VGAUHD.sh | 중간 | NX500 은 UHD 15분 제한이 별도. V 의 nx-patch 는 이를 직접 제거했었음 |
-| | 30분 녹화 제한 해제 | KS | 설정 > No Rec Limit | r-limit.sh: prefman 0xc2d9 / 0x306d = 1 | 낮음 | 70분 넘는 파일 문제 있다는 원본 경고. 해킹 없이 쓰는 U 의 nx_rec_limit_remover.zip 도 있음 |
-| | 배치 녹화 (클립 자동 이어 찍기) | KS | Custom Func. > Batch Recording | brec.sh, brb.sh, blackout: 길이 입력 후 REC 누를 때까지 반복, 블랙아웃 선택 | 낮음 | 제한 시간보다 짧게 설정해야 함 |
-| | 스텔스 녹화 | KS | EV+AEL | EV_AEL.sh: 터치 OFF, LCD/LED 끄고 10분 단위 배치 녹화 즉시 시작 | 낮음 | W 는 이 키를 FilmLab 으로 재할당, 원본은 EV_AEL.community.sh 로 보존 |
-| | LCD 끈 채 녹화 | KS | 2.55 메뉴의 LCD-Off Rec (2.88 은 메뉴 제외) | nrec.sh | 낮음 | 스크립트만 잔존 |
-| | 캠코더 모드 (반셔터=일시정지, 셔터=REC) | KS | Custom Func. > Camcorder Mode | camcorder_mode.sh -> shutter_to_rec | 낮음 | 짐벌 사용 시 유용 |
-| | 셔터 키 임의 재지정 | U | 없음 | shutter_to_key ael rec 처럼 반셔터/전셔터를 원하는 키로 | 낮음 | 2019년 Otto 추가, NX-KS 에 미포함 |
-| | 영상 파일 손상 전 자동 재시작 | U | 없음 | log_watcher | 낮음 | 상류에만 있음 |
-| | 1080p 120fps (NX500, 실제로는 진짜 120 아님) | U | factory mode 스크립트 | sys_param movie size | 낮음 | 비트레이트 낮음 |
-| | 2.5K 영상 (구형 방식) | U | factory mode 스크립트 | sys_param movie size 2560_1440_30p | 낮음 | 저비트레이트. 해상도 모드로 대체됨 |
-| | NX500 UHD 15분, FHD 50/60p 25분 제한 제거 | V | nx-patch | 메모리 패치 | 중간 | NX-KS 에는 직접 제거 기능 없음 |
-| | DEV 메뉴 상시 접근 | V | nx-patch | | 중간 | 키 조합은 여전히 필요 |
+|3 | 비트레이트 변경 | KS | Custom Func. > Video Bitrates | br_set.sh, pokemon, pokemonche, gbr, poker: di-camera-app 메모리의 비트레이트 상수 패치. 슬롯 4K Pro/HQ, HD Pro/HQ, VGA HQ, 35~400 Mbps | 중간 | 부팅 기본값 Pro4K 160, ProHD 180, Hq4K 90, HqHD 90, HqVGA 180 (auto/a_init.sh). 펌웨어 1.12/1.41 고정 오프셋 |
+|3 | 해상도 슬롯 바꿔치기 | KS | Custom Func. > Mod Resolutions | res_*.sh 와 resup: di-camera-app 코드의 해상도 상수 패치. DC/UHD/VGA 슬롯을 UHD/DC/2.5K/1080p 로 | 중간 | NX500 8종, NX1 6종(2.5K 없음). 이전 문서의 "NX500 전용"은 오류 |
+|3 | 4K 15분 제한 우회 | KS | VGA 슬롯을 UHD 로 바꿔 촬영 | res_VGAUHD.sh | 중간 | NX500 은 UHD 15분 제한이 별도. V 의 nx-patch 는 이를 직접 제거했었음 |
+|3 | 30분 녹화 제한 해제 | KS | 설정 > No Rec Limit | r-limit.sh: prefman 0xc2d9 / 0x306d = 1 | 낮음 | 70분 넘는 파일 문제 있다는 원본 경고. 해킹 없이 쓰는 U 의 nx_rec_limit_remover.zip 도 있음 |
+|3 | 배치 녹화 (클립 자동 이어 찍기) | KS | Custom Func. > Batch Recording | brec.sh, brb.sh, blackout: 길이 입력 후 REC 누를 때까지 반복, 블랙아웃 선택 | 낮음 | 제한 시간보다 짧게 설정해야 함 |
+|3 | 스텔스 녹화 | KS | EV+AEL | EV_AEL.sh: 터치 OFF, LCD/LED 끄고 10분 단위 배치 녹화 즉시 시작 | 낮음 | W 는 이 키를 FilmLab 으로 재할당, 원본은 EV_AEL.community.sh 로 보존 |
+|3 | LCD 끈 채 녹화 | KS | 2.55 메뉴의 LCD-Off Rec (2.88 은 메뉴 제외) | nrec.sh | 낮음 | 스크립트만 잔존 |
+|3 | 캠코더 모드 (반셔터=일시정지, 셔터=REC) | KS | Custom Func. > Camcorder Mode | camcorder_mode.sh -> shutter_to_rec | 낮음 | 짐벌 사용 시 유용 |
+|3 | 셔터 키 임의 재지정 | U | 없음 | shutter_to_key ael rec 처럼 반셔터/전셔터를 원하는 키로 | 낮음 | 2019년 Otto 추가, NX-KS 에 미포함 |
+|3 | 영상 파일 손상 전 자동 재시작 | U | 없음 | log_watcher | 낮음 | 상류에만 있음 |
+|3 | 1080p 120fps (NX500, 실제로는 진짜 120 아님) | U | factory mode 스크립트 | sys_param movie size | 낮음 | 비트레이트 낮음 |
+|3 | 2.5K 영상 (구형 방식) | U | factory mode 스크립트 | sys_param movie size 2560_1440_30p | 낮음 | 저비트레이트. 해상도 모드로 대체됨 |
+|3 | NX500 UHD 15분, FHD 50/60p 25분 제한 제거 | V | nx-patch | 메모리 패치 | 중간 | NX-KS 에는 직접 제거 기능 없음 |
+|2 | DEV 메뉴 상시 접근 | V | nx-patch | | 중간 | 키 조합은 여전히 필요 |
 
 ### 1.4 타임랩스와 예약 촬영
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | Wake Lapse (예약 시작 타임랩스) | KS | Time-Lapse > Wake Lapse | wakelapse.sh + timelapse.tp: rtcwake -m mem 으로 잠들었다 깨어나 포커스 복원 후 촬영 | 낮음 | 영상 모드에서는 거부 |
-| | Ramping (노출 램핑, 홀리그레일) | KS | Time-Lapse > Ramping | ramping.sh + ramplapse.tp + ramp/*.sh 7개 파라미터 | 낮음 | 수동 렌즈나 조리개 고정 권장 |
-| | Mod Lapse (사진/영상 인터벌, EV Smooth) | KS/U | Time-Lapse > Mod Lapse | mod_lapse 바이너리 자체 GUI | 낮음 | 종료 후 전원 OFF, 블랙아웃 옵션 |
-| | 전원 절약 기능 끄기/켜기 | U | factory mode 도구 | nx_power_save_disabler.zip | 낮음 | 장시간 타임랩스용 |
+|2 | Wake Lapse (예약 시작 타임랩스) | KS | Time-Lapse > Wake Lapse | wakelapse.sh + timelapse.tp: rtcwake -m mem 으로 잠들었다 깨어나 포커스 복원 후 촬영 | 낮음 | 영상 모드에서는 거부 |
+|2 | Ramping (노출 램핑, 홀리그레일) | KS | Time-Lapse > Ramping | ramping.sh + ramplapse.tp + ramp/*.sh 7개 파라미터 | 낮음 | 수동 렌즈나 조리개 고정 권장 |
+|2 | Mod Lapse (사진/영상 인터벌, EV Smooth) | KS/U | Time-Lapse > Mod Lapse | mod_lapse 바이너리 자체 GUI | 낮음 | 종료 후 전원 OFF, 블랙아웃 옵션 |
+|2 | 전원 절약 기능 끄기/켜기 | U | factory mode 도구 | nx_power_save_disabler.zip | 낮음 | 장시간 타임랩스용 |
 
 ### 1.5 화면과 조작
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | 모드 메뉴 (두 열 버튼) | KS | EV 더블클릭(NX500), EV+OK(NX1), 화면의 NX-KS 버튼 | loadgui.sh -> mod_gui + gui_*.NX500 | 낮음 | 최대 24버튼, 스크롤 없음, 누르면 닫힘 |
-| | 메뉴에 IP 표시 | G/W | 메인 메뉴 IP 버튼 | G: 수정된 mod_gui 바이너리(소스 없음). W: gen_menu.sh 가 메뉴 파일을 매번 생성 | 낮음 | W 방식은 바이너리 수정 없음 |
-| | 메뉴 속도 개선 | W | | fork 횟수 줄이기, 메뉴 캐시 | 낮음 | |
-| | NXUI 대체 메뉴 (Nuklear) | W | EV+AEL, EV+WiFi, nxui.sh | nxui.arm (X11 직접, EFL 미사용) | 낮음 | 720x192 하단 필터 바, 720x336 메인 메뉴. 중국어 |
-| | 화면 상단 NX-KS 버튼 | KS | 자동 | onscreen_ks, on_ks(PNG) | 낮음 | OFF menu-button 체크로 5초 뒤 숨김 |
-| | 2.35:1 시네마 가이드 | KS | EV+OK (NX500) | onscreen_235 | 낮음 | |
-| | PNG 오버레이 또는 3x3 그리드 | KS | 설정 > Overlay | ov.sh -> onscreen_ov, /sdcard/overlay.png | 낮음 | |
-| | 터치스크린 ON/OFF | KS | EV+RIGHT | EV_RIGHT.sh: prefman 0xa690 토글 | 낮음 | |
-| | 온스크린 가상 버튼 | U | 없음 | onscreen_key [라벨] [키] [좌표] | 낮음 | 화면에 REC 등 버튼 띄우기 |
-| | LCD/EVF 제어 | U | 없음 | st app disp, st app bb lcd | 낮음 | |
-| | 화면 스크린샷 | U/E | 없음 | Enable-Screenshot 문서, MultiNX 의 screenshot.sh | 낮음 | |
-| | 사용자 정의 버튼/체크박스 | KS | Focus+Profiles > My Button / My Checkbox | /sdcard/mod/cButton.sh, cCheckbox.sh, off_cCheckbox.sh 호출 | 낮음 | SD 기반 확장 지점. 예제 CustomButtons-example.zip |
-| | WiFi 키 더블클릭 동작 | W | WiFi 두 번 | MOBILE_MOBILE.sh (keyscan 의 같은 키 연타 규칙) | 낮음 | keyscan 이 EV 없이 같은 키 1초 내 연타도 인식한다는 사실을 W 가 문서화 |
+|1 | 모드 메뉴 (두 열 버튼) | KS | EV 더블클릭(NX500), EV+OK(NX1), 화면의 NX-KS 버튼 | loadgui.sh -> mod_gui + gui_*.NX500 | 낮음 | 최대 24버튼, 스크롤 없음, 누르면 닫힘 |
+|1 | 메뉴에 IP 표시 | G/W | 메인 메뉴 IP 버튼 | G: 수정된 mod_gui 바이너리(소스 없음). W: gen_menu.sh 가 메뉴 파일을 매번 생성 | 낮음 | W 방식은 바이너리 수정 없음 |
+|2 | 메뉴 속도 개선 | W | | fork 횟수 줄이기, 메뉴 캐시 | 낮음 | |
+|2 | NXUI 대체 메뉴 (Nuklear) | W | EV+AEL, EV+WiFi, nxui.sh | nxui.arm (X11 직접, EFL 미사용) | 낮음 | 720x192 하단 필터 바, 720x336 메인 메뉴. 중국어 |
+|2 | 화면 상단 NX-KS 버튼 | KS | 자동 | onscreen_ks, on_ks(PNG) | 낮음 | OFF menu-button 체크로 5초 뒤 숨김 |
+|2 | 2.35:1 시네마 가이드 | KS | EV+OK (NX500) | onscreen_235 | 낮음 | |
+|2 | PNG 오버레이 또는 3x3 그리드 | KS | 설정 > Overlay | ov.sh -> onscreen_ov, /sdcard/overlay.png | 낮음 | |
+|2 | 터치스크린 ON/OFF | KS | EV+RIGHT | EV_RIGHT.sh: prefman 0xa690 토글 | 낮음 | |
+|2 | 온스크린 가상 버튼 | U | 없음 | onscreen_key [라벨] [키] [좌표] | 낮음 | 화면에 REC 등 버튼 띄우기 |
+|2 | LCD/EVF 제어 | U | 없음 | st app disp, st app bb lcd | 낮음 | |
+|2 | 화면 스크린샷 | U/E | 없음 | Enable-Screenshot 문서, MultiNX 의 screenshot.sh | 낮음 | |
+|2 | 사용자 정의 버튼/체크박스 | KS | Focus+Profiles > My Button / My Checkbox | /sdcard/mod/cButton.sh, cCheckbox.sh, off_cCheckbox.sh 호출 | 낮음 | SD 기반 확장 지점. 예제 CustomButtons-example.zip |
+|2 | WiFi 키 더블클릭 동작 | W | WiFi 두 번 | MOBILE_MOBILE.sh (keyscan 의 같은 키 연타 규칙) | 낮음 | keyscan 이 EV 없이 같은 키 1초 내 연타도 인식한다는 사실을 W 가 문서화 |
 
 ### 1.6 프로필과 설정 관리
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | UP/DOWN 프로필 저장/로드 | KS | EV+UP, EV+DOWN, 메뉴 | save_UP.sh 등: prefman save_file/load_file 블록 0, 두 사본 cksum 비교 | 낮음 | /sdcard/presets/ |
-| | 전체 설정 백업/복원 | KS | Profiles > Save/Load FullBackup | FullSave.sh, FullLoad.sh: prefman 블록 0~10 | 낮음 | 로드 후 전원 OFF |
-| | prefman 덤프 해석기 | G(U에 커밋) | PC | prefmandumpread.py + NX500 필드 정의 | 없음 | 설정 오프셋 찾기용 |
-| | 펌웨어 업데이트 알림 메시지 조작 | G(U에 커밋) | 수동 | prefman 0x5ce6, 0x746c | 낮음 | 재미 요소 |
-| | 셔터 횟수/전원 횟수 조회 | U | factory mode 도구 | nxinfo.zip | 없음 | |
+|2 | UP/DOWN 프로필 저장/로드 | KS | EV+UP, EV+DOWN, 메뉴 | save_UP.sh 등: prefman save_file/load_file 블록 0, 두 사본 cksum 비교 | 낮음 | /sdcard/presets/ |
+|1 | 전체 설정 백업/복원 | KS | Profiles > Save/Load FullBackup | FullSave.sh, FullLoad.sh: prefman 블록 0~10 | 낮음 | 로드 후 전원 OFF |
+|2 | prefman 덤프 해석기 | G(U에 커밋) | PC | prefmandumpread.py + NX500 필드 정의 | 없음 | 설정 오프셋 찾기용 |
+|2 | 펌웨어 업데이트 알림 메시지 조작 | G(U에 커밋) | 수동 | prefman 0x5ce6, 0x746c | 낮음 | 재미 요소 |
+|1 | 셔터 횟수/전원 횟수 조회 | U | factory mode 도구 | nxinfo.zip | 없음 | |
 
 ### 1.7 전원과 시스템
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | Hibernate | KS | 메인 메뉴 | hibernate.sh: 포커스 저장, 렌즈 전원 OFF, systemctl hybrid-sleep | 낮음 | PR 에서는 "더 이상 필요 없다"며 메뉴에서 제거 제안 |
-| | Sleep (아무 키로 복귀) | KS | EV+LEFT | sleep.sh: LCD OFF, 12분 후 렌즈 전원 OFF | 낮음 | |
-| | 블루투스 복원 | KS | 설정 > Enable Bluetooth | bt.sh: bluetoothd.orig 실행 | 낮음 | NX-KS 래퍼가 원본 bluetoothd 를 실행하지 않기 때문에 필요 |
-| | 128MB 스왑 | KS | 2.55 메뉴 (2.88 은 제외) | swap.sh: /opt/usr/home/swapmod | 낮음 | eMMC 마모 |
-| | CPU performance 모드 | KS | 스크립트만 | performance.sh | 낮음 | |
-| | 설치/제거 | KS/W | SD 루트 install.sh, 설정 > Uninstall | install.sh, uninstall.sh. W 는 증분 동기화 설치기, uninstall_direct.sh, update_nxrc.sh | 높음(rootfs 1파일) | 원본 install.sh 는 두 번 실행하면 제거됨 |
-| | 설치 직후 telnet/ftp 자동 기동 | W | 자동 | onboard.sh | 낮음 | 디버깅 경로 확보용 |
+|3 | Hibernate | KS | 메인 메뉴 | hibernate.sh: 포커스 저장, 렌즈 전원 OFF, systemctl hybrid-sleep | 낮음 | PR 에서는 "더 이상 필요 없다"며 메뉴에서 제거 제안 |
+|3 | Sleep (아무 키로 복귀) | KS | EV+LEFT | sleep.sh: LCD OFF, 12분 후 렌즈 전원 OFF | 낮음 | |
+|2 | 블루투스 복원 | KS | 설정 > Enable Bluetooth | bt.sh: bluetoothd.orig 실행 | 낮음 | NX-KS 래퍼가 원본 bluetoothd 를 실행하지 않기 때문에 필요 |
+|3 | 128MB 스왑 | KS | 2.55 메뉴 (2.88 은 제외) | swap.sh: /opt/usr/home/swapmod | 낮음 | eMMC 마모 |
+|2 | CPU performance 모드 | KS | 스크립트만 | performance.sh | 낮음 | |
+|1 | 설치/제거 | KS/W | SD 루트 install.sh, 설정 > Uninstall | install.sh, uninstall.sh. W 는 증분 동기화 설치기, uninstall_direct.sh, update_nxrc.sh | 높음(rootfs 1파일) | 원본 install.sh 는 두 번 실행하면 제거됨 |
+|2 | 설치 직후 telnet/ftp 자동 기동 | W | 자동 | onboard.sh | 낮음 | 디버깅 경로 확보용 |
 
 ### 1.8 네트워크와 원격
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | telnet + FTP | KS | EV+MOBILE | EV_MOBILE.sh: telnetd, busybox ftpd(21, SD 루트), WiFi 끊기면 종료 | 낮음 | 인증 없음. W 가 원본의 멈춤 버그 수정, 메뉴에서 토글(telnet_toggle.sh) |
-| | 웹 원격 제어 (라이브뷰, 키 입력, 갤러리) | KS+M | 메인 메뉴 Remote Ctr | nx-rc.sh -> nx-remote-controller-daemon, xdotool, nx-input-injector, web_root | 낮음 | 2.56 부터 내장. G 의 fork 에 AP 모드 IP 대응 수정 |
-| | 웹 갤러리 개선 | W | Remote Ctr | thumb-cgi, dirlist-cgi, prewarm-cgi(8080), 썸네일 캐시 | 낮음 | 실시간 디렉터리, 접이식 폴더 |
-| | 웹 촬영 파라미터 API | W | 8080 | capdtm-cgi, capdtm-httpd.sh | 낮음 | |
-| | WiFi 로 웹 프런트 푸시 | W | PC 에서 | push.sh, push-cgi | 낮음 | 개발용 |
-| | 원격 저장 (SMB/SFTP 마운트) | KS+M | Custom Func. > Remote Save | rem*.sh -> nx-netfs/remote_storage.sh | 낮음 | nx-netfs 별도 설치 필요 |
-| | SSH/SFTP/SCP 서버 | G(U에 커밋) | 자동 | Dropbear 2020.81, init.sh 에 dropbear -R 추가 | 낮음 | 공개키 인증. rsync 바이너리는 상류에 있음 |
-| | WiFi AP 모드 (카메라가 공유기 역할) | PR | 메인 메뉴 WiFi Access Point | apstart.sh, off_apstart.sh, hostapd/udhcpd 설정. SSID NX500-AP | 낮음 | 미병합. 클라이언트 모드 복귀는 재부팅 필요 |
-| | 이메일/SNS 업로드를 자기 서버로 | G(별도) | 카메라 순정 공유 메뉴 | samsung-nx-emailservice (서버 쪽 Flask) + DNS 리다이렉트 | 없음 | 카메라 개조 불필요. Mastodon 게시, 디렉터리 저장 |
-| | PTP 모드 | U | 스크립트 | Enable-PTP 문서 | 낮음 | |
-| | 카메라 내 브라우저 | U | telnet 에서 browser | | 낮음 | |
-| | 여러 대 동기 제어 | E | PC/Android 앱 | MultiNX (ajavamind), telnet+HTTP | 낮음 | 순수 factory mode SD 패키지 |
+|2 | telnet + FTP | KS | EV+MOBILE | EV_MOBILE.sh: telnetd, busybox ftpd(21, SD 루트), WiFi 끊기면 종료 | 낮음 | 인증 없음. W 가 원본의 멈춤 버그 수정, 메뉴에서 토글(telnet_toggle.sh) |
+|1 | 웹 원격 제어 (라이브뷰, 키 입력, 갤러리) | KS+M | 메인 메뉴 Remote Ctr | nx-rc.sh -> nx-remote-controller-daemon, xdotool, nx-input-injector, web_root | 낮음 | 2.56 부터 내장. G 의 fork 에 AP 모드 IP 대응 수정 |
+|2 | 웹 갤러리 개선 | W | Remote Ctr | thumb-cgi, dirlist-cgi, prewarm-cgi(8080), 썸네일 캐시 | 낮음 | 실시간 디렉터리, 접이식 폴더 |
+|2 | 웹 촬영 파라미터 API | W | 8080 | capdtm-cgi, capdtm-httpd.sh | 낮음 | |
+|2 | WiFi 로 웹 프런트 푸시 | W | PC 에서 | push.sh, push-cgi | 낮음 | 개발용 |
+|2 | 원격 저장 (SMB/SFTP 마운트) | KS+M | Custom Func. > Remote Save | rem*.sh -> nx-netfs/remote_storage.sh | 낮음 | nx-netfs 별도 설치 필요 |
+|2 | SSH/SFTP/SCP 서버 | G(U에 커밋) | 자동 | Dropbear 2020.81, init.sh 에 dropbear -R 추가 | 낮음 | 공개키 인증. rsync 바이너리는 상류에 있음 |
+|2 | WiFi AP 모드 (카메라가 공유기 역할) | PR | 메인 메뉴 WiFi Access Point | apstart.sh, off_apstart.sh, hostapd/udhcpd 설정. SSID NX500-AP | 낮음 | 미병합. 클라이언트 모드 복귀는 재부팅 필요 |
+|2 | 이메일/SNS 업로드를 자기 서버로 | G(별도) | 카메라 순정 공유 메뉴 | samsung-nx-emailservice (서버 쪽 Flask) + DNS 리다이렉트 | 없음 | 카메라 개조 불필요. Mastodon 게시, 디렉터리 저장 |
+|2 | PTP 모드 | U | 스크립트 | Enable-PTP 문서 | 낮음 | |
+|3 | 카메라 내 브라우저 | U | telnet 에서 browser | | 낮음 | |
+|2 | 여러 대 동기 제어 | E | PC/Android 앱 | MultiNX (ajavamind), telnet+HTTP | 낮음 | 순수 factory mode SD 패키지 |
 
 ### 1.9 색과 필름 시뮬레이션
 
 | 선택 | 기능 | 출처 | 진입 방법 | 구현 | 위험 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- |
-| | FilmLab 필름 레시피 (68종) | W | EV+AEL, NXUI | filmlab.sh, recipes.json: Picture Wizard 7차원을 CUSTOM 슬롯에 기록 | 낮음 | 순정 펌웨어에서는 화면 마법사에서 사용자1 확인 한 번 필요 |
-| | 레시피 7차원 즉시 반영 | W | | pwsend.arm + A2 펌웨어 | 높음 | p7 파티션에 dd. 범위 밖 권장 |
-| | 3D LUT 실시간 교체 | W | EV+WiFi, LUT 패널, lut.sh | /dev/mem 으로 등록표 4바이트 + 빈 슬롯 A18 에 표 기록, 반셔터로 반영. 뷰와 결과물 각각 지정 가능 | 중간 | 2026-10-18 공개. 재부팅 시 원복 |
-| | .cube 변환기 (카메라 내) | W | lut.sh | cube2lut.arm | 없음 | |
-| | 내장 4종 LUT 전환, LUT 진단 | W | nx-rc 메뉴 | 3dlut_set.sh, 3dlut_stat.sh, iqr_dump.sh 등 | 중간 | 실험용 |
-| | 사용자1/2/3 이름을 레시피 이름으로 | W | 순정 메뉴 | m2_locale.sh: .mo 파일 bind-mount | 중간 | 실험 단계 |
-| | 미공개 NX-KS3 LUT 파일 | KS | 없음 | VirtualDi_NX-KS3.cube (mbriney 보존) | | 이를 쓰는 스크립트는 없음 |
+|1 | FilmLab 필름 레시피 (68종) | W | EV+AEL, NXUI | filmlab.sh, recipes.json: Picture Wizard 7차원을 CUSTOM 슬롯에 기록 | 낮음 | 순정 펌웨어에서는 화면 마법사에서 사용자1 확인 한 번 필요 |
+|2 | 레시피 7차원 즉시 반영 | W | | pwsend.arm + A2 펌웨어 | 높음 | p7 파티션에 dd. 범위 밖 권장 |
+|1 | 3D LUT 실시간 교체 | W | EV+WiFi, LUT 패널, lut.sh | /dev/mem 으로 등록표 4바이트 + 빈 슬롯 A18 에 표 기록, 반셔터로 반영. 뷰와 결과물 각각 지정 가능 | 중간 | 2026-10-18 공개. 재부팅 시 원복 |
+|2 | .cube 변환기 (카메라 내) | W | lut.sh | cube2lut.arm | 없음 | |
+|1 | 내장 4종 LUT 전환, LUT 진단 | W | nx-rc 메뉴 | 3dlut_set.sh, 3dlut_stat.sh, iqr_dump.sh 등 | 중간 | 실험용 |
+|2 | 사용자1/2/3 이름을 레시피 이름으로 | W | 순정 메뉴 | m2_locale.sh: .mo 파일 bind-mount | 중간 | 실험 단계 |
+|2 | 미공개 NX-KS3 LUT 파일 | KS | 없음 | VirtualDi_NX-KS3.cube (mbriney 보존) | | 이를 쓰는 스크립트는 없음 |
 
 ### 1.10 개발과 진단 도구
 
 | 선택 | 기능 | 출처 | 구현 | 비고 |
 | --- | --- | --- | --- | --- |
-| | 팝업 메시지/확인/입력 | KS/U | popup_timeout, popup_ok, popup_entry | 스크립트 UI 의 기본 부품 |
-| | 키 이벤트 감지와 실행 | KS/U | keyscan | 2. 장 참고 |
-| | 프로세스 메모리/파일 읽기쓰기 | KS/U | poker, poker2 | |
-| | st app 명령 고속 전송 | G(U에 커밋) | stapp | st 호출 지연 회피 |
-| | 모델 판별 | U/V | nx-model | |
-| | 공유 라이브러리 함수 직접 호출 | U | nxcalldyn | prefman 함수 테스트 등 |
-| | gdb 원격 디버깅 | U | Running-gdb 문서 | |
-| | PNG 버튼 | U | button_png | KinoSeed 작성 |
-| | di-camera-app 정적 분석 스크립트 | W | discovery/t1~t5 (Python) | PC 용 |
-| | di-camera-app 명령 브리지 | W | f.sh, dicam/*.sh | st app film 명령 추가. 실험 단계, restart 시 멈춤 경고 |
-| | p7 백업/검증/플래시 | W | p7_*.sh | 높음. 범위 밖 |
+|1 | 팝업 메시지/확인/입력 | KS/U | popup_timeout, popup_ok, popup_entry | 스크립트 UI 의 기본 부품 |
+|1 | 키 이벤트 감지와 실행 | KS/U | keyscan | 2. 장 참고 |
+|1 | 프로세스 메모리/파일 읽기쓰기 | KS/U | poker, poker2 | |
+|2 | st app 명령 고속 전송 | G(U에 커밋) | stapp | st 호출 지연 회피 |
+|2 | 모델 판별 | U/V | nx-model | |
+|2 | 공유 라이브러리 함수 직접 호출 | U | nxcalldyn | prefman 함수 테스트 등 |
+|2 | gdb 원격 디버깅 | U | Running-gdb 문서 | |
+|2 | PNG 버튼 | U | button_png | KinoSeed 작성 |
+|2 | di-camera-app 정적 분석 스크립트 | W | discovery/t1~t5 (Python) | PC 용 |
+|2 | di-camera-app 명령 브리지 | W | f.sh, dicam/*.sh | st app film 명령 추가. 실험 단계, restart 시 멈춤 경고 |
+|2 | p7 백업/검증/플래시 | W | p7_*.sh | 높음. 범위 밖 |
 
 ---
 
