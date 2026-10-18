@@ -5,9 +5,9 @@
 # 그래서 30초를 넘는 노출은 하지 않는다. 무음 셔터는 1/5 초보다 긴 노출이 안 되므로 거부한다.
 # 드라이브는 그동안 단사로 바꿨다가 되돌린다. 사진이 안 생기면(초점 실패) 알린다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
-job_running && { popup "다른 작업 중. EV 두 번으로 중단" 3; exit 0; }
+job_running && { popup "다른 작업 중" 3; exit 0; }
 [ "$(dial)" = DIALMODE_MANUAL ] || { popup "M 모드에서 사용" 3; exit 0; }
-silent_on && { popup "무음 셔터는 1/5초보다 긴 노출 불가. 무음 셔터를 끄고 사용" 4; exit 0; }
+silent_on && { popup "무음 셔터에서는 장노출 불가" 4; exit 0; }
 N=$(conf_get bulb_sec 30 1 30)
 IDX=$(shutter_idx)
 case "$IDX" in ''|*[!0-9-]*) popup "셔터 값을 읽지 못함" 3; exit 0 ;; esac
@@ -15,7 +15,7 @@ T=1; V=0
 for p in 1:0 2:-16 3:-27 4:-32 5:-37 6:-43 8:-48 10:-53 13:-59 15:-64 20:-69 25:-75 30:-80; do
   [ "${p%:*}" -le "$N" ] && { T=${p%:*}; V=${p#*:}; }
 done
-popup "장노출 ${T}초. 2초 뒤 시작 (EV 두 번 = 중단)" 2
+popup "장노출 ${T}초 (EV 두번=중단)" 2
 (
   fin() { keys_release; lcd_restore; shutter_set $IDX; drive_restore; rm -f $JOBPID; }
   trap 'fin; jlog "bulb stopped"; exit 0' TERM

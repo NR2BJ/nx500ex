@@ -6,20 +6,20 @@
 # 셔터 값을 바꾼 뒤 화면 갱신(st app mode m)을 하면 눌러 둔 반셔터가 풀리는 것으로 보여(2026-10-19 실기: 첫 장 뒤 안 찍힘)
 # 장마다 반셔터를 다시 누른다 (초점을 다시 잡음). 장마다 사진이 생겼는지 확인하고, 안 생기면(초점 실패) 중단한다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
-job_running && { popup "다른 작업 중. EV 두 번으로 중단" 3; exit 0; }
-[ "$(dial)" = DIALMODE_MANUAL ] || { popup "M 모드에서 사용 (가운데 노출을 먼저 맞춘다)" 3; exit 0; }
+job_running && { popup "다른 작업 중" 3; exit 0; }
+[ "$(dial)" = DIALMODE_MANUAL ] || { popup "M 모드에서 사용" 3; exit 0; }
 E=$(conf_get hdr_ev 2 1 3)
 IDX=$(shutter_idx)
 case "$IDX" in ''|*[!0-9-]*) popup "셔터 값을 읽지 못함" 3; exit 0 ;; esac
 # ISO 자동이면 카메라가 셔터에 맞춰 ISO 를 바꿔 밝기가 같아진다 (2026-10-19 실기: 1/160 ISO1250, 1/40 ISO320, 1/10 ISO100)
 ISO=$(iso_now)
 jlog "hdr check iso=$ISO silent=$(silent_on && echo on || echo off) idx=$IDX"
-case "$ISO" in *AUTO*) false ;; *) true ;; esac || { popup "ISO 자동이면 HDR 이 안 됨. ISO 를 고정하고 사용" 4; exit 0; }
+case "$ISO" in *AUTO*) false ;; *) true ;; esac || { popup "ISO 자동에서는 HDR 불가" 4; exit 0; }
 # 무음 셔터는 1/5 초보다 긴 노출이 막힌다. 가장 긴 장(IDX - 2 x 간격)이 그보다 길면 거부
 if silent_on && [ $((IDX - 2 * 16 * E)) -lt $SILENT_MIN_IDX ]; then
-  popup "무음 셔터는 1/5초보다 긴 노출 불가. 가운데 셔터를 빠르게 하거나 간격을 줄이세요" 4; exit 0
+  popup "무음: 1/5초보다 느린 장이 생김" 4; exit 0
 fi
-popup "HDR 5장 ±$((2*E))EV 시작 (EV 두 번 = 중단)" 2
+popup "HDR ±$((2*E))EV (EV 두번=중단)" 2
 (
   fin() { keys_release; lcd_restore; shutter_set $IDX; drive_restore; rm -f $JOBPID; }
   trap 'fin; jlog "hdr stopped"; exit 0' TERM

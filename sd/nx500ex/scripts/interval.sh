@@ -4,16 +4,17 @@
 # 드라이브는 그동안 단사로 바꿨다가 되돌린다. 반셔터를 누른 채 두고 셔터만 누른다: 첫 장에서 초점(과 P/A/S 의 노출)이 잡히면 끝날 때까지 다시 잡지 않는다.
 # 첫 장이 초점 실패로 찍히지 않으면 중단한다. 촬영이 밀리면 몰아서 찍지 않고 그 시점부터 다시 간격을 센다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
-job_running && { popup "다른 작업 중. EV 두 번으로 중단" 3; exit 0; }
+job_running && { popup "다른 작업 중" 3; exit 0; }
 G=$(conf_get iv_sec 10 2 3600)
 if silent_on && [ "$(shutter_idx)" -lt $SILENT_MIN_IDX ] 2>/dev/null; then
-  popup "무음 셔터는 1/5초보다 긴 노출 불가. 셔터를 빠르게 하세요" 4; exit 0
+  popup "무음: 1/5초보다 느린 셔터 불가" 4; exit 0
 fi
 C=$(conf_get iv_count 0 0 9999)
+if [ "$C" -eq 0 ]; then CN=계속; else CN=${C}장; fi
 if [ "$(dial)" = DIALMODE_MANUAL ]; then
-  popup "인터벌 ${G}초 x ${C}장. 3초 뒤 시작 (EV 두 번 = 중단)" 3
+  popup "인터벌 ${G}초 x ${CN} (EV 두번=중단)" 3
 else
-  popup "M 모드가 아니면 첫 장의 노출로 고정됨. 3초 뒤 시작" 3
+  popup "M 아님: 첫 장 노출로 고정" 3
 fi
 (
   trap 'keys_release; lcd_restore; drive_restore; rm -f $JOBPID; jlog "interval stopped after $k"; exit 0' TERM
