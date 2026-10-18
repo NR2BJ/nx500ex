@@ -1,0 +1,8 @@
+button|셔터 횟수|info.sh
+checkbox|진단 기록|debug.sh
+
+checkbox|사용자 체크박스|user_check.sh
+button|사용자 버튼|user_button.sh
+
+button|< 뒤로|@/mnt/mmc/nx500ex/scripts/gui_ini
+button|닫기|close.sh

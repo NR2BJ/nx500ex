@@ -20,10 +20,10 @@ popup "스태킹 ${F}장 시작 (EV 두 번 = 중단)" 2
     T=$((NEAR + (FAR - NEAR) * k / (F - 1)))
     P=$(pos)
     st cap iq af mv 255 $((T - P)) 255 > /dev/null 2>&1
-    sleep 1
-    shoot
+    sleep 0.5
     jlog "fstack shot $((k+1)) target=$T pos=$(pos)"
-    sleep 1
+    shoot
+    sleep 0.5
     k=$((k+1))
   done
   fin; jlog "fstack done"

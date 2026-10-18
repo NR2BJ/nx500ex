@@ -1,0 +1,10 @@
+button|벌브|bulb.sh
+button|인터벌 촬영|interval.sh
+
+button|HDR 5장|hdr.sh
+button|포커스 스태킹 >|@/mnt/mmc/nx500ex/scripts/gui_fstack
+
+button|작업 중단|job_stop.sh
+button|< 뒤로|@/mnt/mmc/nx500ex/scripts/gui_ini
+
+button|닫기|close.sh

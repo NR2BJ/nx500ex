@@ -7,11 +7,11 @@ job_running && { popup "다른 작업 중. EV 두 번으로 중단" 3; exit 0; }
 [ "$(dial)" = DIALMODE_MANUAL ] || { popup "M 모드에서 사용 (가운데 노출을 먼저 맞춘다)" 3; exit 0; }
 E=$(ask "HDR 간격 (EV, 1~3):" "$(conf_get hdr_ev 2)" 1 3) || exit 0
 conf_set hdr_ev "$E"
-IDX=$(prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p')
+IDX=$(shutter_idx)
 case "$IDX" in ''|*[!0-9-]*) popup "셔터 값을 읽지 못함" 3; exit 0 ;; esac
 popup "HDR 5장 ±$((2*E))EV 시작 (EV 두 번 = 중단)" 2
 (
-  fin() { prefman set 0 0xa340 l $IDX > /dev/null 2>&1; st app mode m > /dev/null 2>&1; af_restore; rm -f $JOBPID; }
+  fin() { prefman set 0 0xa340 l $IDX > /dev/null 2>&1; sta app mode m; af_restore; rm -f $JOBPID; }
   trap 'fin; jlog "hdr stopped"; exit 0' TERM
   af_save; af_manual
   S=$((16 * E))
@@ -21,10 +21,11 @@ popup "HDR 5장 ±$((2*E))EV 시작 (EV 두 번 = 중단)" 2
     [ $v -gt 200 ] && v=200
     [ $v -lt 0 ] && v=0
     prefman set 0 0xa340 l $v > /dev/null 2>&1
-    st app mode m > /dev/null 2>&1
-    sleep 1
+    sta app mode m
+    sleep 0.3
     shoot
-    jlog "hdr shot ev=$((e * E)) idx=$v"
+    jlog "hdr shot ev=$((e * E)) idx=$v up=$(cut -d' ' -f1 /proc/uptime)"
+    # 노출과 저장이 끝나기 전에 다음 셔터 값을 바꾸지 않도록 잠깐 기다린다
     sleep 1
   done
   fin; jlog "hdr done"

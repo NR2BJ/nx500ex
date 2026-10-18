@@ -1,11 +1,11 @@
+button|타이머 시간|timer_delay.sh
 checkbox|타이머 램프|timer_lamp.sh
+
 checkbox|작업 중 화면 끄기|screen_dark.sh
-
 checkbox|화면 캡처 EV+OK|screenshot.sh
-checkbox|진단 기록|debug.sh
 
-checkbox|사용자 체크박스|user_check.sh
-button|사용자 버튼|user_button.sh
+checkbox|텔넷 / FTP|telnet.sh
+button|IP|
 
-button|뒤로|@/mnt/mmc/nx500ex/scripts/gui_ini
+button|< 뒤로|@/mnt/mmc/nx500ex/scripts/gui_ini
 button|닫기|close.sh

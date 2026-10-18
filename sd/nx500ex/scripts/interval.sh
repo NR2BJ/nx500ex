@@ -12,14 +12,16 @@ popup "인터벌 ${G}초 x ${C}장. 3초 뒤 시작 (EV 두 번 = 중단)" 3
   trap 'lcd_restore; rm -f $JOBPID; jlog "interval stopped after $k"; exit 0' TERM
   k=0
   sleep 3
-  lcd_dark
   jlog "interval start every ${G}s count ${C}"
   T0=$(date +%s)
-  while [ "$C" -eq 0 ] || [ $k -lt "$C" ]; do
+  ( sleep 1; lcd_dark ) &
+  while :; do
+    jlog "interval shot $((k+1)) t=$(( $(date +%s) - T0 ))s"
     shoot; k=$((k+1))
+    [ "$C" -ne 0 ] && [ $k -ge "$C" ] && break
     # 시작 시각 기준으로 다음 촬영 시각을 정해 간격이 밀리지 않게 한다
     NEXT=$((T0 + k * G))
-    while [ $(date +%s) -lt $NEXT ]; do sleep 1; done
+    while [ $(date +%s) -lt $NEXT ]; do sleep 0.2; done
   done
   lcd_restore; rm -f $JOBPID; jlog "interval done $k"
   popup "인터벌 완료 ${k}장" 3

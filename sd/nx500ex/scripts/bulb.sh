@@ -8,14 +8,15 @@ N=$(ask "벌브 노출 시간 (초, 1~3600):" "$(conf_get bulb_sec 30)" 1 3600) 
 conf_set bulb_sec "$N"
 popup "벌브 ${N}초. 2초 뒤 시작 (EV 두 번 = 중단)" 2
 (
-  fin() { st key release s2 > /dev/null 2>&1; st key release s1 > /dev/null 2>&1; lcd_restore; rm -f $JOBPID; }
+  fin() { sta key release s2; sta key release s1; lcd_restore; rm -f $JOBPID; }
   trap 'fin; jlog "bulb stopped at ${i}s"; exit 0' TERM
   i=0
   sleep 2
-  lcd_dark
-  jlog "bulb start ${N}s"
-  st key push s1 > /dev/null 2>&1; st key push s2 > /dev/null 2>&1
-  while [ $i -lt "$N" ]; do sleep 1; i=$((i+1)); done
+  jlog "bulb start ${N}s shutter_idx=$(shutter_idx)"
+  sta key push s1; sleep 0.3; sta key push s2
+  # 카메라가 촬영을 시작하며 화면을 다시 켜므로 그 뒤에 끈다
+  sleep 1; lcd_dark
+  i=1; while [ $i -lt "$N" ]; do sleep 1; i=$((i+1)); done
   fin; jlog "bulb done ${N}s"
   popup "벌브 완료" 2
 ) < /dev/null > /dev/null 2>&1 &

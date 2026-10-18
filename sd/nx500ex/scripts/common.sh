@@ -37,11 +37,15 @@ JOBPID=/tmp/nx500ex-job.pid
 job_running() { [ -f $JOBPID ] && [ -d /proc/$(cat $JOBPID) ]; }
 job_stop() { job_running && kill $(cat $JOBPID) 2>/dev/null; rm -f $JOBPID; }
 jlog() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "$D/log/jobs.log"; sync; }
-# 반셔터, 셔터를 누르고 뗀다 (셀프타이머와 같은 방식. 지금 AF, 드라이브 설정을 따른다)
-shoot() { { st key push s1; st key push s2; st key release s2; st key release s1; } > /dev/null 2>&1; }
+# st 명령을 빠르게 보낸다. stapp 은 st 를 새로 띄우지 않고 메시지 큐로 보낸다 (실패하면 stapp 이 st 로 대신 실행)
+sta() { "$D/bin/stapp" "$*" > /dev/null 2>&1; }
+# 반셔터, 셔터를 누르고 뗀다 (지금 AF, 드라이브 설정을 따른다)
+shoot() { sta key push s1; sleep 0.3; sta key push s2; sleep 0.1; sta key release s2; sta key release s1; }
+# 셔터 속도 값 (APPPREF_SHUTTER_SPEED_INDEX). HDR, 벌브 기록용
+shutter_idx() { prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'; }
 dial() { set -- $(st cap capdtm getusr DIALMODE 2>/dev/null); echo "$3"; }
 # 작업 중 화면 끄기 (메뉴 체크박스 = auto/screen_dark.sh 가 있으면)
-lcd_dark() { [ -f "$D/scripts/auto/screen_dark.sh" ] && st app bb lcd off > /dev/null 2>&1; }
+lcd_dark() { [ -f "$D/scripts/auto/screen_dark.sh" ] || return 0; st app bb lcd off > /dev/null 2>&1; jlog "lcd off rc=$?"; }
 lcd_restore() { st app bb lcd on > /dev/null 2>&1; rm -f /tmp/nx500ex-lcd-video; }
 # AF 모드 저장, MF 로 전환, 복원 (focus_stack 바이너리와 같은 방식)
 af_save() { st cap capdtm getusr AFMODE 2>/dev/null | sed -n 's/.*(\(0x[0-9a-fA-F]*\)).*/\1/p' > /tmp/nx500ex-af.saved; }
