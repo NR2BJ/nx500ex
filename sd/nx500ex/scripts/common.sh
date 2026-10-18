@@ -54,6 +54,10 @@ now_cs() { read _u _r < /proc/uptime; echo "${_u%.*}${_u#*.}"; }
 shutter_idx() { _s=$(prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'); [ -n "$_s" ] && [ "$_s" -gt 32767 ] && _s=$((_s - 65536)); echo "$_s"; }
 shutter_set() { _s=$1; [ "$_s" -lt 0 ] && _s=$((_s + 65536)); prefman set 0 0xa340 l $_s > /dev/null 2>&1; st app mode m > /dev/null 2>&1; }
 BULB_IDX=-96
+# 무음 셔터: 1/4 초(셔터 값 32)보다 긴 노출은 막히거나(1/4 초 근처에서 멈춤) 깨진다 (2026-10-19 RAW 실측)
+SILENT_MIN_IDX=32
+silent_on() { [ -f "$D/scripts/auto/silent.sh" ]; }
+iso_now() { st cap capdtm getusr ISO 2>/dev/null | tr -d '\000\r' | sed -n 's/.*is \([A-Z_0-9]*\).*/\1/p'; }
 dial() { set -- $(st cap capdtm getusr DIALMODE 2>/dev/null); echo "$3"; }
 # 작업 중 화면 끄기 (메뉴 체크박스 = auto/screen_dark.sh 가 있으면).
 # 화면 전체를 검은 창(blackout, NX-KS)으로 덮는다. AMOLED 라 검은 화소는 꺼진 것과 같다.
@@ -67,20 +71,20 @@ lcd_restore() { [ -f /tmp/nx500ex-blackout.pid ] && kill $(cat /tmp/nx500ex-blac
 # 드라이브: 작업 동안 단사로 바꾸고 끝나면 되돌린다.
 # 연사 상태에서 셔터를 누르는 동안(st 한 번에 0.3~1초) 2~4장씩 찍히고, 카메라가 그것을 연사 묶음으로 보여 주고,
 # 무음 셔터도 적용되지 않았다 (2026-10-19 실기).
-drive_save() { st cap capdtm getusr DRIVE 2>/dev/null | tr -d '\000\r' | sed -n 's/.*is \([A-Z_]*\) (\(0x[0-9a-fA-F]*\)).*/\1 \2/p' > /tmp/nx500ex-drive.saved; jlog "drive was $(cat /tmp/nx500ex-drive.saved)"; }
+# 드라이브 설정은 prefman 0 0xa5b8 (APPPREF_DRIVE_P, P/A/S/M 공통으로 보임) 에 있다.
+# st app drive 와 capdtm setusr 로는 연사 저속(DRIVE_CONTILOW)이 돌아오지 않았다 (2026-10-19 실기). 설정 값을 직접 되돌리고 화면을 갱신한다
+drive_now() { st cap capdtm getusr DRIVE 2>/dev/null | tr -d '\000\r' | sed -n 's/.*is \([A-Z_]*\).*/\1/p'; }
+drive_save() {
+  prefman get 0 0xa5b8 l 2>/dev/null | sed -n 's/.*value = \([0-9]*\).*/\1/p' > /tmp/nx500ex-drive.saved
+  jlog "drive was $(drive_now) pref=$(cat /tmp/nx500ex-drive.saved)"
+}
 drive_single() { st app drive single > /dev/null 2>&1; }
 drive_restore() {
   [ -s /tmp/nx500ex-drive.saved ] || return 0
-  set -- $(cat /tmp/nx500ex-drive.saved)
-  rm -f /tmp/nx500ex-drive.saved
-  [ "$1" = DRIVE_SINGLE ] && return 0
-  # st app drive conti_n 으로는 연사 저속(DRIVE_CONTILOW)이 돌아오지 않았다 (2026-10-19 실기). 값을 직접 되돌리고 화면을 갱신한다
-  case "$1" in
-    DRIVE_CONTIHIGH) st app drive conti_h ;;
-    *BRK) st app drive bracket ;;
-    *) st cap capdtm setusr DRIVE $2; reapply_mode ;;
-  esac > /dev/null 2>&1
-  jlog "drive restore $1 -> $(st cap capdtm getusr DRIVE 2>/dev/null | tr -d '\000\r' | sed -n 's/.*is \([A-Z_]*\).*/\1/p')"
+  _d=$(cat /tmp/nx500ex-drive.saved); rm -f /tmp/nx500ex-drive.saved
+  prefman set 0 0xa5b8 l "$_d" > /dev/null 2>&1
+  reapply_mode
+  jlog "drive restore pref=$_d -> $(drive_now)"
 }
 # 메모리 카드의 사진 파일 수 (첫 장이 실제로 찍혔는지 확인용)
 dcim_count() { find /mnt/mmc/DCIM -type f 2>/dev/null | wc -l; }

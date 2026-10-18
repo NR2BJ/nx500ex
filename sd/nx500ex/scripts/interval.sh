@@ -6,6 +6,9 @@
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 job_running && { popup "다른 작업 중. EV 두 번으로 중단" 3; exit 0; }
 G=$(conf_get iv_sec 10 2 3600)
+if silent_on && [ "$(shutter_idx)" -lt $SILENT_MIN_IDX ] 2>/dev/null; then
+  popup "무음 셔터는 1/4초보다 긴 노출 불가. 셔터를 빠르게 하세요" 4; exit 0
+fi
 C=$(conf_get iv_count 0 0 9999)
 if [ "$(dial)" = DIALMODE_MANUAL ]; then
   popup "인터벌 ${G}초 x ${C}장. 3초 뒤 시작 (EV 두 번 = 중단)" 3
