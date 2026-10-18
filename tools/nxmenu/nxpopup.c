@@ -13,7 +13,9 @@
 
 #define MAX_W 700
 #define PAD_X 3
-#define PAD_Y 2
+/* 라벨 테마가 글 위에 약 11, 아래에 약 28 픽셀을 더 잡는다 (PC 에서 카메라 라이브러리로 측정). 그만큼 잘라 낸다 */
+#define TRIM_TOP 8
+#define TRIM_BOTTOM 20
 
 static Eina_Bool on_timeout(void *data)
 {
@@ -56,10 +58,11 @@ int main(int argc, char **argv)
 	evas_object_size_hint_min_get(lab, &w, &h);
 	if (w <= 0 || h <= 0) { w = 600; h = 60; }
 	w += 2 * PAD_X;
-	h += 2 * PAD_Y;
 	if (w > MAX_W) w = MAX_W;
-	elm_win_resize_object_add(win, lab);
-	evas_object_resize(win, w, h);
+	/* 라벨은 창 크기에 묶지 않고 직접 놓아 위아래 빈 공간을 창 밖으로 뺀다 */
+	evas_object_move(lab, 0, -TRIM_TOP);
+	evas_object_resize(lab, w, h);
+	evas_object_resize(win, w, h - TRIM_TOP - TRIM_BOTTOM);
 	evas_object_show(win);
 	ecore_timer_add(secs > 0 ? secs : 2.0, on_timeout, NULL);
 	elm_run();
