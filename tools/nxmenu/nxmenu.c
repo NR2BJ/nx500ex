@@ -17,7 +17,10 @@
  *   keep|라벨|스크립트       메뉴를 숨기고 스크립트가 끝날 때까지 기다린 뒤 메뉴를 다시 보인다
  *   checkbox|라벨|스크립트   켜면 스크립트를 scripts/auto 에 복사하고 실행, 끄면 지우고 off_스크립트 실행
  *   page|라벨|화면 이름      하위 화면으로 이동
- *   num|라벨|이름|최소|최대|기본|단위   "라벨: 값단위" 로 보이고, 누르면 숫자 설정 화면
+ *   num|라벨|이름|최소|최대|기본|단위|단계|특수값
+ *                            "라벨: 값단위" 로 보이고, 누르면 숫자 설정 화면.
+ *                            단계는 쉼표로 최대 3개 (예: 1,5,10 -> -1 +1 / -5 +5 / -10 +10). 없으면 1,10
+ *                            특수값은 "값:라벨" (예: 0:계속) -> 값 옆에 그 값으로 바로 바꾸는 버튼
  *   ip|라벨                  라벨 뒤에 지금 WiFi IP 를 붙여 표시 (누르면 다시 읽음)
  *   blank                    빈 칸
  *   back|화면 이름           (항목 아님) 마지막 행 왼쪽 "뒤로" 가 갈 화면. 없으면 빈 칸
@@ -48,7 +51,7 @@
 #define PIDFILE "/tmp/nx500ex-menu.pid"
 #define LASTFILE "/tmp/nx500ex-menu.last"
 
-enum { T_BUTTON, T_KEEP, T_CHECK, T_PAGE, T_NUM, T_IP, T_BLANK, T_BACK, T_CLOSE, T_TEXT, T_STEP, T_OK };
+enum { T_BUTTON, T_KEEP, T_CHECK, T_PAGE, T_NUM, T_IP, T_BLANK, T_BACK, T_CLOSE, T_TEXT, T_STEP, T_OK, T_SPECIAL };
 
 typedef struct {
 	int type;
@@ -56,6 +59,9 @@ typedef struct {
 	char arg[256];
 	int min, max, def, step;
 	char unit[32];
+	int steps[3], n_steps;
+	int special;
+	char special_label[32];
 	Evas_Object *obj;
 } Item;
 
@@ -69,7 +75,6 @@ static Evas_Object *win, *table;
 /* 숫자 설정 화면 상태 */
 static Item num_item;
 static int num_value;
-static Evas_Object *num_label;
 
 static void close_menu(void);
 static void show_page(const char *name);
@@ -181,12 +186,12 @@ static int load_page(const char *name)
 	n_items = 0;
 	back_page[0] = 0;
 	while (fgets(line, sizeof line, f)) {
-		char *field[8];
+		char *field[10];
 		int nf = 0;
 		char *p = line;
 		line[strcspn(line, "\r\n")] = 0;
 		if (!line[0] || line[0] == '#') continue;
-		while (nf < 8) {
+		while (nf < 10) {
 			field[nf++] = p;
 			p = strchr(p, '|');
 			if (!p) break;
@@ -214,6 +219,21 @@ static int load_page(const char *name)
 			it->max = nf > 4 ? atoi(field[4]) : 100;
 			it->def = nf > 5 ? atoi(field[5]) : it->min;
 			snprintf(it->unit, sizeof it->unit, "%s", nf > 6 ? field[6] : "");
+			it->n_steps = 0;
+			if (nf > 7 && field[7][0]) {
+				char *q = field[7];
+				while (it->n_steps < 3 && q && *q) {
+					it->steps[it->n_steps++] = atoi(q);
+					q = strchr(q, ',');
+					if (q) q++;
+				}
+			}
+			if (it->n_steps == 0) { it->steps[0] = 1; it->steps[1] = 10; it->n_steps = 2; }
+			it->special = -1;
+			if (nf > 8 && strchr(field[8], ':')) {
+				it->special = atoi(field[8]);
+				snprintf(it->special_label, sizeof it->special_label, "%s", strchr(field[8], ':') + 1);
+			}
 		}
 		n_items++;
 	}
@@ -237,11 +257,13 @@ static void switch_later(const char *name)
 	ecore_job_add(switch_job, NULL);
 }
 
-static void number_text(void)
+/* "라벨: 값단위". 특수값이면 "라벨: 특수값 라벨" */
+static void value_text(Item *it, int v, char *out, size_t size)
 {
-	char text[256];
-	snprintf(text, sizeof text, "%s: %d%s", num_item.label, num_value, num_item.unit);
-	set_text(num_label, text);
+	if (it->special >= 0 && v == it->special)
+		snprintf(out, size, "%s: %s", it->label, it->special_label);
+	else
+		snprintf(out, size, "%s: %d%s", it->label, v, it->unit);
 }
 
 static void on_click(void *data, Evas_Object *obj, void *ev)
@@ -271,11 +293,18 @@ static void on_click(void *data, Evas_Object *obj, void *ev)
 		pending_number = 1;
 		ecore_job_add(switch_job, NULL);
 		break;
+	/* 값 글자를 바꾸면 영문이 섞인 라벨이 ... 으로 잘리므로(EFL) 숫자 화면을 새로 그린다 */
+	case T_SPECIAL:
+		num_value = num_item.special;
+		pending_number = 1;
+		ecore_job_add(switch_job, NULL);
+		break;
 	case T_STEP:
 		num_value += it->step;
 		if (num_value < num_item.min) num_value = num_item.min;
 		if (num_value > num_item.max) num_value = num_item.max;
-		number_text();
+		pending_number = 1;
+		ecore_job_add(switch_job, NULL);
 		break;
 	case T_OK:
 		conf_write(&num_item, num_value);
@@ -339,7 +368,7 @@ static Evas_Object *add_cell(Item *it, int col, int row, int span)
 		get_ip(ip, sizeof ip);
 		snprintf(text, sizeof text, "%s %s", it->label, ip);
 	} else if (it->type == T_NUM)
-		snprintf(text, sizeof text, "%s: %d%s", it->label, conf_read(it), it->unit);
+		value_text(it, conf_read(it), text, sizeof text);
 	else
 		snprintf(text, sizeof text, "%s", it->label);
 	set_text(btn, text);
@@ -427,25 +456,41 @@ static void show_page(const char *name)
 	show_window();
 }
 
-/* 숫자 설정 화면: 값 / -1 +1 / -10 +10 / (범위가 넓으면 -60 +60) / 취소 확인 */
+/* 숫자 설정 화면: 값 (+ 특수값 버튼) / 단계마다 -n +n 한 행 / 취소 확인 */
 static void show_number(void)
 {
-	static Item text, steps[6], ok, cancel, blank = { T_BLANK };
-	static const int step_val[6] = { -1, 1, -10, 10, -60, 60 };
-	int i, n_steps = num_item.max - num_item.min >= 120 ? 6 : 4;
+	static Item text, steps[6], ok, cancel, special, blank = { T_BLANK };
+	int i;
 
 	ensure_window();
+	/* 값 칸은 한 열만 쓴다 (두 열 칸에서는 글자를 바꾸면 ... 으로 잘렸다) */
 	memset(&text, 0, sizeof text);
 	text.type = T_TEXT;
-	num_label = add_cell(&text, 0, 0, 2);
-	number_text();
-	for (i = 0; i < 6; i++) {
-		if (i >= n_steps) { add_cell(&blank, i % 2, 1 + i / 2, 1); continue; }
-		memset(&steps[i], 0, sizeof steps[i]);
-		steps[i].type = T_STEP;
-		steps[i].step = step_val[i];
-		snprintf(steps[i].label, sizeof steps[i].label, "%+d", step_val[i]);
-		add_cell(&steps[i], i % 2, 1 + i / 2, 1);
+	value_text(&num_item, num_value, text.label, sizeof text.label);
+	add_cell(&text, 0, 0, 1);
+	if (num_item.special >= 0) {
+		memset(&special, 0, sizeof special);
+		special.type = T_SPECIAL;
+		snprintf(special.label, sizeof special.label, "%s", num_item.special_label);
+		add_cell(&special, 1, 0, 1);
+	} else
+		add_cell(&blank, 1, 0, 1);
+	for (i = 0; i < 3; i++) {
+		int r = 1 + i;
+		if (i >= num_item.n_steps) {
+			add_cell(&blank, 0, r, 1);
+			add_cell(&blank, 1, r, 1);
+			continue;
+		}
+		memset(&steps[2 * i], 0, sizeof steps[0]);
+		memset(&steps[2 * i + 1], 0, sizeof steps[0]);
+		steps[2 * i].type = steps[2 * i + 1].type = T_STEP;
+		steps[2 * i].step = -num_item.steps[i];
+		steps[2 * i + 1].step = num_item.steps[i];
+		snprintf(steps[2 * i].label, sizeof steps[0].label, "-%d", num_item.steps[i]);
+		snprintf(steps[2 * i + 1].label, sizeof steps[0].label, "+%d", num_item.steps[i]);
+		add_cell(&steps[2 * i], 0, r, 1);
+		add_cell(&steps[2 * i + 1], 1, r, 1);
 	}
 	memset(&cancel, 0, sizeof cancel);
 	cancel.type = T_PAGE;

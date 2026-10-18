@@ -1,4 +1,4 @@
 back|gui_shoot
 button|인터벌 시작|interval.sh
-num|간격|iv_sec|2|3600|10|초
-num|장수 (0=계속)|iv_count|0|9999|0|
+num|간격|iv_sec|2|3600|10|초|1,10,60
+num|장수|iv_count|0|9999|0||1,5,10|0:계속

@@ -2,5 +2,5 @@ back|gui_shoot
 button|가까운 끝 저장|fs_near.sh
 button|먼 끝 저장|fs_far.sh
 button|스태킹 시작|fs_run.sh
-num|장수|fs_frames|2|200|10|
+num|장수|fs_frames|2|200|10||1,5,10
 button|작업 중단|job_stop.sh
