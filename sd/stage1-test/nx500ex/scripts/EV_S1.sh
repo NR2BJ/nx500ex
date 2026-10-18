@@ -7,11 +7,11 @@ done
 LOG=/mnt/mmc/nx500ex/log/boot.log
 {
   echo "$(date '+%Y-%m-%d %H:%M:%S') up=$(cut -d' ' -f1 /proc/uptime) EV_S1"
-  for p in $(pidof keyscan); do
-    echo "  keyscan pid=$p $(grep -E '^State' /proc/$p/status)"
-    sed "s/^/  keyscan cgroup /" /proc/$p/cgroup
-  done
-  for p in $(pidof bluetoothd.orig bluetoothd); do
-    echo "  bluetoothd pid=$p $(grep -E '^State' /proc/$p/status)"
+  # pidof 가 없으므로 /proc 을 직접 훑는다
+  for d in /proc/[0-9]*; do
+    c=$(cat $d/comm 2>/dev/null)
+    case "$c" in
+      keyscan|bluetoothd*) echo "  $c pid=${d#/proc/} $(grep -E '^State' $d/status)";;
+    esac
   done
 } >> $LOG 2>&1
