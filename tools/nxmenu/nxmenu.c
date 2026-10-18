@@ -41,7 +41,8 @@
 #define SCREEN_W 720
 /* 창이 화면(480)을 다 덮으면 창 관리자가 카메라 앱을 "완전히 가려짐" 으로 보고 일시정지시킨다.
  * 그때 카메라 앱이 자기 화면을 캡처하다 Xorg 가 죽었다 (2026-10-19 실기, dlog: fully_obscured -> PAUSE -> Xorg SIGSEGV).
- * 그래서 아래 60 픽셀(카메라의 MENU, 셔터, 조리개, 노출, ISO, Fn 막대)은 덮지 않는다. */
+ * 그래서 높이를 420 으로 한다. 창 관리자가 대화상자 창을 가운데로 옮겨 위아래 30 픽셀씩 카메라 정보가 보인다
+ * (위쪽 고정을 요청해도 받아들이지 않았고, 이 배치가 좋다는 사용자 판단으로 그대로 둔다. 2026-10-19). */
 #define MENU_H 420
 #define COLS 2
 #define ROWS 5
@@ -393,23 +394,16 @@ static Evas_Object *add_cell(Item *it, int col, int row, int span)
 	return btn;
 }
 
-/* 창은 처음 한 번만 만든다. 위쪽에 붙인 떠 있는(floating) 창으로 요청한다 (대화상자는 창 관리자가 가운데로 옮긴다) */
+/* 창은 처음 한 번만 만든다 */
 static void ensure_window(void)
 {
 	Evas_Object *bg;
-	unsigned int xwin;
 	if (win) {
 		elm_table_clear(table, EINA_TRUE);
 		return;
 	}
 	win = elm_win_add(NULL, "nxmenu", ELM_WIN_DIALOG_BASIC);
 	evas_object_smart_callback_add(win, "delete,request", (Evas_Smart_Cb)close_menu, NULL);
-	xwin = elm_win_xwindow_get(win);
-	if (xwin) {
-		ecore_x_e_illume_window_state_set(xwin, ECORE_X_ILLUME_WINDOW_STATE_FLOATING);
-		ecore_x_icccm_size_pos_hints_set(xwin, EINA_TRUE, ECORE_X_GRAVITY_NW, SCREEN_W, MENU_H, SCREEN_W, MENU_H,
-						 0, 0, 1, 1, 0.0, 0.0);
-	}
 	bg = evas_object_rectangle_add(evas_object_evas_get(win));
 	evas_object_color_set(bg, 0, 0, 0, 255);
 	elm_win_resize_object_add(win, bg);

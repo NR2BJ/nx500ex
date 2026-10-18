@@ -64,18 +64,40 @@ lcd_dark() {
   echo $! > /tmp/nx500ex-blackout.pid; jlog "blackout on"
 }
 lcd_restore() { [ -f /tmp/nx500ex-blackout.pid ] && kill $(cat /tmp/nx500ex-blackout.pid) 2>/dev/null; rm -f /tmp/nx500ex-blackout.pid; }
+# 드라이브: 작업 동안 단사로 바꾸고 끝나면 되돌린다.
+# 연사 상태에서 셔터를 누르는 동안(st 한 번에 0.3~1초) 2~4장씩 찍히고, 카메라가 그것을 연사 묶음으로 보여 주고,
+# 무음 셔터도 적용되지 않았다 (2026-10-19 실기).
+drive_save() { st cap capdtm getusr DRIVE 2>/dev/null | tr -d '\000\r' | sed -n 's/.*is \([A-Z_]*\) (\(0x[0-9a-fA-F]*\)).*/\1 \2/p' > /tmp/nx500ex-drive.saved; jlog "drive was $(cat /tmp/nx500ex-drive.saved)"; }
+drive_single() { st app drive single > /dev/null 2>&1; }
+drive_restore() {
+  [ -s /tmp/nx500ex-drive.saved ] || return 0
+  set -- $(cat /tmp/nx500ex-drive.saved)
+  case "$1" in
+    DRIVE_SINGLE|DRIVE_EFS_SINGLE) ;;
+    DRIVE_CONTIHIGH) st app drive conti_h ;;
+    DRIVE_CONTILOW|DRIVE_CONTIMID|DRIVE_CONTINUOUS|DRIVE_EFS_CONTINUOUS) st app drive conti_n ;;
+    *BRK) st app drive bracket ;;
+    *) st cap capdtm setusr DRIVE $2 ;;
+  esac > /dev/null 2>&1
+  rm -f /tmp/nx500ex-drive.saved
+}
 # 메모리 카드의 사진 파일 수 (첫 장이 실제로 찍혔는지 확인용)
 dcim_count() { find /mnt/mmc/DCIM -type f 2>/dev/null | wc -l; }
+# 새 파일이 생길 때까지 최대 $2 초 기다린다 ($1 = 기다리기 전 파일 수)
+wait_file() {
+  _w=0
+  while [ $_w -lt "${2:-8}" ]; do
+    sleep 1; _w=$((_w + 1))
+    [ "$(dcim_count)" -gt "$1" ] && return 0
+  done
+  return 1
+}
 # 첫 장: 반셔터를 누른 채(s1_hold 뒤) 셔터를 누르고, 새 파일이 생기는지 최대 $1 초 기다린다.
 # AF-S 는 초점을 못 잡으면 셔터가 눌리지 않아 파일이 생기지 않는다.
 # 렌즈 AF/MF 스위치가 AF 면 카메라 설정으로 MF 전환이 막혀 있어서(2026-10-19 실기) MF 전환 대신 반셔터를 계속 누르고 있는다.
 first_shot() {
-  _n=$(dcim_count); s2_click; _w=0
-  while [ $_w -lt "${1:-8}" ]; do
-    sleep 1; _w=$((_w + 1))
-    [ "$(dcim_count)" -gt "$_n" ] && return 0
-  done
-  return 1
+  _n=$(dcim_count); s2_click
+  wait_file $_n "${1:-8}"
 }
 # 숫자 설정은 메뉴(nxmenu 의 num 항목)가 conf/<이름> 에 쓴다. 스크립트는 읽기만 한다
 # conf_get 이름 기본값 [최소 최대]

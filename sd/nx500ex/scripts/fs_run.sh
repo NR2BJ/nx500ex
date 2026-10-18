@@ -9,11 +9,12 @@ NEAR=$(cat /tmp/nx500ex-fs.near 2>/dev/null); FAR=$(cat /tmp/nx500ex-fs.far 2>/d
 F=$(conf_get fs_frames 10 2 200)
 popup "스태킹 ${F}장 시작 (EV 두 번 = 중단)" 2
 (
-  fin() { keys_release; rm -f $JOBPID; }
+  fin() { keys_release; drive_restore; rm -f $JOBPID; }
   trap 'fin; jlog "fstack stopped"; exit 0' TERM
   pos() { set -- $(st cap iq af pos 2>/dev/null); echo "$3"; }
   jlog "fstack start near=$NEAR far=$FAR frames=$F"
   sleep 1
+  drive_save; drive_single
   s1_hold; sleep 1
   k=0
   while [ $k -lt "$F" ]; do
