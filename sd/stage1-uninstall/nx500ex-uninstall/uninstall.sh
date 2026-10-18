@@ -97,18 +97,24 @@ SB_MT=$(rec sbin_mtime)
 [ -n "$SB_MT" ] && touch -d "$SB_MT" "$SBIN" 2>>"$LOG"
 ro
 
-# 4. 검증
+# 4. 검증 (항목별로 기록)
 OK=1
-is_elf "$BT" || OK=0
-[ "$(size_of $BT)" = "$EXPECT_SIZE" ] || OK=0
-[ -e "$ORIG" ] && OK=0
-[ -e "$NEW" ] && OK=0
-[ -d "$OPTDIR" ] && OK=0
+chk() { if [ "$2" = 0 ]; then log "check $1: ok"; else log "check $1: FAIL"; OK=0; fi; }
+# 수정 시각은 마이크로초까지 비교한다. 이 카메라의 touch 는 나노초 자리를 설정하지 못한다.
+us() { echo "$1" | sed 's/\.\([0-9]\{6\}\)[0-9]*/.\1/'; }
+is_elf "$BT"; chk "bluetoothd is ELF" $?
+[ "$(size_of $BT)" = "$EXPECT_SIZE" ]; chk "bluetoothd size $EXPECT_SIZE" $?
+[ ! -e "$ORIG" ]; chk "no bluetoothd.orig" $?
+[ ! -e "$NEW" ]; chk "no temp file" $?
+[ ! -d "$OPTDIR" ]; chk "no /opt/usr/nx500ex" $?
 REC_SUM=$(rec bt_cksum)
-[ -n "$REC_SUM" ] && [ "$(sum_of $BT)" != "$REC_SUM" ] && OK=0
+if [ -n "$REC_SUM" ]; then [ "$(sum_of $BT)" = "$REC_SUM" ]; chk "bluetoothd cksum = record" $?; fi
 REC_MT=$(rec bt_mtime)
-[ -n "$REC_MT" ] && [ "$(mtime_of $BT)" != "$REC_MT" ] && OK=0
-[ -n "$SB_MT" ] && [ "$(mtime_of $SBIN)" != "$SB_MT" ] && OK=0
+if [ -n "$REC_MT" ]; then [ "$(mtime_of $BT)" = "$REC_MT" ]; chk "bluetoothd mtime = record" $?; fi
+if [ -n "$SB_MT" ]; then
+  [ "$(us "$(mtime_of $SBIN)")" = "$(us "$SB_MT")" ]; chk "sbin mtime = record (us)" $?
+  [ "$(mtime_of $SBIN)" = "$SB_MT" ] || log "note: sbin mtime differs below 1us ($(mtime_of $SBIN) vs $SB_MT)"
+fi
 
 ls -la --full-time $SBIN/bluetoothd* >> "$LOG" 2>&1
 log "sbin mtime after: $(mtime_of $SBIN)"
