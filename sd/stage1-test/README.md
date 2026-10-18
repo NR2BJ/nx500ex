@@ -4,7 +4,8 @@
 
 ```
 nx500ex/
-    boot.sh                 래퍼가 부름. keyscan 시작, log/boot.log 에 시각 기록
+    boot.sh                 래퍼가 부름. 이전 실행 정리 후 keyscan 시작, log/boot.log 에 기록
+    bin/watch.sh            블루투스 데몬이 사라지면 keyscan 정지 (블루투스 = 모드 스위치)
     bin/keyscan             NX-KS 2.55, 2.88, NXWA 가 써 온 것과 같은 바이너리 (md5 3bb2322589883308c488f72af0f6dffc)
     scripts/auto/00_hello.sh  켤 때마다 AF 보조광 1초
     scripts/EV_S1.sh        EV 를 누른 채 반셔터: AF 보조광 두 번 깜빡임
@@ -74,3 +75,14 @@ keyscan 은 Otto Kiksmaler 가 작성했고 상류 저장소(ottokiksmaler/nx500
 | mon.log 에 keyscan 상태 T | 누군가 프로세스를 일시 정지시킴 |
 | mon.log 에서 keyscan 이 사라짐 | 종료됨 |
 | sd:off | SD 가 언마운트된 상태 |
+
+## 블루투스 = 모드 스위치 확인
+
+| 번호 | 할 일 | 기대 결과 |
+| --- | --- | --- |
+| 1 | 블루투스 ON 상태로 전원 ON, EV+반셔터 | AF 광 1초, 조합키 동작 |
+| 2 | 블루투스 OFF, 3초 뒤 EV+반셔터 | 반응 없음. boot.log 에 "bluetooth off: keyscan ... stopped" |
+| 3 | 블루투스 ON, 5초 뒤 EV+반셔터 | AF 광 1초 (매번 새로 시작), 조합키 동작 |
+| 4 | 블루투스 OFF 후 1초 안에 다시 ON, 5초 뒤 EV+반셔터 | AF 광 1초, 조합키 동작 (빠른 전환에도 꺼지지 않음) |
+| 5 | 블루투스 OFF 상태로 전원 OFF, ON | 반응 없음 |
+| 6 | 블루투스 ON | AF 광 1초, 조합키 동작 |
