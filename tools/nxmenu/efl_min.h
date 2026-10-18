@@ -21,6 +21,8 @@ typedef struct {
 #define EINA_FALSE ((Eina_Bool)0)
 #define ECORE_CALLBACK_PASS_ON EINA_TRUE
 #define ELM_WIN_DIALOG_BASIC 1
+#define ECORE_X_ILLUME_WINDOW_STATE_FLOATING 1
+#define ECORE_X_GRAVITY_NW 1
 
 extern int ECORE_EVENT_KEY_DOWN;
 
@@ -55,5 +57,11 @@ void evas_object_smart_callback_add(Evas_Object *obj, const char *event, Evas_Sm
 void *ecore_event_handler_add(int type, Ecore_Event_Handler_Cb func, const void *data);
 void ecore_main_loop_iterate(void);
 void *ecore_job_add(void (*func)(void *data), const void *data);
+
+unsigned int elm_win_xwindow_get(const Evas_Object *obj);
+void ecore_x_e_illume_window_state_set(unsigned int win, int state);
+void ecore_x_icccm_size_pos_hints_set(unsigned int win, Eina_Bool request_pos, int gravity,
+				      int min_w, int min_h, int max_w, int max_h, int base_w, int base_h,
+				      int step_x, int step_y, double min_aspect, double max_aspect);
 
 #endif

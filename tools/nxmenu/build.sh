@@ -11,7 +11,7 @@ arm-linux-gnueabi-gcc -march=armv7-a -mthumb -mfpu=vfp -mfloat-abi=softfp -O2 -W
   -nodefaultlibs -Wl,--dynamic-linker=/lib/ld-linux.so.3 \
   -Wl,-rpath-link,"$ROOT/lib:$ROOT/usr/lib" \
   "$ROOT/usr/lib/libelementary.so.1" "$ROOT/usr/lib/libevas.so.1" "$ROOT/usr/lib/libecore.so.1" \
-  "$ROOT/usr/lib/libecore_input.so.1" "$ROOT/lib/libc.so.6" -lgcc
+  "$ROOT/usr/lib/libecore_input.so.1" "$ROOT/usr/lib/libecore_x.so.1" "$ROOT/lib/libc.so.6" -lgcc
 arm-linux-gnueabi-strip "$OUT"
 # 카메라 glibc(2.13)에 없는 버전 심볼이 있으면 실패
 HAVE=$(arm-linux-gnueabi-readelf -V "$ROOT/lib/libc.so.6" | grep -o 'Name: GLIBC_[0-9.]*' | sort -u)

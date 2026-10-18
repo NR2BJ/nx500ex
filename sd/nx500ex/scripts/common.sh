@@ -39,12 +39,20 @@ job_stop() { job_running && kill $(cat $JOBPID) 2>/dev/null; rm -f $JOBPID; }
 jlog() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "$D/log/jobs.log"; sync; }
 # st 명령을 빠르게 보낸다. stapp 은 st 를 새로 띄우지 않고 메시지 큐로 보낸다 (실패하면 stapp 이 st 로 대신 실행)
 sta() { "$D/bin/stapp" "$*" > /dev/null 2>&1; }
+# 키 입력은 st 로 보낸다 (응답을 기다려 순서와 누락이 확실하다. stapp 은 벌브 해제가 빠지는 일이 있었다)
+key() { st key "$@" > /dev/null 2>&1; }
 # 반셔터, 셔터를 누르고 뗀다 (지금 AF, 드라이브 설정을 따른다)
-shoot() { sta key push s1; sleep 0.3; sta key push s2; sleep 0.1; sta key release s2; sta key release s1; }
+shoot() { key push s1; key push s2; key release s2; key release s1; }
+# 반셔터를 누른 채 두기. AF-S 는 그동안 초점을 다시 잡지 않는다 (사람이 반셔터를 누른 채 셔터만 여러 번 누르는 것과 같다)
+s1_hold() { key push s1; }
+s2_click() { key push s2; key release s2; }
+keys_release() { key release s2; key release s1; }
+# /proc/uptime 의 1/100 초 단위 시각
+now_cs() { read _u _r < /proc/uptime; echo "${_u%.*}${_u#*.}"; }
 # 셔터 속도 값 (APPPREF_SHUTTER_SPEED_INDEX). HDR, 벌브 기록용
 # 1스톱 = 16, 1초 = 0, 1/30 = 80, 1/2 = 16 (실기 EXIF 로 확인). 1초보다 긴 값은 음수이고 16비트 2의 보수로 저장된다 (BULB = 65440 = -96)
 shutter_idx() { _s=$(prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'); [ -n "$_s" ] && [ "$_s" -gt 32767 ] && _s=$((_s - 65536)); echo "$_s"; }
-shutter_set() { _s=$1; [ "$_s" -lt 0 ] && _s=$((_s + 65536)); prefman set 0 0xa340 l $_s > /dev/null 2>&1; sta app mode m; }
+shutter_set() { _s=$1; [ "$_s" -lt 0 ] && _s=$((_s + 65536)); prefman set 0 0xa340 l $_s > /dev/null 2>&1; st app mode m > /dev/null 2>&1; }
 BULB_IDX=-96
 dial() { set -- $(st cap capdtm getusr DIALMODE 2>/dev/null); echo "$3"; }
 # 작업 중 화면 끄기 (메뉴 체크박스 = auto/screen_dark.sh 가 있으면).
@@ -58,28 +66,23 @@ lcd_dark() {
 lcd_restore() { [ -f /tmp/nx500ex-blackout.pid ] && kill $(cat /tmp/nx500ex-blackout.pid) 2>/dev/null; rm -f /tmp/nx500ex-blackout.pid; }
 # 메모리 카드의 사진 파일 수 (첫 장이 실제로 찍혔는지 확인용)
 dcim_count() { find /mnt/mmc/DCIM -type f 2>/dev/null | wc -l; }
-# 첫 장: 지금 AF 설정으로 찍고 새 파일이 생기는지 최대 $1 초 기다린다.
-# AF-S 는 초점을 못 잡으면 셔터가 눌리지 않아 파일이 생기지 않는다. 생기면 AF 모드를 저장하고 MF 로 고정한다.
+# 첫 장: 반셔터를 누른 채(s1_hold 뒤) 셔터를 누르고, 새 파일이 생기는지 최대 $1 초 기다린다.
+# AF-S 는 초점을 못 잡으면 셔터가 눌리지 않아 파일이 생기지 않는다.
+# 렌즈 AF/MF 스위치가 AF 면 카메라 설정으로 MF 전환이 막혀 있어서(2026-10-19 실기) MF 전환 대신 반셔터를 계속 누르고 있는다.
 first_shot() {
-  _n=$(dcim_count); shoot; _w=0
+  _n=$(dcim_count); s2_click; _w=0
   while [ $_w -lt "${1:-8}" ]; do
     sleep 1; _w=$((_w + 1))
-    if [ "$(dcim_count)" -gt "$_n" ]; then af_save; af_manual; return 0; fi
+    [ "$(dcim_count)" -gt "$_n" ] && return 0
   done
   return 1
 }
-# AF 모드 저장, MF 로 전환, 복원 (focus_stack 바이너리와 같은 방식)
-af_save() { st cap capdtm getusr AFMODE 2>/dev/null | sed -n 's/.*(\(0x[0-9a-fA-F]*\)).*/\1/p' > /tmp/nx500ex-af.saved; }
-# 렌즈 AF/MF 스위치가 AF 일 때 카메라 메뉴에서는 MF 를 고를 수 없는 렌즈가 있다 (16-50mm S 등, 사용자 기억).
-# 이 명령으로는 바뀌는지 확인되지 않았으므로 바뀐 뒤 값을 jobs.log 에 남긴다.
-af_manual() { st app nx capture af-mode manual > /dev/null 2>&1; jlog "af-mode manual -> $(st cap capdtm getusr AFMODE 2>/dev/null | tr -d '\000\r' | sed 's/UserData is //')"; }
-af_restore() { [ -s /tmp/nx500ex-af.saved ] && st cap capdtm setusr AFMODE $(cat /tmp/nx500ex-af.saved) > /dev/null 2>&1; rm -f /tmp/nx500ex-af.saved; }
-# 숫자 입력. ask "질문" 기본값 최소 최대 → 값 출력, 취소나 잘못된 값이면 실패
-ask() {
-  _v=$("$D/bin/popup_entry" "$1" 확인 취소 "$2" number 2>/dev/null) || return 1
-  case "$_v" in ''|*[!0-9]*) popup "숫자가 아님" 2; return 1 ;; esac
-  if [ "$_v" -lt "$3" ] || [ "$_v" -gt "$4" ]; then popup "$3~$4 사이로 입력" 2; return 1; fi
-  echo "$_v"
+# 숫자 설정은 메뉴(nxmenu 의 num 항목)가 conf/<이름> 에 쓴다. 스크립트는 읽기만 한다
+# conf_get 이름 기본값 [최소 최대]
+conf_get() {
+  _c=$(cat "$D/conf/$1" 2>/dev/null)
+  case "$_c" in ''|*[!0-9]*) _c=$2 ;; esac
+  [ -n "$3" ] && { [ "$_c" -lt "$3" ] || [ "$_c" -gt "$4" ]; } && _c=$2
+  echo "$_c"
 }
-conf_get() { _c=$(cat "$D/conf/$1" 2>/dev/null); echo "${_c:-$2}"; }
 conf_set() { mkdir -p "$D/conf"; echo "$2" > "$D/conf/$1"; sync; }

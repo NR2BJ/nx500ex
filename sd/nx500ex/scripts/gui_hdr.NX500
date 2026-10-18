@@ -1,0 +1,3 @@
+back|gui_shoot
+button|HDR 시작|hdr.sh
+num|간격|hdr_ev|1|3|2|EV
