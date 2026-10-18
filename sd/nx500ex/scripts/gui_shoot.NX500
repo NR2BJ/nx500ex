@@ -1,6 +1,6 @@
 back|gui_ini
 page|셀프타이머 >|gui_timer
-page|벌브 >|gui_bulb
+page|벌브 (장노출) >|gui_bulb
 page|인터벌 촬영 >|gui_iv
 page|HDR 5장 >|gui_hdr
 page|포커스 스태킹 >|gui_fstack

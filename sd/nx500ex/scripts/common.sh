@@ -72,22 +72,23 @@ drive_single() { st app drive single > /dev/null 2>&1; }
 drive_restore() {
   [ -s /tmp/nx500ex-drive.saved ] || return 0
   set -- $(cat /tmp/nx500ex-drive.saved)
-  case "$1" in
-    DRIVE_SINGLE|DRIVE_EFS_SINGLE) ;;
-    DRIVE_CONTIHIGH) st app drive conti_h ;;
-    DRIVE_CONTILOW|DRIVE_CONTIMID|DRIVE_CONTINUOUS|DRIVE_EFS_CONTINUOUS) st app drive conti_n ;;
-    *BRK) st app drive bracket ;;
-    *) st cap capdtm setusr DRIVE $2 ;;
-  esac > /dev/null 2>&1
   rm -f /tmp/nx500ex-drive.saved
+  [ "$1" = DRIVE_SINGLE ] && return 0
+  # st app drive conti_n 으로는 연사 저속(DRIVE_CONTILOW)이 돌아오지 않았다 (2026-10-19 실기). 값을 직접 되돌리고 화면을 갱신한다
+  case "$1" in
+    DRIVE_CONTIHIGH) st app drive conti_h ;;
+    *BRK) st app drive bracket ;;
+    *) st cap capdtm setusr DRIVE $2; reapply_mode ;;
+  esac > /dev/null 2>&1
+  jlog "drive restore $1 -> $(st cap capdtm getusr DRIVE 2>/dev/null | tr -d '\000\r' | sed -n 's/.*is \([A-Z_]*\).*/\1/p')"
 }
 # 메모리 카드의 사진 파일 수 (첫 장이 실제로 찍혔는지 확인용)
 dcim_count() { find /mnt/mmc/DCIM -type f 2>/dev/null | wc -l; }
 # 새 파일이 생길 때까지 최대 $2 초 기다린다 ($1 = 기다리기 전 파일 수)
 wait_file() {
-  _w=0
-  while [ $_w -lt "${2:-8}" ]; do
-    sleep 1; _w=$((_w + 1))
+  _end=$(( $(now_cs) + ${2:-8} * 100 ))
+  while [ $(now_cs) -lt $_end ]; do
+    sleep 0.3
     [ "$(dcim_count)" -gt "$1" ] && return 0
   done
   return 1
