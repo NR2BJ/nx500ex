@@ -1,11 +1,11 @@
-button|UP 저장|save_UP.sh
-button|UP 불러오기|load_UP.sh
+button|Save UP|save_UP.sh
+button|Load UP|load_UP.sh
 
-button|DN 저장|save_DOWN.sh
-button|DN 불러오기|load_DOWN.sh
+button|Save DOWN|save_DOWN.sh
+button|Load DOWN|load_DOWN.sh
 
-button|전체 백업|full_save.sh
-button|전체 복원|full_load.sh
+button|Full Backup|full_save.sh
+button|Full Restore|full_load.sh
 
-button|뒤로|@/mnt/mmc/nx500ex/scripts/gui_ini
-button|닫기|close.sh
+button|GO BACK|@/mnt/mmc/nx500ex/scripts/gui_ini
+button|CLOSE|close.sh

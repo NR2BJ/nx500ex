@@ -54,7 +54,7 @@ export NX500EX=$D
 export PATH=$D/bin:$PATH
 cd /
 [ -n "$DEBUG" ] && echo "=== $(now) keyscan launch" >> /tmp/nx500ex-keyscan.out
-nice -n 15 $D/bin/keyscan /dev/event0 /dev/event1 $D/scripts/ $DEBUG >> /tmp/nx500ex-keyscan.out 2>&1 &
+$D/bin/keyscan /dev/event0 /dev/event1 $D/scripts/ $DEBUG >> /tmp/nx500ex-keyscan.out 2>&1 &
 KPID=$!
 sleep 1
 if [ -d /proc/$KPID ]; then

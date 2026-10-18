@@ -8,5 +8,6 @@ echo $! > /tmp/nx500ex-telnet.pid
 "$D/bin/busybox" tcpsvd -u root -E 0.0.0.0 21 "$D/bin/busybox" ftpd -w /opt/storage/sdcard > /dev/null 2>&1 &
 echo $! > /tmp/nx500ex-ftp.pid
 IP=$(ip addr ls mlan0 2>/dev/null | sed -n 's/.*inet \([0-9.]*\).*/\1/p')
-[ -n "$IP" ] && popup "텔넷/FTP: $IP" 4
+echo "$(date '+%Y-%m-%d %H:%M:%S') telnet start ip=${IP:-none} telnetd=$(cat /tmp/nx500ex-telnet.pid) ftp=$(cat /tmp/nx500ex-ftp.pid)" >> "$D/log/boot.log"; sync
+[ -n "$IP" ] && popup "Telnet/FTP: $IP" 4
 exit 0

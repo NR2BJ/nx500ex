@@ -2,8 +2,9 @@
 D=${NX500EX:-/mnt/mmc/nx500ex}
 PATH=$D/bin:$PATH
 PRESETS=$D/presets
-popup() { "$D/bin/popup_timeout" " $1 " "${2:-2}" > /dev/null 2>&1; }
-confirm() { "$D/bin/popup_ok" "$1" "${2:-OK}" "${3:-취소}" > /dev/null 2>&1; [ $? -ne 255 ]; }
+# 팝업은 띄워 두고 바로 돌아온다 (기다리면 keyscan 이 그동안 멈춘다)
+popup() { "$D/bin/popup_timeout" " $1 " "${2:-2}" > /dev/null 2>&1 & }
+confirm() { "$D/bin/popup_ok" "$1" "${2:-OK}" "${3:-CANCEL}" > /dev/null 2>&1; [ $? -ne 255 ]; }
 # 프로필을 불러온 뒤 현재 다이얼 모드를 다시 적용해 화면에 반영한다 (NX-KS 방식)
 reapply_mode() {
   set -- $(st cap capdtm getusr DIALMODE)
