@@ -7,6 +7,7 @@ LOG=$D/log/boot.log
 now() { echo "$(date '+%Y-%m-%d %H:%M:%S') up=$(cut -d' ' -f1 /proc/uptime)"; }
 echo "$(now) boot.sh start pid=$$ ppid=$PPID" >> $LOG
 sed 's/^/  cgroup /' /proc/$$/cgroup >> $LOG 2>/dev/null
+sync
 
 # 감시 시작 (이미 돌고 있으면 그대로)
 sh $D/bin/mon.sh </dev/null >/dev/null 2>&1 &
@@ -28,3 +29,4 @@ if [ -d /proc/$KPID ]; then
 else
   echo "$(now) keyscan exited: $(tail -3 /tmp/nx500ex-keyscan.out | tr '\n' ' ' | cut -c1-200)" >> $LOG
 fi
+sync

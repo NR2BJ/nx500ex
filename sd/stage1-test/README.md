@@ -32,7 +32,8 @@ keyscan 은 Otto Kiksmaler 가 작성했고 상류 저장소(ottokiksmaler/nx500
 지금 들어 있는 boot.sh 는 진단판이다. 다음을 추가로 한다.
 
 - bin/mon.sh: 1초마다 keyscan, bluetoothd 의 생존과 상태, SD 마운트 여부를 확인하고 바뀐 순간만 log/mon.log 에 기록
-- keyscan 을 debug 모드로 실행: 받은 키 이벤트를 모두 log/keyscan.out 에 기록. 이 모드에서는 auto 스크립트 실행 때 SD 접근 LED 가 세 번 깜빡인다 (정상)
+- keyscan 을 debug 모드로 실행: 받은 키 이벤트를 log/keyscan.out 에 기록. keyscan 이 출력을 4KB 단위로 모아 내보내므로 키를 여러 번 눌러야 기록이 나타난다. 이 모드에서는 auto 스크립트 실행 때 SD 접근 LED 가 세 번 깜빡인다 (정상)
+- 모든 기록 뒤에 sync 를 해서, 전원을 끄거나 카드를 빼도 기록이 남게 했다 (첫 진단판은 sync 가 없어 기록이 빠졌다)
 - EV+반셔터: 기록에 표식(marker)을 남김
 
 상태 기호: R 실행 중, S 대기(정상), T 정지됨, D 입출력 대기, Z 종료됨. wchan 은 대기 중인 커널 함수 이름이다.

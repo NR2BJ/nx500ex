@@ -4,3 +4,4 @@ echo 1 > /sys/devices/platform/leds-gpio/leds/af/brightness
 sleep 1
 echo 0 > /sys/devices/platform/leds-gpio/leds/af/brightness
 echo "$(date '+%Y-%m-%d %H:%M:%S') auto/00_hello, uptime $(cut -d' ' -f1 /proc/uptime)" >> /mnt/mmc/nx500ex/log/boot.log
+sync

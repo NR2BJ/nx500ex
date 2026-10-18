@@ -6,3 +6,4 @@ for i in 1 2; do
 done
 echo "$(date '+%H:%M:%S') up=$(cut -d' ' -f1 /proc/uptime) ===== EV_S1 marker" >> /tmp/nx500ex-mon.log
 echo "$(date '+%Y-%m-%d %H:%M:%S') up=$(cut -d' ' -f1 /proc/uptime) EV_S1" >> /mnt/mmc/nx500ex/log/boot.log
+sync

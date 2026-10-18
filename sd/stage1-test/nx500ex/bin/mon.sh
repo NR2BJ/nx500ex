@@ -1,15 +1,18 @@
 #!/bin/sh
 # 진단용 감시: 1초마다 keyscan, bluetoothd, SD 상태를 확인하고 바뀐 순간만 기록한다.
-# 기록은 RAM(/tmp) 에 먼저 쓰고, SD 가 마운트돼 있으면 SD 로도 복사한다.
-# SD 에서 실행되므로 전원 OFF 때 함께 종료될 수 있다. 다음 boot.sh 가 /tmp 기록을 SD 로 옮긴다.
+# RAM(/tmp) 에 먼저 쓰고, SD 가 마운트돼 있으면 새로 생긴 줄만 SD 로 덧붙인 뒤 sync 한다.
 T=/tmp/nx500ex-mon.log
 S=/mnt/mmc/nx500ex/log/mon.log
 K=/tmp/nx500ex-keyscan.out
 SK=/mnt/mmc/nx500ex/log/keyscan.out
 
-# 중복 실행 방지
-if [ -f /tmp/nx500ex-mon.pid ] && [ -d /proc/$(cat /tmp/nx500ex-mon.pid) ]; then exit 0; fi
+# 중복 실행 방지 (pid 재사용 대비로 comm 도 확인)
+if [ -f /tmp/nx500ex-mon.pid ]; then
+  op=$(cat /tmp/nx500ex-mon.pid)
+  grep -q mon.sh /proc/$op/cmdline 2>/dev/null && exit 0
+fi
 echo $$ > /tmp/nx500ex-mon.pid
+touch $T $K
 
 state() {
   out=""
@@ -26,6 +29,15 @@ state() {
   echo "$out"
 }
 
+# 파일 $1 의 줄 중 아직 SD($2)로 보내지 않은 것만 덧붙인다. 보낸 줄 수는 $3 에 저장.
+push() {
+  sent=$(cat $3 2>/dev/null); sent=${sent:-0}
+  total=$(wc -l < $1)
+  if [ "$total" -gt "$sent" ]; then
+    tail -n +$((sent+1)) $1 | head -n $((total-sent)) >> $2 && echo $total > $3
+  fi
+}
+
 prev=""
 n=0
 while :; do
@@ -35,9 +47,10 @@ while :; do
     echo "$(date '+%H:%M:%S') up=$(cut -d' ' -f1 /proc/uptime)$cur" >> $T
     prev=$cur
   fi
-  if [ $((n % 3)) -eq 0 ] && grep -q ' /opt/storage/sdcard ' /proc/mounts; then
-    cp $T $S 2>/dev/null
-    cp $K $SK 2>/dev/null
+  if grep -q ' /opt/storage/sdcard ' /proc/mounts; then
+    push $T $S /tmp/nx500ex-mon.sent
+    push $K $SK /tmp/nx500ex-keyscan.sent
+    sync
   fi
   sleep 1
 done
