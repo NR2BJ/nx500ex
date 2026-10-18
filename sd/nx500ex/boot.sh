@@ -49,6 +49,27 @@ n=0
 while st pmu show 2>/dev/null | grep hevc | grep -q ON && [ $n -lt 600 ]; do sleep 1; n=$((n+1)); done
 
 # 4. keyscan 시작 (scripts/auto/*.sh 를 번호 순으로 실행한 뒤 키 감시)
+# 메뉴, 팝업(EFL 프로그램)이 카메라 앱과 같은 환경에서 뜨도록 NX-KS init.sh 와 같은 변수를 맞춘다
+export HIB=a
+export EVAS_FONT_DPI=72
+export EINA_LOG_LEVELS=ecore_x:4,evas_main:1
+export GTK_IM_MODULE_FILE=/opt/etc/gtk-2.0/gtk.immodules
+export LD_LIBRARY_PATH=:/usr/lib:/usr/lib/driver
+export ECORE_IMF_MODULE=isf
+export ECORE_INPUT_TIMEOUT_FIX=0
+export EINA_LOG_DLOG_ENABLE=1
+export XMODIFIERS=@im=SCIM
+export EINA_LOG_LEVEL=1
+export SCIM_MODULE_PATH=/opt/apps/scim/lib/scim-1.0
+export ECORE_INPUT_FIX=1
+export XDG_CACHE_HOME=/tmp/.cache
+export EVAS_GL_NO_BLACKLIST=1
+export DISPLAY=:0
+export GTK_IM_MODULE=scim
+export EINA_LOG_SYSLOG_ENABLE=0
+export ELM_PROFILE=mobile
+export MULTISENSE_SND_PLAYER=tizen_snd_player
+export HOME=/root USER=root LOGNAME=root
 export MODEL=$(grep -x 'NX[0-9]*' /etc/version.info)
 export NX500EX=$D
 export PATH=$D/bin:$PATH

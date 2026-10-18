@@ -1,0 +1,8 @@
+button|한글 시험|ko_popup.sh
+button|무음 셔터|ko_popup.sh
+
+button|셔터 횟수|ko_popup.sh
+button|가나다라마바사|ko_popup.sh
+
+button|뒤로|@/mnt/mmc/nx500ex/scripts/gui_ini
+button|닫기|close.sh

@@ -20,3 +20,10 @@ reapply_mode() {
 # 터치: prefman 0xa690 (NX500). 1 = 켜짐
 touch_get() { set -- $(prefman get 0 0x0000a690 b 2>/dev/null); echo "$6"; }
 touch_set() { prefman set 0 0x0000a690 b "$1" > /dev/null 2>&1; }
+
+# 진단 기록이 켜져 있으면 각 스크립트의 시작/끝 시각(uptime)을 log/timing.log 에 남긴다
+if [ -e "$D/debug" ]; then
+  _T0=$(cut -d' ' -f1 /proc/uptime)
+  _NAME=${0##*/}
+  trap 'echo "$_NAME start=$_T0 end=$(cut -d" " -f1 /proc/uptime)" >> "$D/log/timing.log"; sync' EXIT
+fi

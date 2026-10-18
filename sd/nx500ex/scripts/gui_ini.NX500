@@ -11,4 +11,6 @@ checkbox|My Checkbox|user_check.sh
 button|My Button|user_button.sh
 
 checkbox|Debug Log|debug.sh
+button|Korean Test|@/mnt/mmc/nx500ex/scripts/gui_ko
+
 button|CLOSE|close.sh
