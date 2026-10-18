@@ -1,2 +1,3 @@
 #!/bin/sh
-exit 0
+. "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
+stay

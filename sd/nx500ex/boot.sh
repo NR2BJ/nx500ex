@@ -1,7 +1,7 @@
 #!/bin/sh
 # nx500ex boot.sh: 블루투스가 켜질 때(전원 ON 포함) 내장 래퍼가 부른다.
 # 블루투스 켜짐 = 모드 동작, 블루투스 꺼짐 = 모드 정지.
-# SD 의 nx500ex/debug 파일이 있으면 진단 기록(mon.sh, keyscan debug)을 켠다.
+# 메뉴의 진단 기록이 켜져 있으면(scripts/auto/debug.sh) 진단 기록(mon.sh, keyscan debug)을 켠다.
 D=/mnt/mmc/nx500ex
 mkdir -p $D/log
 LOG=$D/log/boot.log
@@ -11,7 +11,8 @@ log() { echo "$(now) $*" >> $LOG; sync; }
 log "boot.sh start"
 
 DEBUG=""
-if [ -e $D/debug ]; then
+rm -f $D/debug   # 예전 방식의 표시 파일 정리
+if [ -e $D/scripts/auto/debug.sh ]; then
   DEBUG=debug
   sh $D/bin/mon.sh </dev/null >/dev/null 2>&1 &
 fi

@@ -6,3 +6,4 @@ B=$(prefman get 0 0x0000c2dd b 2>&1 | tr -s '\r\n' '  ')
 prefman set 0 0x0000c2dd b 1 > /dev/null 2>&1
 A=$(prefman get 0 0x0000c2dd b 2>&1 | tr -s '\r\n' '  ')
 echo "$(date '+%Y-%m-%d %H:%M:%S') nolens on: before=[$B] after=[$A]" >> "$D/log/boot.log"; sync
+stay

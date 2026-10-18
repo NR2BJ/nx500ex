@@ -24,8 +24,11 @@ wifi_ip() { ip addr ls mlan0 2>/dev/null | sed -n 's/.*inet \([0-9.]*\).*/\1/p';
 touch_get() { set -- $(prefman get 0 0x0000a690 b 2>/dev/null); echo "$6"; }
 touch_set() { prefman set 0 0x0000a690 b "$1" > /dev/null 2>&1; }
 
+# 메뉴에서 실행된 설정 항목은 끝난 뒤 같은 메뉴 화면을 다시 띄운다 (mod_gui 는 항목을 누르면 항상 닫히므로)
+stay() { [ -n "$NX500EX_PAGE" ] && sh "$D/scripts/menu.sh" "$NX500EX_PAGE" < /dev/null > /dev/null 2>&1 & }
+
 # 진단 기록이 켜져 있으면 각 스크립트의 시작/끝 시각(uptime)을 log/timing.log 에 남긴다
-if [ -e "$D/debug" ]; then
+if [ -e "$D/scripts/auto/debug.sh" ]; then
   _T0=$(cut -d' ' -f1 /proc/uptime)
   _NAME=${0##*/}
   trap 'echo "$_NAME start=$_T0 end=$(cut -d" " -f1 /proc/uptime)" >> "$D/log/timing.log"; sync' EXIT
@@ -42,11 +45,20 @@ sta() { "$D/bin/stapp" "$*" > /dev/null 2>&1; }
 # 반셔터, 셔터를 누르고 뗀다 (지금 AF, 드라이브 설정을 따른다)
 shoot() { sta key push s1; sleep 0.3; sta key push s2; sleep 0.1; sta key release s2; sta key release s1; }
 # 셔터 속도 값 (APPPREF_SHUTTER_SPEED_INDEX). HDR, 벌브 기록용
-shutter_idx() { prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'; }
+# 1스톱 = 16, 1초 = 0, 1/30 = 80, 1/2 = 16 (실기 EXIF 로 확인). 1초보다 긴 값은 음수이고 16비트 2의 보수로 저장된다 (BULB = 65440 = -96)
+shutter_idx() { _s=$(prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'); [ -n "$_s" ] && [ "$_s" -gt 32767 ] && _s=$((_s - 65536)); echo "$_s"; }
+shutter_set() { _s=$1; [ "$_s" -lt 0 ] && _s=$((_s + 65536)); prefman set 0 0xa340 l $_s > /dev/null 2>&1; sta app mode m; }
+BULB_IDX=-96
 dial() { set -- $(st cap capdtm getusr DIALMODE 2>/dev/null); echo "$3"; }
-# 작업 중 화면 끄기 (메뉴 체크박스 = auto/screen_dark.sh 가 있으면)
-lcd_dark() { [ -f "$D/scripts/auto/screen_dark.sh" ] || return 0; st app bb lcd off > /dev/null 2>&1; jlog "lcd off rc=$?"; }
-lcd_restore() { st app bb lcd on > /dev/null 2>&1; rm -f /tmp/nx500ex-lcd-video; }
+# 작업 중 화면 끄기 (메뉴 체크박스 = auto/screen_dark.sh 가 있으면).
+# 화면 전체를 검은 창(blackout, NX-KS)으로 덮는다. AMOLED 라 검은 화소는 꺼진 것과 같다.
+# (st app bb lcd off 는 실기에서 rc=0 이지만 변화 없었음)
+lcd_dark() {
+  [ -f "$D/scripts/auto/screen_dark.sh" ] || return 0
+  "$D/bin/blackout" < /dev/null > /dev/null 2>&1 &
+  echo $! > /tmp/nx500ex-blackout.pid; jlog "blackout on"
+}
+lcd_restore() { [ -f /tmp/nx500ex-blackout.pid ] && kill $(cat /tmp/nx500ex-blackout.pid) 2>/dev/null; rm -f /tmp/nx500ex-blackout.pid; }
 # AF 모드 저장, MF 로 전환, 복원 (focus_stack 바이너리와 같은 방식)
 af_save() { st cap capdtm getusr AFMODE 2>/dev/null | sed -n 's/.*(\(0x[0-9a-fA-F]*\)).*/\1/p' > /tmp/nx500ex-af.saved; }
 af_manual() { st app nx capture af-mode manual > /dev/null 2>&1; }

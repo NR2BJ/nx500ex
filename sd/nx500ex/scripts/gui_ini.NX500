@@ -2,10 +2,9 @@ checkbox|무음 셔터|silent.sh
 checkbox|렌즈 없이 촬영|nolens.sh
 
 button|셀프타이머|timer.sh
-button|촬영 도구 >|@/mnt/mmc/nx500ex/scripts/gui_shoot
+button|촬영 도구 >|menu.sh gui_shoot
 
-button|화면 정보 숨김|lcd_info.sh
-button|프로필 >|@/mnt/mmc/nx500ex/scripts/gui_profile
+button|프로필 >|menu.sh gui_profile
+button|설정 >|menu.sh gui_more
 
-button|설정 >|@/mnt/mmc/nx500ex/scripts/gui_more
 button|닫기|close.sh

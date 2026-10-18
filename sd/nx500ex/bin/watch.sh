@@ -8,9 +8,9 @@ while [ -d /proc/$BTPID ] && [ -d /proc/$KPID ]; do sleep 2; done
 if [ -d /proc/$KPID ]; then
   kill $KPID 2>/dev/null
   killall -q mod_gui 2>/dev/null
-  # 촬영 작업 중단 (작업이 스스로 셔터, AF, 화면을 되돌린다), 화면 정보 숨김 해제
+  # 촬영 작업 중단 (작업이 스스로 셔터, AF, 화면을 되돌린다)
   [ -f /tmp/nx500ex-job.pid ] && kill $(cat /tmp/nx500ex-job.pid) 2>/dev/null
-  [ -e /tmp/nx500ex-lcd-video ] && { st app bb lcd on; rm -f /tmp/nx500ex-lcd-video; } > /dev/null 2>&1
+  killall -q blackout 2>/dev/null
   for f in $D/scripts/auto/*.sh; do
     [ -f "$f" ] || continue
     off=$D/scripts/off_${f##*/}
