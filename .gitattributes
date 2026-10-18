@@ -1,1 +1,2 @@
 sd/** text eol=lf
+sd/**/bin/* -text binary
