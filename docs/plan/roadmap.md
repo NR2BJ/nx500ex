@@ -20,9 +20,9 @@
 | --- | --- |
 | 카메라 펌웨어 버전 확인 (설정 > 기기 정보) | 완료. 1.12 |
 | NX500 1.12 공식 펌웨어 파일 확보 및 보관 (https://nxfiles.nx.tc/files/NX500/Firmware/NX500_FW_v1.12.zip) | |
-| 테스트용 SD 카드 준비 | |
-| sd/stage0-probe 실행 (정보 수집, 설정 백업, 셔터 횟수) | |
-| 진단 결과 분석 후 단계 1 설계 확정 | |
+| 테스트용 SD 카드 준비 | 완료. 128GB 쓰던 카드 사용 |
+| sd/stage0-probe 실행 (정보 수집, 설정 백업, 셔터 횟수) | 완료. docs/research/2026-10-18-probe-result.md |
+| 진단 결과 분석 후 단계 1 설계 확정 | 설계안 작성. docs/plan/stage1-design.md 의 결정 항목 대기 |
 
 ### 단계 1. 기반
 

@@ -40,7 +40,7 @@ ls -la /dev/event* >> "$OUT/input-devices.txt" 2>&1
 # 2. 기존 모드 흔적 확인 (bluetoothd 가 스크립트로 바뀌었는지 등)
 {
   echo "== /usr/sbin/bluetoothd*"; ls -la /usr/sbin/bluetoothd* 2>&1
-  echo "== bluetoothd head"; head -c 200 /usr/sbin/bluetoothd | strings 2>&1 | head -10
+  echo "== bluetoothd first bytes (ELF = 원본, #! = 스크립트로 교체됨)"; head -c 4 /usr/sbin/bluetoothd | od -c 2>&1 | head -1
   echo "== /opt/usr"; ls -la /opt/usr 2>&1
   echo "== /opt/usr/nx-ks"; ls -la /opt/usr/nx-ks 2>&1 | head -20
   echo "== /opt/usr/nx-on-wake"; ls -la /opt/usr/nx-on-wake 2>&1
