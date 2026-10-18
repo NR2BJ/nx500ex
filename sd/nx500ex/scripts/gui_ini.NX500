@@ -8,6 +8,4 @@ button|화면 정보 숨김|lcd_info.sh
 button|프로필 >|@/mnt/mmc/nx500ex/scripts/gui_profile
 
 button|설정 >|@/mnt/mmc/nx500ex/scripts/gui_more
-button|기타 >|@/mnt/mmc/nx500ex/scripts/gui_etc
-
 button|닫기|close.sh
