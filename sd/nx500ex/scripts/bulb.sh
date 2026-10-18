@@ -7,7 +7,7 @@
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 job_running && { popup "다른 작업 중" 3; exit 0; }
 [ "$(dial)" = DIALMODE_MANUAL ] || { popup "M 모드에서 사용" 3; exit 0; }
-silent_on && { popup "무음 셔터에서는 장노출 불가" 4; exit 0; }
+silent_on && { popup "무음 셔터에서는 장노출 불가<br>(1/5초까지만 됨)" 4; exit 0; }
 N=$(conf_get bulb_sec 30 1 30)
 IDX=$(shutter_idx)
 case "$IDX" in ''|*[!0-9-]*) popup "셔터 값을 읽지 못함" 3; exit 0 ;; esac

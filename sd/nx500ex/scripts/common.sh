@@ -2,7 +2,8 @@
 D=${NX500EX:-/mnt/mmc/nx500ex}
 PATH=$D/bin:$PATH
 PRESETS=$D/presets
-# 팝업은 한 줄로 그려지고 창 너비가 글 길이를 따른다. 화면(720)보다 길면 보이지 않으므로 한글 20자 안팎으로 쓴다 (2026-10-19 실기).
+# 팝업은 줄바꿈 없이 그려지고 창 너비가 글 길이를 따른다. 화면(720)보다 길면 보이지 않으므로 한 줄은 한글 20자 안팎으로 쓰고,
+# 더 필요하면 <br> 로 줄을 나눈다 (popup_timeout 은 EFL 마크업을 쓴다. 2026-10-19 실기).
 # 팝업은 띄워 두고 바로 돌아온다 (기다리면 keyscan 이 그동안 멈춘다)
 popup() { "$D/bin/popup_timeout" " $1 " "${2:-2}" > /dev/null 2>&1 & }
 # 확인 창. NX-KS 의 popup_ok 빌드는 첫 버튼(확인)이 255, 두 번째(취소)가 0 을 돌려준다 (상류 소스와 반대, 디스어셈블로 확인)
@@ -84,6 +85,8 @@ drive_single() { st app drive single > /dev/null 2>&1; }
 drive_restore() {
   [ -s /tmp/nx500ex-drive.saved ] || return 0
   _d=$(cat /tmp/nx500ex-drive.saved); rm -f /tmp/nx500ex-drive.saved
+  # 원래 단사였으면 되돌릴 것이 없다 (화면 갱신은 AF 위치를 가운데로 되돌리는 것으로 보여 필요할 때만)
+  [ "$_d" = 0 ] && return 0
   prefman set 0 0xa5b8 l "$_d" > /dev/null 2>&1
   reapply_mode
   jlog "drive restore pref=$_d -> $(drive_now)"

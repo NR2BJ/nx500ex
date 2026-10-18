@@ -7,14 +7,14 @@
 job_running && { popup "다른 작업 중" 3; exit 0; }
 G=$(conf_get iv_sec 10 2 3600)
 if silent_on && [ "$(shutter_idx)" -lt $SILENT_MIN_IDX ] 2>/dev/null; then
-  popup "무음: 1/5초보다 느린 셔터 불가" 4; exit 0
+  popup "무음: 1/5초보다 느린 셔터 불가<br>셔터를 빠르게 하세요" 4; exit 0
 fi
 C=$(conf_get iv_count 0 0 9999)
 if [ "$C" -eq 0 ]; then CN=계속; else CN=${C}장; fi
 if [ "$(dial)" = DIALMODE_MANUAL ]; then
   popup "인터벌 ${G}초 x ${CN} (EV 두번=중단)" 3
 else
-  popup "M 아님: 첫 장 노출로 고정" 3
+  popup "M 모드 아님<br>첫 장의 노출로 고정됨" 3
 fi
 (
   trap 'keys_release; lcd_restore; drive_restore; rm -f $JOBPID; jlog "interval stopped after $k"; exit 0' TERM
