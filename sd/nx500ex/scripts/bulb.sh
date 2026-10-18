@@ -21,7 +21,7 @@ popup "장노출 ${T}초 (EV 두번=중단)" 2
   trap 'fin; jlog "bulb stopped"; exit 0' TERM
   drive_save; drive_single
   shutter_set $V
-  sleep 2
+  sleep $POPUP_CLEAR
   N0=$(dcim_count)
   jlog "bulb start ${T}s (shutter $IDX -> $(shutter_idx))"
   s1_hold; sleep 0.5; s2_click; key release s1

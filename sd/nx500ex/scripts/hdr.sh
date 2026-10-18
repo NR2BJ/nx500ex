@@ -25,6 +25,7 @@ popup "HDR ±$((2*E))EV (EV 두번=중단)" 2
   trap 'fin; jlog "hdr stopped"; exit 0' TERM
   S=$((16 * E))
   i=0
+  sleep $POPUP_CLEAR
   drive_save; drive_single
   jlog "hdr start idx=$IDX step=$S iso=$ISO"
   for e in -2 -1 0 1 2; do
