@@ -2,18 +2,19 @@ checkbox|Silent Shutter|silent.sh
 checkbox|No Lens Release|nolens.sh
 
 button|Self-Timer|timer.sh
+button|Timer Delay|timer_delay.sh
+
 checkbox|Timer Lamp|timer_lamp.sh
+button|IP|
 
 button|Profiles|@/mnt/mmc/nx500ex/scripts/gui_profile
 button|Shutter Count|info.sh
 
 checkbox|Telnet / FTP|telnet.sh
-button|IP|
+button|CLOSE|close.sh
 
 checkbox|My Checkbox|user_check.sh
 button|My Button|user_button.sh
 
 checkbox|Debug Log|debug.sh
 button|Korean Test|@/mnt/mmc/nx500ex/scripts/gui_ko
-
-button|CLOSE|close.sh
