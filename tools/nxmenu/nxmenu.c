@@ -3,7 +3,8 @@
  *
  * NX-KS 의 mod_gui (ottokiksmaler/nx500_nx1_modding, AGPL-3.0) 의 화면 구성과 키 처리를 바탕으로 새로 작성했다.
  * mod_gui 와 다른 점:
- *   - 하위 화면으로 갈 때 창을 새로 만든다 (mod_gui 는 같은 창의 표를 지우고 다시 그려 이전 화면이 비치고 눌리는 위치가 어긋났다)
+ *   - 칸 크기가 모든 화면에서 같아 화면을 바꿔도 이전 화면 조각이 남지 않는다 (mod_gui 는 화면마다 칸 높이를 바꿔 이전 화면이 비치고 눌리는 위치가 어긋났다).
+ *     창은 하나만 만들고 내용만 바꾼다 (화면 버퍼를 늘리지 않게)
  *   - 체크박스와 keep 항목은 눌러도 메뉴가 닫히지 않는다
  *   - 칸 크기가 모든 화면에서 같다 (2열 x 5행). 마지막 행은 왼쪽 뒤로, 오른쪽 닫기로 고정
  *   - 라벨의 < > & 를 그대로 표시한다 (EFL 마크업으로 해석되지 않게 바꿔 넣는다)
@@ -32,11 +33,14 @@
 #include "efl_min.h"
 
 #define SCREEN_W 720
-#define SCREEN_H 480
+/* 창이 화면(480)을 다 덮으면 창 관리자가 카메라 앱을 "완전히 가려짐" 으로 보고 일시정지시킨다.
+ * 그때 카메라 앱이 자기 화면을 캡처하다 Xorg 가 죽었다 (2026-10-19 실기, dlog: fully_obscured -> PAUSE -> Xorg SIGSEGV).
+ * 그래서 아래 10 픽셀은 덮지 않는다. */
+#define MENU_H 470
 #define COLS 2
 #define ROWS 5
 #define CELL_W (SCREEN_W / COLS)
-#define CELL_H (SCREEN_H / ROWS)
+#define CELL_H (MENU_H / ROWS)
 #define MAX_ITEMS ((ROWS - 1) * COLS)
 #define PIDFILE "/tmp/nx500ex-menu.pid"
 #define LASTFILE "/tmp/nx500ex-menu.last"
@@ -55,7 +59,7 @@ static char page[256];
 static char back_page[256];
 static Item items[MAX_ITEMS + 2];
 static int n_items;
-static Evas_Object *win;
+static Evas_Object *win, *table;
 
 static void close_menu(void);
 
@@ -286,7 +290,7 @@ static void add_cell(Evas_Object *table, Item *it, int col, int row)
 
 static void show_page(const char *name)
 {
-	Evas_Object *old = win, *bg, *table;
+	Evas_Object *bg;
 	static char cur[256];
 	int i;
 	FILE *f;
@@ -297,14 +301,17 @@ static void show_page(const char *name)
 	f = fopen(LASTFILE, "w");
 	if (f) { fprintf(f, "%s\n", page); fclose(f); }
 
-	win = elm_win_add(NULL, "nxmenu", ELM_WIN_DIALOG_BASIC);
-	evas_object_smart_callback_add(win, "delete,request", (Evas_Smart_Cb)close_menu, NULL);
-	bg = evas_object_rectangle_add(evas_object_evas_get(win));
-	evas_object_color_set(bg, 0, 0, 0, 255);
-	elm_win_resize_object_add(win, bg);
-	evas_object_show(bg);
-	table = elm_table_add(win);
-	elm_win_resize_object_add(win, table);
+	if (!win) {
+		win = elm_win_add(NULL, "nxmenu", ELM_WIN_DIALOG_BASIC);
+		evas_object_smart_callback_add(win, "delete,request", (Evas_Smart_Cb)close_menu, NULL);
+		bg = evas_object_rectangle_add(evas_object_evas_get(win));
+		evas_object_color_set(bg, 0, 0, 0, 255);
+		elm_win_resize_object_add(win, bg);
+		evas_object_show(bg);
+		table = elm_table_add(win);
+		elm_win_resize_object_add(win, table);
+	} else
+		elm_table_clear(table, EINA_TRUE);
 
 	for (i = 0; i < MAX_ITEMS; i++) {
 		static Item blank = { T_BLANK };
@@ -320,9 +327,8 @@ static void show_page(const char *name)
 
 	evas_object_show(table);
 	evas_object_move(win, 0, 0);
-	evas_object_resize(win, SCREEN_W, SCREEN_H);
+	evas_object_resize(win, SCREEN_W, MENU_H);
 	evas_object_show(win);
-	if (old) evas_object_del(old);
 }
 
 static void close_menu(void)

@@ -32,6 +32,7 @@ void elm_exit(void);
 Evas_Object *elm_win_add(Evas_Object *parent, const char *name, int type);
 void elm_win_resize_object_add(Evas_Object *win, Evas_Object *subobj);
 Evas_Object *elm_table_add(Evas_Object *parent);
+void elm_table_clear(Evas_Object *obj, Eina_Bool clear);
 void elm_table_pack(Evas_Object *obj, Evas_Object *subobj, int x, int y, int w, int h);
 Evas_Object *elm_button_add(Evas_Object *parent);
 Evas_Object *elm_check_add(Evas_Object *parent);
