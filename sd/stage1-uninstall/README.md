@@ -29,8 +29,8 @@ ls, cksum, stat 의 수정 날짜로 보이는 범위에서는 설치한 적이 
 
 ## 사용 방법
 
-1. 이 폴더의 내용(info.tg, nx_cs.adj, nx500ex-uninstall 폴더)을 SD 루트에 복사한다. 설치 때 생긴 nx500ex-state 폴더가 카드에 있어야 수정 날짜까지 되돌린다.
+1. 이 폴더의 내용(info.tg, nx_cs.adj, nxex_unin.sh, nx500ex-uninstall 폴더)을 SD 루트에 복사한다. 같은 이름의 파일이 있으면 모두 덮어쓴다. 설치 때 생긴 nx500ex-state 폴더가 카드에 있어야 수정 날짜까지 되돌린다.
 2. 배터리를 뺐다 넣고, 카드를 넣고 전원을 켠다.
 3. UNINSTALL OK 가 나오면 전원을 끈다.
 4. 확인하고 싶으면 stage0-probe 를 다시 실행해 existing-mods.txt 를 설치 전 결과와 비교한다.
-5. SD 의 nx500ex-state, nx500ex-uninstall, info.tg.done, nx_cs.adj 를 지우면 카드에도 흔적이 없다.
+5. SD 의 nx500ex-state, nx500ex-install, nx500ex-uninstall, nxex_inst.sh, nxex_unin.sh, info.tg.done, nx_cs.adj 를 지우면 카드에도 흔적이 없다.

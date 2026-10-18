@@ -16,9 +16,13 @@
 
 ## 사용 방법
 
-1. 이 폴더의 내용(info.tg, nx_cs.adj, nx500ex-install 폴더)을 SD 루트에 복사한다.
+1. 이 폴더의 내용(info.tg, nx_cs.adj, nxex_inst.sh, nx500ex-install 폴더)을 SD 루트에 복사한다. 같은 이름의 파일이 있으면 모두 덮어쓴다.
 2. 배터리를 뺐다 넣고, 카드를 넣고 전원을 켠다.
 3. 화면에 INSTALL OK 와 DONE 이 나오면 전원을 끈다.
 4. 카메라 메뉴에서 블루투스를 켠다.
 
 설치 전 상태는 SD 의 nx500ex-state/record.txt 에, 진행 기록은 nx500ex-state/install-날짜.log 에 남는다. record.txt 는 제거할 때 검증과 복원에 쓰이므로 지우지 않는다. 카드가 바뀌면 PC 에 보관한 복사본을 같은 위치에 둔다.
+
+## 경로 길이 제한
+
+nx_cs.adj 의 shell script 경로가 길면 카메라가 실행하지 않는다. 31자는 동작했고 34자는 동작하지 않았다 (2026-10-18 실기). 그래서 루트에 짧은 이름의 nxex_inst.sh 를 두고, 그것이 폴더 안의 install.sh 를 부른다.
