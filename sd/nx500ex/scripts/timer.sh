@@ -11,7 +11,7 @@ case "$N" in ''|*[!0-9]*) N=5 ;; esac
 [ "$N" -gt 60 ] && N=60
 L=/sys/devices/platform/leds-gpio/leds/af/brightness
 [ -f "$D/scripts/auto/timer_lamp.sh" ] || L=/dev/null
-popup "Self-timer ${N}s" "$N"
+popup "셀프타이머 ${N}초" "$N"
 (
   i=1; while [ $i -lt "$N" ]; do echo 1 > $L; sleep 0.5; echo 0 > $L; sleep 0.5; i=$((i+1)); done
   for i in 1 2 3 4 5; do echo 1 > $L; sleep 0.1; echo 0 > $L; sleep 0.1; done

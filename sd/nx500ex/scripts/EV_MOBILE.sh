@@ -1,5 +1,6 @@
 #!/bin/sh
-# EV+WiFi: 텔넷/FTP 켜기 (이번 전원 동안만. 계속 켜 두려면 메뉴의 체크박스)
+# EV+WiFi: 텔넷/FTP 상태와 IP 보기. 켜고 끄는 것은 메뉴의 "텔넷 / FTP" 체크박스만 한다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
-sh "$D/scripts/telnet.sh"
-ip addr ls mlan0 2>/dev/null | grep -q 'inet ' || popup "Telnet/FTP ON. Connect WiFi first" 3
+IP=$(wifi_ip)
+if [ -f /tmp/nx500ex-telnet.pid ] && [ -d /proc/$(cat /tmp/nx500ex-telnet.pid) ]; then S="텔넷/FTP 켜짐"; else S="텔넷/FTP 꺼짐"; fi
+popup "$S  IP: ${IP:-WiFi 미연결}" 4

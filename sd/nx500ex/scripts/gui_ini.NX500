@@ -1,20 +1,19 @@
-checkbox|Silent Shutter|silent.sh
-checkbox|No Lens Release|nolens.sh
+checkbox|무음 셔터|silent.sh
+checkbox|렌즈 없이 촬영|nolens.sh
 
-button|Self-Timer|timer.sh
-button|Timer Delay|timer_delay.sh
+button|셀프타이머|timer.sh
+button|타이머 시간|timer_delay.sh
 
-checkbox|Timer Lamp|timer_lamp.sh
+checkbox|타이머 램프|timer_lamp.sh
+button|셔터 횟수|info.sh
+
+checkbox|텔넷 / FTP|telnet.sh
 button|IP|
 
-button|Profiles|@/mnt/mmc/nx500ex/scripts/gui_profile
-button|Shutter Count|info.sh
+button|프로필|@/mnt/mmc/nx500ex/scripts/gui_profile
+button|사용자 버튼|user_button.sh
 
-checkbox|Telnet / FTP|telnet.sh
-button|CLOSE|close.sh
+checkbox|사용자 체크박스|user_check.sh
+checkbox|진단 기록|debug.sh
 
-checkbox|My Checkbox|user_check.sh
-button|My Button|user_button.sh
-
-checkbox|Debug Log|debug.sh
-button|Korean Test|@/mnt/mmc/nx500ex/scripts/gui_ko
+button|닫기|close.sh
