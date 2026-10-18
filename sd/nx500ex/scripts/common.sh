@@ -30,3 +30,29 @@ if [ -e "$D/debug" ]; then
   _NAME=${0##*/}
   trap 'echo "$_NAME start=$_T0 end=$(cut -d" " -f1 /proc/uptime)" >> "$D/log/timing.log"; sync' EXIT
 fi
+
+# ---- 촬영 작업 (벌브, 인터벌, HDR, 포커스 스태킹) ----
+# 한 번에 하나만 돈다. EV 두 번으로 중단 (EV_EV.sh), 블루투스를 꺼도 중단 (watch.sh).
+JOBPID=/tmp/nx500ex-job.pid
+job_running() { [ -f $JOBPID ] && [ -d /proc/$(cat $JOBPID) ]; }
+job_stop() { job_running && kill $(cat $JOBPID) 2>/dev/null; rm -f $JOBPID; }
+jlog() { echo "$(date '+%Y-%m-%d %H:%M:%S') $*" >> "$D/log/jobs.log"; sync; }
+# 반셔터, 셔터를 누르고 뗀다 (셀프타이머와 같은 방식. 지금 AF, 드라이브 설정을 따른다)
+shoot() { { st key push s1; st key push s2; st key release s2; st key release s1; } > /dev/null 2>&1; }
+dial() { set -- $(st cap capdtm getusr DIALMODE 2>/dev/null); echo "$3"; }
+# 작업 중 화면 끄기 (메뉴 체크박스 = auto/screen_dark.sh 가 있으면)
+lcd_dark() { [ -f "$D/scripts/auto/screen_dark.sh" ] && st app bb lcd off > /dev/null 2>&1; }
+lcd_restore() { st app bb lcd on > /dev/null 2>&1; rm -f /tmp/nx500ex-lcd-video; }
+# AF 모드 저장, MF 로 전환, 복원 (focus_stack 바이너리와 같은 방식)
+af_save() { st cap capdtm getusr AFMODE 2>/dev/null | sed -n 's/.*(\(0x[0-9a-fA-F]*\)).*/\1/p' > /tmp/nx500ex-af.saved; }
+af_manual() { st app nx capture af-mode manual > /dev/null 2>&1; }
+af_restore() { [ -s /tmp/nx500ex-af.saved ] && st cap capdtm setusr AFMODE $(cat /tmp/nx500ex-af.saved) > /dev/null 2>&1; rm -f /tmp/nx500ex-af.saved; }
+# 숫자 입력. ask "질문" 기본값 최소 최대 → 값 출력, 취소나 잘못된 값이면 실패
+ask() {
+  _v=$("$D/bin/popup_entry" "$1" 확인 취소 "$2" number 2>/dev/null) || return 1
+  case "$_v" in ''|*[!0-9]*) popup "숫자가 아님" 2; return 1 ;; esac
+  if [ "$_v" -lt "$3" ] || [ "$_v" -gt "$4" ]; then popup "$3~$4 사이로 입력" 2; return 1; fi
+  echo "$_v"
+}
+conf_get() { _c=$(cat "$D/conf/$1" 2>/dev/null); echo "${_c:-$2}"; }
+conf_set() { mkdir -p "$D/conf"; echo "$2" > "$D/conf/$1"; sync; }

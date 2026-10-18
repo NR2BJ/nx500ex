@@ -4,16 +4,20 @@ checkbox|렌즈 없이 촬영|nolens.sh
 button|셀프타이머|timer.sh
 button|타이머 시간|timer_delay.sh
 
-checkbox|타이머 램프|timer_lamp.sh
+button|벌브|bulb.sh
+button|인터벌 촬영|interval.sh
+
+button|HDR 5장|hdr.sh
+button|포커스 스태킹|@/mnt/mmc/nx500ex/scripts/gui_fstack
+
+button|화면 정보 숨김|lcd_info.sh
 button|셔터 횟수|info.sh
 
 checkbox|텔넷 / FTP|telnet.sh
 button|IP|
 
 button|프로필|@/mnt/mmc/nx500ex/scripts/gui_profile
-button|사용자 버튼|user_button.sh
+button|기타 설정|@/mnt/mmc/nx500ex/scripts/gui_more
 
-checkbox|사용자 체크박스|user_check.sh
-checkbox|진단 기록|debug.sh
-
+button|작업 중단|job_stop.sh
 button|닫기|close.sh

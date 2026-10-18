@@ -1,0 +1,8 @@
+button|가까운 끝 저장|fs_near.sh
+button|먼 끝 저장|fs_far.sh
+
+button|스태킹 시작|fs_run.sh
+button|작업 중단|job_stop.sh
+
+button|뒤로|@/mnt/mmc/nx500ex/scripts/gui_ini
+button|닫기|close.sh

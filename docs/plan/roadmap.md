@@ -27,7 +27,7 @@
 
 단계 1 완료 (2026-10-19): v2 래퍼(bt-stack-up.sh) 실기 검증, 블루투스 = 모드 스위치 동작 확인. 패키지는 sd/stage1-install, sd/stage1-uninstall, sd/stage1-test.
 
-단계 2 첫 판: sd/nx500ex (메뉴, A 순위 기능). 실기 확인 대기.
+단계 2: sd/nx500ex. A 순위 실기 확인 완료 (2026-10-19, 기록은 docs/research/2026-10-18-stage1-test.md). B 순위 첫 묶음(벌브, 인터벌, HDR 5장, 포커스 스태킹, 화면 정보 숨김, 화면 캡처) 구현, 실기 확인 대기.
 
 ### 단계 1. 기반
 
@@ -48,28 +48,28 @@
 | 기능 | 출처 | 우선순위 | 비고 | 완료 |
 | --- | --- | --- | --- | --- |
 | 팝업, 키 감지(keyscan), poker, stapp, 모델 판별 | KS/U/G | A | 기반 부품 | |
-| 설치/제거, 설치 직후 telnet/FTP, telnet+FTP | KS/W | A | 개발 통로. 완성 후 끄는 옵션 | |
-| 모드 메뉴 + IP 표시 + 메뉴 속도 개선 기법 | KS/W | A | IP 는 W 의 gen_menu 방식 | |
-| 사용자 정의 버튼/체크박스, WiFi 키 더블클릭 | KS/W | A | SD 스크립트 확장 지점 | |
-| LCD/EVF 제어, 터치스크린 ON/OFF | U/KS | A | | |
-| 무음 전자셔터 | KS | A | 부팅마다 재적용 | |
-| 렌즈 미인식 상태 촬영 | KS | A | | |
-| AF-S/단사 와 AF-C/고속연사 토글 | U | A | | |
-| 촬영 지연 셀프타이머 | U | A | | |
-| 전체 설정 백업/복원, UP/DOWN 프로필 | KS | A | 같은 prefman 원리 | |
-| 셔터 횟수/전원 횟수 조회 | U | A | | |
-| 벌브 타이머 | G | B | | |
-| HDR 5장 브라케팅 | KS | B | | |
+| 설치/제거, 설치 직후 telnet/FTP, telnet+FTP | KS/W | A | 개발 통로. 완성 후 끄는 옵션 | 확인 (제거기 실기는 남음) |
+| 모드 메뉴 + IP 표시 + 메뉴 속도 개선 기법 | KS/W | A | 한글 메뉴. 속도 개선은 기능 구현 뒤 | 확인 |
+| 사용자 정의 버튼/체크박스, WiFi 키 더블클릭 | KS/W | A | SD 스크립트 확장 지점. WiFi 두 번은 빈 자리 (MOBILE_MOBILE.sh) | 확인 |
+| LCD/EVF 제어, 터치스크린 ON/OFF | U/KS | A | NX500 은 EVF 없음. 화면 정보 숨김, 작업 중 화면 끄기 (st app bb lcd) | 구현 |
+| 무음 전자셔터 | KS | A | 부팅마다 재적용. 단사만, 브라케팅 불가 | 확인 |
+| 렌즈 미인식 상태 촬영 | KS | A | | 확인 |
+| AF-S/단사 와 AF-C/고속연사 토글 | U | A | | 구현 |
+| 촬영 지연 셀프타이머 | U | A | 자체 타이머, 시간과 램프 설정 | 확인 |
+| 전체 설정 백업/복원, UP/DOWN 프로필 | KS | A | 같은 prefman 원리 | UP 확인 |
+| 셔터 횟수/전원 횟수 조회 | U | A | 전원 끌 때 갱신되는 값 | 확인 |
+| 벌브 타이머 | G | B | 화면 끄기는 blackout 바이너리 대신 st app bb lcd off | 구현 |
+| HDR 5장 브라케팅 | KS | B | 지금 셔터 기준 ±2 단계, 간격 1~3 EV 입력 | 구현 |
 | ZoomZoom | KS | B | 파워줌 렌즈 필요 | |
-| 포커스 스태킹 | KS/U | B | 접사용 | |
+| 포커스 스태킹 | KS/U | B | 접사용. focus_stack 바이너리는 설정을 내장 /root 에 써서 셸 스크립트로 새로 작성. AF 렌즈만 | 구현 |
 | 지속 피킹 | KS/U | B | MF 렌즈 구입 후 검증 | |
 | 화면 상단 메뉴 버튼, PNG 오버레이/3x3 그리드, 온스크린 가상 버튼 | KS/U | B | 화면 표시 바이너리 묶음. 소스 없는 onscreen_* 는 상류 onscreen_key.c 로 대체 검토 | |
-| 화면 스크린샷 | U/E | B | | |
+| 화면 스크린샷 | U/E | B | 순정 기능 (SD 루트 save_screen_enable.txt + EV+OK) | 구현 |
 | 웹 원격 제어 + 웹 갤러리 개선 + 웹 촬영 파라미터 API | KS+M/W | B | 폰 핫스팟에 카메라가 접속. AP 모드 미사용 | |
 | SSH/SFTP/SCP | G | B | | |
 | PTP 모드 | U | B | | |
 | FilmLab 필름 레시피 | W | B | A2 펌웨어 없이. 화면 마법사 사용자1 확인 단계 감수 | |
-| Mod Lapse, Wake Lapse, Ramping, 자동 꺼짐 해제 | KS/U | B | | |
+| Mod Lapse, Wake Lapse, Ramping, 자동 꺼짐 해제 | KS/U | B | 간단한 인터벌 촬영 먼저 구현 | 일부 |
 | SD 의 LUT 를 필요할 때만 적용 (.cube 변환기, 적용/해제, 상태 진단) | W | C | 내장 LUT 전환은 제외. NXWA 에서 몇 주 안정화 확인 후 | |
 | 진짜 백버튼 AF | U | C | 실패 가능. 안 되면 포기 | |
 
