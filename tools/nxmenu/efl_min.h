@@ -55,5 +55,7 @@ void evas_object_smart_callback_add(Evas_Object *obj, const char *event, Evas_Sm
 void *ecore_event_handler_add(int type, Ecore_Event_Handler_Cb func, const void *data);
 void ecore_main_loop_iterate(void);
 void *ecore_job_add(void (*func)(void *data), const void *data);
+void *ecore_timer_add(double in, Eina_Bool (*func)(void *data), const void *data);
+Evas_Object *elm_label_add(Evas_Object *parent);
 
 #endif

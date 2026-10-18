@@ -62,7 +62,7 @@ EV 는 다른 키보다 먼저 누르고 있어야 한다.
 | 벌브 (장노출) | M 모드에서 사용. 셔터 속도를 정한 시간(그 이하에서 가장 긴 표준값, 예 7초 -> 6초, 최대 30초)으로 맞춰 보통 단사로 찍고 되돌린다. 카메라의 BULB 는 스크립트로 끝낼 수 없어(30초에 끝남) 쓰지 않는다. 무음 셔터가 켜져 있으면 거부. 사진이 안 생기면(초점 실패) 알린다 |
 | 인터벌 촬영 | 반셔터를 누른 채 두고 셔터만 누른다. 첫 장에서 잡힌 초점(P/A/S 면 노출도)으로 끝까지 찍는다. 첫 장이 초점 실패로 안 찍히면 중단. 촬영이 밀리면 몰아서 찍지 않고 그때부터 다시 간격을 센다 |
 | HDR 5장 | M 모드, ISO 고정(자동이면 거부)에서 가운데 노출을 맞춘 뒤 시작. 무음 셔터면 가장 긴 장이 1/5초보다 느릴 때 거부. 셔터 속도만 바꿔 다섯 장 (30초 ~ 1/6000 범위). 셔터 값을 바꿀 때 반셔터가 풀려 장마다 초점을 다시 잡으므로, AF 면 모든 장에서 초점이 맞아야 한다 (안 맞는 장에서 중단). 삼각대와 MF 를 권장. 끝나면 셔터 복원 |
-| 포커스 스태킹 | AF 렌즈만. 초점 모터를 직접 움직이고, 촬영 서비스의 MF(st cap capt mf on)를 켜서 셔터 때 초점을 다시 잡지 않게 한다 (시험 중). 화면의 거리 표시는 따라오지 않는다. 장마다 촬영 전후 초점 위치를 jobs.log 에 남긴다 |
+| 포커스 스태킹 | AF 렌즈만. 초점 모터를 직접 움직이고, 촬영 서비스의 MF(st cap capt mf on)를 켜서 셔터 때 초점을 다시 잡지 않게 한다 (기계, 무음 모두 확인). 화면의 거리 표시는 한 장씩 늦게 따라온다. 장마다 촬영 전후 초점 위치를 jobs.log 에 남긴다 |
 | 작업 중 화면 끄기 | 벌브, 인터벌, HDR 동안 화면 전체를 검은 창으로 덮는다 (AMOLED 라 꺼진 것과 같음). 팝업은 그 위에 뜬다 |
 | 텔넷 / FTP | 서버를 켜 둔다 (전원 켤 때마다 자동). WiFi 연결 전에도 서버는 떠 있고 연결되면 접속 가능. IP 는 IP 항목이나 EV+WiFi. 인증 없음, 본인 기기만 있는 네트워크에서만 |
 | 셔터 횟수 | 셔터, 전원, 플래시 횟수. 전원을 끌 때 저장되는 값이라 켜져 있는 동안 찍은 수는 다음 전원 켜기부터 반영 |
@@ -77,7 +77,7 @@ EV 는 다른 키보다 먼저 누르고 있어야 한다.
 ```
 nx500ex/
   boot.sh              내장 래퍼가 부름
-  bin/                 keyscan, nxmenu, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
+  bin/                 keyscan, nxmenu, nxpopup, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
   scripts/             키 조합(EV_*.sh), 기능, 메뉴(gui_*.NX500), common.sh
   scripts/auto/        켜 둔 기능 (체크박스가 관리)
   presets/             프로필과 전체 백업 (처음 저장할 때 생김)
@@ -90,7 +90,7 @@ nx500ex/
 | --- | --- | --- |
 | keyscan, popup_timeout, popup_ok, popup_entry, poker, blackout | Otto Kiksmaler, NX-KS 2.88 에 포함된 빌드 | AGPL-3.0 (상류 ottokiksmaler/nx500_nx1_modding) |
 | stapp | ge0rg/nx-ks-mod 의 빌드 | AGPL-3.0 |
-| nxmenu | 이 저장소 tools/nxmenu (mod_gui 바탕) | AGPL-3.0 |
+| nxmenu, nxpopup | 이 저장소 tools/nxmenu (mod_gui, popup_timeout 바탕) | AGPL-3.0 |
 | busybox, telnetd | NX-KS 2.88 에 포함된 빌드 | GPL-2.0 |
 
 ## 첫 확인 순서
