@@ -24,9 +24,6 @@ wifi_ip() { ip addr ls mlan0 2>/dev/null | sed -n 's/.*inet \([0-9.]*\).*/\1/p';
 touch_get() { set -- $(prefman get 0 0x0000a690 b 2>/dev/null); echo "$6"; }
 touch_set() { prefman set 0 0x0000a690 b "$1" > /dev/null 2>&1; }
 
-# 메뉴에서 실행된 설정 항목은 끝난 뒤 같은 메뉴 화면을 다시 띄운다 (mod_gui 는 항목을 누르면 항상 닫히므로)
-stay() { [ -n "$NX500EX_PAGE" ] && sh "$D/scripts/menu.sh" "$NX500EX_PAGE" < /dev/null > /dev/null 2>&1 & }
-
 # 진단 기록이 켜져 있으면 각 스크립트의 시작/끝 시각(uptime)을 log/timing.log 에 남긴다
 if [ -e "$D/scripts/auto/debug.sh" ]; then
   _T0=$(cut -d' ' -f1 /proc/uptime)
@@ -59,6 +56,18 @@ lcd_dark() {
   echo $! > /tmp/nx500ex-blackout.pid; jlog "blackout on"
 }
 lcd_restore() { [ -f /tmp/nx500ex-blackout.pid ] && kill $(cat /tmp/nx500ex-blackout.pid) 2>/dev/null; rm -f /tmp/nx500ex-blackout.pid; }
+# 메모리 카드의 사진 파일 수 (첫 장이 실제로 찍혔는지 확인용)
+dcim_count() { find /mnt/mmc/DCIM -type f 2>/dev/null | wc -l; }
+# 첫 장: 지금 AF 설정으로 찍고 새 파일이 생기는지 최대 $1 초 기다린다.
+# AF-S 는 초점을 못 잡으면 셔터가 눌리지 않아 파일이 생기지 않는다. 생기면 AF 모드를 저장하고 MF 로 고정한다.
+first_shot() {
+  _n=$(dcim_count); shoot; _w=0
+  while [ $_w -lt "${1:-8}" ]; do
+    sleep 1; _w=$((_w + 1))
+    if [ "$(dcim_count)" -gt "$_n" ]; then af_save; af_manual; return 0; fi
+  done
+  return 1
+}
 # AF 모드 저장, MF 로 전환, 복원 (focus_stack 바이너리와 같은 방식)
 af_save() { st cap capdtm getusr AFMODE 2>/dev/null | sed -n 's/.*(\(0x[0-9a-fA-F]*\)).*/\1/p' > /tmp/nx500ex-af.saved; }
 af_manual() { st app nx capture af-mode manual > /dev/null 2>&1; }

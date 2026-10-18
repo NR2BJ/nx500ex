@@ -4,4 +4,3 @@
 # 재부팅 때 풀리므로 auto 에서 다시 적용된다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 st cap capdtm setusr ADJUSTSHUTTERTYPE 0x750001 > /dev/null 2>&1
-stay

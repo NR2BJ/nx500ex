@@ -1,11 +1,7 @@
+back|gui_ini
 button|UP 저장|save_UP.sh
 button|UP 불러오기|load_UP.sh
-
 button|DOWN 저장|save_DOWN.sh
 button|DOWN 불러오기|load_DOWN.sh
-
 button|전체 백업|full_save.sh
 button|전체 복원|full_load.sh
-
-button|< 뒤로|menu.sh gui_ini
-button|닫기|close.sh

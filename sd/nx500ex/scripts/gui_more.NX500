@@ -1,8 +1,5 @@
+back|gui_ini
 checkbox|텔넷 / FTP|telnet.sh
-button|IP|
-
+ip|IP
 button|셔터 횟수|info.sh
 checkbox|진단 기록|debug.sh
-
-button|< 뒤로|menu.sh gui_ini
-button|닫기|close.sh

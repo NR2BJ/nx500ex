@@ -1,4 +1,3 @@
 #!/bin/sh
 # 메뉴 "작업 중 화면 끄기" 체크박스. 벌브, 인터벌이 auto 에 이 파일이 있는지로 판단한다.
-. "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
-stay
+exit 0

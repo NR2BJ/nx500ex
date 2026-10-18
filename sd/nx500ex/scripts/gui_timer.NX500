@@ -1,7 +1,4 @@
+back|gui_shoot
 button|셀프타이머 시작|timer.sh
-button|타이머 시간|timer_delay.sh
-
+keep|타이머 시간|timer_delay.sh
 checkbox|타이머 램프|timer_lamp.sh
-button|< 뒤로|menu.sh gui_shoot
-
-button|닫기|close.sh

@@ -5,5 +5,4 @@ for f in /tmp/nx500ex-telnet.pid /tmp/nx500ex-ftp.pid; do
   rm -f $f
 done
 killall -q telnetd 2>/dev/null
-[ -n "$1" ] || stay
 exit 0
