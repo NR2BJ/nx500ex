@@ -57,5 +57,7 @@ void ecore_main_loop_iterate(void);
 void *ecore_job_add(void (*func)(void *data), const void *data);
 void *ecore_timer_add(double in, Eina_Bool (*func)(void *data), const void *data);
 Evas_Object *elm_label_add(Evas_Object *parent);
+void evas_smart_objects_calculate(Evas *e);
+void evas_object_size_hint_min_get(const Evas_Object *obj, Evas_Coord *w, Evas_Coord *h);
 
 #endif
