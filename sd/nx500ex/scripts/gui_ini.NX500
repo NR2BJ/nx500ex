@@ -1,6 +1,9 @@
 checkbox|Silent Shutter|silent.sh
 checkbox|No Lens Release|nolens.sh
 
+button|Self-Timer|timer.sh
+checkbox|Timer Lamp|timer_lamp.sh
+
 button|Profiles|@/mnt/mmc/nx500ex/scripts/gui_profile
 button|Shutter Count|info.sh
 
