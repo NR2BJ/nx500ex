@@ -30,7 +30,7 @@
 - 그래서 SD 에서 실행해도 켤 때마다 keyscan 이 다시 올라온다. 대가는 bluetoothd 시작과 SD 마운트를 기다리는 몇 초의 지연이다.
 - NX-KS 는 이 지연을 없애려고 내장에 넣었다. 내장의 keyscan 은 OFF 중에도 메모리에 남아 켜는 즉시 동작한다.
 
-검증할 가정: "켤 때마다 bluetoothd 가 다시 시작된다". 첫 실기 테스트에서 확인한다. 성립하지 않으면 keyscan 하나(약 14KB)만 /opt/usr/nx500ex 에 둔다.
+실기 확인 (2026-10-18): 진짜 bluetoothd 는 계속 살아 있지만, 카메라가 전원 ON 때와 블루투스를 켤 때마다 /usr/sbin/bluetoothd 실행을 요청하므로 래퍼가 매번 불린다. 따라서 keyscan 을 내장에 둘 필요가 없다. 자세한 기록은 docs/research/2026-10-18-stage1-test.md.
 
 ## 3. 실행 순서와 우선순위
 
