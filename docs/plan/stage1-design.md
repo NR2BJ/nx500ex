@@ -1,3 +1,5 @@
+> 2026-10-19 변경: 진입 훅을 /usr/sbin/bluetoothd 래퍼에서 /usr/etc/bluetooth/bt-stack-up.sh 래퍼로 바꿨다. bluetoothd 이름을 바꾸면 블루투스를 끌 때 데몬이 종료되지 않아 순정과 다르게 동작하기 때문이다. 근거는 docs/research/2026-10-19-firmware-bt-analysis.md. 아래 본문의 bluetoothd 래퍼 설명은 v1 기록으로 남긴다.
+
 # 단계 1 설계안: 진입 훅과 SD 구조
 
 진단 결과(docs/research/2026-10-18-probe-result.md)와 2026-10-18 결정 사항을 반영한 설계다.
