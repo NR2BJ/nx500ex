@@ -70,7 +70,9 @@ first_shot() {
 }
 # AF 모드 저장, MF 로 전환, 복원 (focus_stack 바이너리와 같은 방식)
 af_save() { st cap capdtm getusr AFMODE 2>/dev/null | sed -n 's/.*(\(0x[0-9a-fA-F]*\)).*/\1/p' > /tmp/nx500ex-af.saved; }
-af_manual() { st app nx capture af-mode manual > /dev/null 2>&1; }
+# 렌즈 AF/MF 스위치가 AF 일 때 카메라 메뉴에서는 MF 를 고를 수 없는 렌즈가 있다 (16-50mm S 등, 사용자 기억).
+# 이 명령으로는 바뀌는지 확인되지 않았으므로 바뀐 뒤 값을 jobs.log 에 남긴다.
+af_manual() { st app nx capture af-mode manual > /dev/null 2>&1; jlog "af-mode manual -> $(st cap capdtm getusr AFMODE 2>/dev/null | tr -d '\000\r' | sed 's/UserData is //')"; }
 af_restore() { [ -s /tmp/nx500ex-af.saved ] && st cap capdtm setusr AFMODE $(cat /tmp/nx500ex-af.saved) > /dev/null 2>&1; rm -f /tmp/nx500ex-af.saved; }
 # 숫자 입력. ask "질문" 기본값 최소 최대 → 값 출력, 취소나 잘못된 값이면 실패
 ask() {
