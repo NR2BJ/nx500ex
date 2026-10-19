@@ -1,9 +1,5 @@
 # 자동 생성 (tools/filmlab/gen_pages.py)
 back|gui_film
-button|CineStill 50D|film.sh cinestill50d
+button|Vision3 50D/250D|film.sh vision3d
 button|CineStill 800T|film.sh cinestill800t
-button|Vision3 50D|film.sh vision3_50d
-button|Vision3 250D|film.sh vision250d
-button|Vision3 500T|film.sh vision500t
-button|Eterna 500T|film.sh fuji_eterna500
-button|시네 틸|film.sh cine_teal
+button|Eterna 500T|film.sh eterna500t

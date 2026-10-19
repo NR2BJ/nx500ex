@@ -1,10 +1,5 @@
 # 자동 생성 (tools/filmlab/gen_pages.py)
 back|gui_film
-button|크로스 프로세스|film.sh xpro
-button|틸 오렌지|film.sh teal_orange
-button|따뜻한 빈티지|film.sh warm_vintage
-button|차가운 강철|film.sh cold_steel
-button|바랜 필름|film.sh faded_film
-button|하이키|film.sh highkey
-button|로우키|film.sh lowkey
-page|다음 >|gui_film_style2
+button|크로스 프로세스|film.sh crossprocess
+button|블리치 바이패스|film.sh bleachbypass
+button|바랜 인화|film.sh faded

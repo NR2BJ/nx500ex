@@ -9,7 +9,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | 분류 | 기능 |
 | --- | --- |
 | 촬영 | 무음 셔터, 렌즈 없이 촬영, 셀프타이머, 장노출(30초까지), 인터벌, HDR 5장, 포커스 스태킹, 작업 중 화면 끄기, 재생 화면에서 작업 사진 묶기 |
-| 색 | 필름 레시피 68개 (화면 마법사 사용자 1 에 적용) |
+| 색 | 필름 레시피 31개 (화면 마법사 사용자 1 과 화이트 밸런스에 적용) |
 | 설정 | UP/DOWN 프로필, 전체 설정 백업/복원, 셔터 횟수, 텔넷/FTP |
 | 조작 | 한글 메뉴 (EV 두 번), 키 설정 (EV 조합, 두 번 누르기, 길게 누르기) |
 
@@ -57,7 +57,7 @@ busybox, telnetd 바이너리는 GPL-2.0 이다.
 | ottokiksmaler/nx500_nx1_modding (Otto 와 상류 기여자: vasile-gh, KinoSeed, Georg Lukas 등) | 키 감지(keyscan.c, nxkeys 의 바탕), 메뉴(mod_gui, nxmenu 의 바탕), 알림(popup_timeout, nxpopup 의 바탕), popup_ok, popup_entry, poker, blackout. st 명령, prefman, 키 이벤트, 펌웨어 구조 문서 |
 | NX-KS 2.88 (KinoSeed) | 무음 셔터, 렌즈 없이 촬영, 프로필, 셔터 횟수 등 기능 스크립트의 원리와 prefman 위치. 포함된 바이너리 빌드 (popup 류, poker, blackout, busybox, telnetd). 블루투스로 모드를 시작하는 방식 |
 | ge0rg/nx-ks-mod (Georg Lukas) | NX-KS 이력 복원과 유지보수, stapp 바이너리, 벌브 타이머, IP 표시 |
-| WApaperplane/NXWA-nx500_modding (NXWA) | 필름 레시피 68개 (scripts/film/recipes.txt), 화면 마법사 prefman 위치와 반영 판단 방법 (st cap capdtm varlist), 펌웨어 분석 문서 |
+| WApaperplane/NXWA-nx500_modding (NXWA) | 필름 레시피 기능의 출발점 (FilmLab), 화면 마법사 prefman 위치와 반영 판단 방법 (st cap capdtm varlist), 펌웨어 분석 문서. 레시피 값은 처음에 NXWA 68개를 썼다가 실제 필름 조사로 다시 정했다 |
 | mewlips/nx-remote-controller-mod, ajavamind/Multi-NX-Camera-Control, mbriney/nx500_nx1_modding, ge0rg/samsung-nx-hacks | 조사 참고 (원격 제어, 여러 대 제어, 배포본 보존, 모델 정보) |
 | nxfiles.nx.tc | NX-KS 배포본과 공식 펌웨어 미러 |
 

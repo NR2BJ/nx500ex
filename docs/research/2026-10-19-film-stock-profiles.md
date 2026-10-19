@@ -1,0 +1,86 @@
+# 필름 레시피를 위한 실제 필름 특성 조사 (2026-10-19)
+
+NXWA 레시피 68개는 근거 없는 근사값이 섞여 있었다 (예: Kodachrome 25 와 64 가 전혀 다른 방향). 그래서 실제 필름 특성을 웹 자료로 조사하고, 우리가 바꿀 수 있는 값(화면 마법사 7가지 + 색온도)으로 다시 정했다. 결과는 sd/nx500ex/scripts/film/recipes.txt.
+
+자료는 대부분 스캔 결과를 근거로 한 리뷰라 같은 필름도 현상소와 스캐너에 따라 다르게 보인다. 데이터시트로 확인한 것은 Portra 800, Tri-X, Pan F Plus, Rollei CN 200, Reala 기술 논문뿐이다.
+
+## 1. 원칙
+
+| 항목 | 정한 것 | 이유 |
+| --- | --- | --- |
+| 색온도 방향 | 카메라는 설정한 K 의 광원을 중립으로 처리. 주광에서 3200K 면 파랗고 6500K 면 따뜻하다 | |
+| 컬러 네거티브 WB | 바꾸지 않음 (카메라 설정 그대로) | 현상소가 인화와 스캔 때 색을 맞추던 필름. 필름 성향은 RGB 게인으로만 |
+| 슬라이드 WB | 5500K 고정 | 주광 고정 밸런스. 그늘은 파랗게, 노을은 붉게 나오는 성질 |
+| 텅스텐 필름 WB | 3200K | 주광에서 강한 파랑 (원래 용도는 텅스텐 조명 아래 중립) |
+| RGB 게인 | 합을 대략 300, 100 에서 ±8 이내 | 밝기 변화를 줄이고, 100 을 넘는 채널의 하이라이트 클리핑을 줄임 |
+| 색조 | 모두 10 | 전역 회전이라 피부와 하늘이 같이 돈다. 한 단계의 방향과 크기를 모름 (컬러 차트로 9, 11 을 찍어 확인 후 일부에만 ±1) |
+| 흑백 | 채도 0, RGB 게인을 컬러 필터처럼 (R 올리고 B 내리면 주황 필터처럼 하늘이 어두워짐) | 게인이 흑백 변환 전에 적용되는지 시험 촬영으로 확인 필요. 아니면 100/100/100 |
+| 재현 불가 | 그레인, 할레이션 (CineStill 붉은 번짐), 하이라이트 롤오프, 들뜬 블랙, 스플릿 톤, 특정 색만 바꾸기 | 7가지 값 밖 |
+
+## 2. 필름별 특성 요약
+
+컬러 네거티브 (모두 주광)
+
+| 필름 | 색 | 채도 | 대비 | 특징 |
+| --- | --- | --- | --- | --- |
+| Portra 160 | 약간 따뜻 | 낮음 | 낮음 | 피부 우선, Portra 중 가장 차분 |
+| Portra 400 | 따뜻 | 낮음~중간 | 낮음~중간 | 160 보다 약간 진함, 관용도 넓음 |
+| Portra 800 | 따뜻 | 중간~높음 | 중간~높음 | 160/400 보다 진함, 빨강 좋음 |
+| Gold 200 | 노랑, 주황 쪽으로 강하게 따뜻 | 중간~높음 | 중간 | 햇살 같은 소비자용 |
+| UltraMax 400 | 따뜻 | Gold 보다 진함 | 중간 | 빨강, 녹색, 파랑 모두 강조 (Gold 400 은 같은 계열) |
+| ColorPlus 200 | 노랑 쪽 따뜻 | Gold 보다 차분 | 중간 | 저가형 |
+| ProImage 100 | 따뜻 | 중간~높음 | 중간 | 피부가 Ektar 처럼 붉어지지 않음 |
+| Ektar 100 | 빨강 쪽 | 높음 | 중간~높음 | 네거티브 중 슬라이드에 가장 가까움, 피부가 붉어짐 |
+| Superia X-TRA 400 | 차가움 (녹색, 청색) | 중간 | 중간 | Venus 800 도 같은 계열 |
+| Natura 1600 | 중립~약간 차가움 | 중간 | 낮음 | Superia 1600 과 사실상 같음 |
+| Pro 400H | 차가움 (시안, 녹색) | 낮음 (파스텔) | 낮음 | 4번째 감색층, 과노출 룩 |
+| Fujicolor C200 | 녹색 쪽 | 중간 | 중간 | 녹색과 파랑 좋음 |
+| Reala 100 | 중립 | 중간 | 중간 | 색 충실도, 기준 레시피 |
+
+슬라이드 (모두 주광)
+
+| 필름 | 색 | 채도 | 대비 | 특징 |
+| --- | --- | --- | --- | --- |
+| Velvia 50 | 따뜻 | 매우 높음 | 높음 | 녹색과 빨강이 특히 강함 |
+| Velvia 100 | 50 보다 약간 차가움 | 매우 높음 (50 보다 약간 낮음) | 높음 | |
+| Provia 100F | 엄격한 중립 | 중간~높음 | 중간~높음 | 정확, 그늘에서 정직하게 파랑 |
+| Astia 100F | 약간 따뜻 | 낮음~중간 | 낮음 | 피부 |
+| Ektachrome E100 | 중립~약간 차가움 | 중간 | 중간 | 깨끗한 흰색 |
+| Kodachrome 25 | 중립~약간 따뜻 | 중간 | 중간~높음 | 64 보다 섬세, 극미립자 |
+| Kodachrome 64 | 25 보다 조금 더 따뜻 | 중간~높음 | 높음 | 25 보다 조금 더 강함 |
+
+흑백
+
+| 필름 | 계조, 대비 | 분광 (확실도 낮음) |
+| --- | --- | --- |
+| Tri-X 400 | 고전적이고 힘 있음, 중간~높음 | 표준 범색성 |
+| HP5 Plus | Tri-X 보다 약간 부드러움 | 노랑, 빨강 감도가 약간 높다는 설 |
+| T-MAX 100 | 매끄럽고 샤프 | 범색성 |
+| Pan F Plus 50 | 극미립자, 높은 대비 (Ilford 공식) | 범색성 |
+| Acros 100 | 넓은 계조, 깊은 블랙 | 직교범색성: 청색 밝게, 빨강 어둡게 |
+
+영화용
+
+| 필름 | 밸런스 | 특징 |
+| --- | --- | --- |
+| Vision3 50D, 250D, CineStill 50D | 주광 | 중립, 낮은 대비, 넓은 관용도 |
+| CineStill 800T (Vision3 500T) | 텅스텐 | 주광에서 강한 파랑, 할레이션은 재현 불가 |
+| Eterna 500T | 텅스텐 (추정) | 차분하고 약간 차가운 저대비 (추정) |
+
+## 3. 정리한 목록 (31개)
+
+- 묶음: Superia 400 + X-TRA 400 + Venus 800, Superia 1600 + Natura 1600, Vision3 50D + CineStill 50D + Vision3 250D, Vision3 500T + CineStill 800T, Gold 400 + UltraMax 400.
+- 뺀 것: Portra 400VC (2010 단종, Portra 800 과 Ektar 사이), Vista 200 (확인 불가), Lomography 800 (Portra 800 과 1단계 이하 차이), Fuji 9000 (해당 필름 확인 불가), Agfa Vista 100, Ferrania Solaris 400, Konica Centuria 400 (제조 시기별로 다르거나 자료 부족), Rollei CN 200 (Portra 160, Vision3 와 겹침), Velvia 100F (Velvia 100 과 Provia 사이), Sensia (자료 엇갈림), Fortia SP (Velvia 50 에서 채도만 더), EliteChrome 100 (E100 과 거의 같음), Agfachrome CT100, RSX100 (생산처 변경, Provia 와 거의 같음), Delta 3200 (정체성이 그레인), 틸 오렌지 (색별 조정 없이 불가). NXWA 의 스타일 중 빈티지, 강철, 하이키, 로우키, 세피아, 블루 아워도 근거가 없어 뺐다.
+- 남긴 것: Kodak 네거티브 8, Fuji 네거티브 5, 슬라이드 7, 흑백 5, 영화용 3, 스타일 3 (크로스 프로세스, 블리치 바이패스, 바랜 인화). 값은 recipes.txt.
+
+## 4. 시험 촬영으로 확인할 것
+
+- 채도와 대비 한 단계의 실제 크기. 극단값(Velvia 50 채도 15, 크로스 프로세스 대비 15)은 클리핑을 보고 1 낮출 수 있다.
+- 흑백에서 게인이 흑백 변환 전에 적용되는지: 빨간 피사체를 R 120 과 R 80 으로 비교.
+- 색조 9, 11 의 방향.
+- CineStill 800T 가 너무 파라면 3800~4200K.
+
+## 5. 출처
+
+- Kodak Portra 800 데이터시트 E-4040, Kodak Tri-X F-4017, Ilford Pan F Plus 데이터시트, Rollei CN 200 데이터시트, Fuji Reala 4번째 감색층 논문 (IS&T 1999)
+- 리뷰: analoguewonderland (Portra), photrio, l-camera-forum, shootitwithfilm, richardphotolab, vsco, lomography magazine, adorama, analog.cafe, uniquephoto, parallaxphotographic, brooklynfilmcamera, emulsive, 35mmc, culturedkiwi, richardhaw, fujixweekly, 50mmf2, ateliers-marinette, shutterbug, japancamerahunter, erickimphotography, KenRockwell, talkphotography, DxO FilmPack 필름 목록, viewcameraaustralia, summitpost, kosmofoto, beauphoto, casualphotophile, dustygrain, dehancer, shopmoment, cinematography.net, fujifilm-x.com, fsfsweden, Wikipedia (Fujifilm Superia, Fortia SP)

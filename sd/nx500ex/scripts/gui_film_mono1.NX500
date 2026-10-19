@@ -2,9 +2,6 @@
 back|gui_film
 button|Tri-X 400|film.sh trix400
 button|HP5 Plus|film.sh hp5
-button|Delta 3200|film.sh delta3200
 button|T-MAX 100|film.sh tmax100
 button|Pan F Plus 50|film.sh panf50
 button|Acros 100|film.sh acros100
-button|흑백 따뜻한|film.sh monowarm
-button|흑백 차가운|film.sh monocool

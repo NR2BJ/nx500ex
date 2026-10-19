@@ -7,7 +7,8 @@
 # Fn -> WB 칸 -> 목록(자동 0 ... 색온도 10, 11칸, 커서 = 지금 촬영 쪽 WB) -> 색온도까지 오른쪽 -> 위(세부) -> 슬라이더 터치 -> 좌우로 100K 단위 맞춤 -> OK.
 # 처음 WB 를 바꿀 때 원래 WB (종류, 색온도면 K) 를 conf/film_wb.bak 에 남기고, 색온도 없는 레시피, off, restore 가 되돌린다.
 # scripts/auto/film_nowb.sh 가 있으면 (메뉴 체크박스 "화이트 밸런스 유지") 레시피가 WB 를 바꾸지 않는다.
-# 레시피 값과 prefman 위치는 NXWA (WApaperplane/NXWA-nx500_modding, AGPL-3.0) 의 FilmLab 에서 가져왔다.
+# prefman 위치와 반영 확인 방법(varlist)은 NXWA (WApaperplane/NXWA-nx500_modding, AGPL-3.0) 의 FilmLab 에서 가져왔다.
+# 레시피 값은 실제 필름 특성 조사로 nx500ex 가 정했다 (docs/research/2026-10-19-film-stock-profiles.md).
 # prefman 에 값을 쓰는 것만으로는 화면과 사진에 반영되지 않고, 카메라 앱이 화면 마법사 목록을 열 때 반영한다 (2026-10-19 실기).
 # 그래서 st key 로 Fn -> 화면 마법사 칸 터치 -> OK (목록) -> 오른쪽 n 번 -> OK 를 누른다.
 # 목록 커서는 지금 종류(해제 0, 표준 1 ... 클래식 9, 사용자 1~3 10~12)에 있고 끝에서 처음으로 돈다.

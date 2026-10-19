@@ -1,5 +1,0 @@
-# 자동 생성 (tools/filmlab/gen_pages.py)
-back|gui_film_style1
-button|세피아|film.sh sepia_vintage
-button|블리치 바이패스|film.sh bleach_bypass
-button|블루 아워|film.sh blue_hour

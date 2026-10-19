@@ -1,5 +1,0 @@
-# 자동 생성 (tools/filmlab/gen_pages.py)
-back|gui_film_slide2
-button|Kodachrome 64|film.sh kodachrome64
-button|Agfachrome CT100|film.sh agfachrome_ct100
-button|Agfachrome RSX100|film.sh agfachrome_rsx100
