@@ -90,12 +90,14 @@ nx500ex/
 
 | 파일 | 출처 | 라이선스 |
 | --- | --- | --- |
-| popup_timeout, popup_ok, popup_entry, poker, blackout | Otto Kiksmaler, NX-KS 2.88 에 포함된 빌드 | AGPL-3.0 (상류 ottokiksmaler/nx500_nx1_modding) |
+| popup_timeout, popup_ok, popup_entry, poker, blackout | 상류 ottokiksmaler/nx500_nx1_modding 의 소스, NX-KS 2.88 (KinoSeed) 에 포함된 빌드 | AGPL-3.0 |
 | stapp | ge0rg/nx-ks-mod 의 빌드 | AGPL-3.0 |
 | nxmenu, nxpopup, nxkeys | 이 저장소 tools/nxmenu (mod_gui, popup_timeout, keyscan 바탕) | AGPL-3.0 |
 | nxgroup | 이 저장소 tools/nxmenu (새로 작성) | AGPL-3.0 |
 | scripts/film/recipes.txt 의 레시피 값 | WApaperplane/NXWA-nx500_modding (FilmLab) | AGPL-3.0 |
 | busybox, telnetd | NX-KS 2.88 에 포함된 빌드 | GPL-2.0 |
+
+라이선스(AGPL-3.0), 전체 출처, 상표 안내는 저장소 맨 위 README.md 와 LICENSE 에 있다.
 
 ## 첫 확인 순서
 
