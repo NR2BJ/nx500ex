@@ -6,5 +6,4 @@ page|흑백 >|gui_film_mono1
 page|영화 >|gui_film_cine1
 page|스타일 >|gui_film_style1
 button|레시피 끄기|film.sh off
-button|사용자 1 원래대로|film.sh restore
 checkbox|화이트 밸런스 유지|film_nowb.sh
