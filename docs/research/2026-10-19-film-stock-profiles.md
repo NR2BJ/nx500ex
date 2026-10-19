@@ -84,3 +84,8 @@ NXWA 레시피 68개는 근거 없는 근사값이 섞여 있었다 (예: Kodach
 
 - Kodak Portra 800 데이터시트 E-4040, Kodak Tri-X F-4017, Ilford Pan F Plus 데이터시트, Rollei CN 200 데이터시트, Fuji Reala 4번째 감색층 논문 (IS&T 1999)
 - 리뷰: analoguewonderland (Portra), photrio, l-camera-forum, shootitwithfilm, richardphotolab, vsco, lomography magazine, adorama, analog.cafe, uniquephoto, parallaxphotographic, brooklynfilmcamera, emulsive, 35mmc, culturedkiwi, richardhaw, fujixweekly, 50mmf2, ateliers-marinette, shutterbug, japancamerahunter, erickimphotography, KenRockwell, talkphotography, DxO FilmPack 필름 목록, viewcameraaustralia, summitpost, kosmofoto, beauphoto, casualphotophile, dustygrain, dehancer, shopmoment, cinematography.net, fujifilm-x.com, fsfsweden, Wikipedia (Fujifilm Superia, Fortia SP)
+
+## 6. 바뀐 원칙 (2026-10-19, 사용자 결정)
+
+- WB: 필름의 밸런스대로 고정. 주광용(네거티브, 슬라이드, 영화 D) 5500K, 텅스텐 3200K, 흑백과 스타일도 일관되게 5500K. 현상소의 부분 보정은 재현할 수 없어 실내 조명에서는 실제 네거티브보다 색이 세게 남을 수 있다 (실제 장면 촬영으로 판단).
+- 숫자 값의 근거를 잡기 위해 보정 촬영을 한다: 모니터에 컬러체커 색표(tools/filmlab/calib_chart.png)를 띄우고 scripts/calib.sh 로 값 하나씩 바꾼 16장을 찍어, 칸별 색 변화를 PC 에서 잰다. 모니터의 색이 정확할 필요는 없다 (같은 입력에서 설정끼리 비교).

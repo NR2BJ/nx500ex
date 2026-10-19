@@ -38,5 +38,5 @@ for cat, label in CATS:
             lines.append('page|다음 >|gui_film_%s%d' % (cat, i + 2))
         write('gui_film_%s%d' % (cat, i + 1), lines)
     top.append('page|%s >|gui_film_%s1' % (label, cat))
-top += ['button|레시피 끄기|film.sh off', 'checkbox|화이트 밸런스 유지|film_nowb.sh']
+top += ['button|레시피 끄기|film.sh off', 'checkbox|화이트 밸런스 유지|film_nowb.sh', 'button|보정 촬영 (색표)|calib.sh']
 write('gui_film', top)

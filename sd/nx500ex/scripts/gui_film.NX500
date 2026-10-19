@@ -7,3 +7,4 @@ page|영화 >|gui_film_cine1
 page|스타일 >|gui_film_style1
 button|레시피 끄기|film.sh off
 checkbox|화이트 밸런스 유지|film_nowb.sh
+button|보정 촬영 (색표)|calib.sh
