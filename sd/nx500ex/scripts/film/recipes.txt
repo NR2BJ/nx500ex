@@ -1,71 +1,72 @@
 # 필름 레시피: 화면 마법사 사용자 1 의 7가지 값 (film.sh 가 읽는다)
 # 출처: WApaperplane/NXWA-nx500_modding scripts/filmlab/recipes.json (AGPL-3.0). 분류와 한국어 이름은 nx500ex
-# 형식: 이름|분류|라벨|R 게인|G 게인|B 게인|색조|채도|선명도|대비  (게인 중립 100, 나머지 중립 10)
-portra160|neg|Portra 160|105|100|95|10|8|10|8
-portra400|neg|Portra 400|108|100|93|11|6|9|8
-portra400vc|neg|Portra 400VC|111|100|90|11|10|9|9
-portra800|neg|Portra 800|109|101|92|11|7|8|7
-portra800_push|neg|Portra 800 증감|110|102|91|11|8|8|9
-gold200|neg|Gold 200|113|101|87|12|11|9|10
-kodak_gold400|neg|Gold 400|114|100|86|13|12|9|11
-ultramax400|neg|UltraMax 400|106|100|94|12|13|9|11
-colorplus200|neg|ColorPlus 200|112|102|88|12|10|8|9
-proimage100|neg|ProImage 100|112|100|89|11|9|9|9
-ektar100|neg|Ektar 100|115|100|85|11|14|12|12
-vista200|neg|Vista 200|107|100|93|12|14|8|10
-lomo800|neg|Lomo 800|104|100|96|13|15|8|11
-superia400|neg|Superia 400|100|99|101|13|6|9|9
-fuji_superia1600|neg|Superia 1600|99|100|102|13|11|8|11
-fuji400h|neg|Fuji 400H|88|103|112|9|6|8|8
-fuji_natura1600|neg|Natura 1600|100|101|100|12|8|8|10
-c200|neg|Fuji C200|97|103|103|12|10|8|8
-reala100|neg|Reala 100|93|102|108|11|15|10|9
-fuji9000|neg|Fuji 9000|101|101|99|12|9|9|9
-fuji_xtra400|neg|Fuji X-TRA 400|98|102|102|12|7|9|9
-fuji_venus800|neg|Fuji Venus 800|99|100|101|12|12|8|10
-agfa_vista100|neg|Agfa Vista 100|103|100|97|11|13|10|10
-ferrania_solaris400|neg|Solaris 400|103|100|98|12|15|9|11
-konica_centuria400|neg|Centuria 400|102|102|98|12|14|9|10
-rollei_cn200|neg|Rollei CN 200|102|101|99|11|10|10|10
-velvia50|slide|Velvia 50|95|110|106|10|13|11|13
-velvia50_land|slide|Velvia 50 풍경|91|112|109|10|16|12|14
-velvia100|slide|Velvia 100|93|108|108|10|14|11|13
-velvia100f|slide|Velvia 100F|99|106|102|10|17|11|13
-provia100f|slide|Provia 100F|98|102|103|10|13|11|12
-astia100f|slide|Astia 100F|100|103|100|11|9|9|9
-sensia100|slide|Sensia 100|101|102|99|11|10|10|10
-fuji_sensia200|slide|Sensia 200|99|102|101|11|12|10|10
-fuji_fortia|slide|Fortia SP|96|110|104|10|17|12|14
-ektachrome|slide|Ektachrome|90|105|110|12|12|10|11
-ektachrome_cyan|slide|Ektachrome 차가운|88|112|125|13|15|12|14
-e100|slide|Ektachrome E100|94|103|107|11|9|10|10
-elitechrome100|slide|EliteChrome 100|97|104|103|11|10|11|11
-kodachrome25|slide|Kodachrome 25|103|99|97|12|9|13|14
-kodachrome64|slide|Kodachrome 64|112|99|88|12|17|11|13
-agfachrome_ct100|slide|Agfachrome CT100|102|100|99|11|14|11|12
-agfachrome_rsx100|slide|Agfachrome RSX100|103|99|98|12|16|12|13
-trix400|mono|Tri-X 400|107|100|95|10|0|12|12
-hp5|mono|HP5 Plus|101|100|99|10|0|7|13
-delta3200|mono|Delta 3200|100|100|100|10|0|6|17
-tmax100|mono|T-MAX 100|100|100|100|10|0|15|11
-panf50|mono|Pan F Plus 50|99|100|102|10|0|15|7
-acros100|mono|Acros 100|95|100|106|10|0|13|9
-monowarm|mono|흑백 따뜻한|112|100|88|10|0|10|11
-monocool|mono|흑백 차가운|88|100|114|10|0|10|13
-cinestill50d|cine|CineStill 50D|100|101|100|11|16|9|10
-cinestill800t|cine|CineStill 800T|89|104|111|13|12|7|10
-vision3_50d|cine|Vision3 50D|98|101|102|11|12|10|10
-vision250d|cine|Vision3 250D|102|101|98|11|7|8|9
-vision500t|cine|Vision3 500T|93|102|107|13|16|8|10
-fuji_eterna500|cine|Eterna 500T|97|101|103|12|7|7|8
-cine_teal|cine|시네 틸|89|104|110|12|11|8|12
-xpro|style|크로스 프로세스|110|103|88|15|15|10|14
-teal_orange|style|틸 오렌지|106|97|107|14|13|10|12
-warm_vintage|style|따뜻한 빈티지|110|100|88|12|9|8|9
-cold_steel|style|차가운 강철|92|100|110|11|9|11|12
-faded_film|style|바랜 필름|102|100|102|11|6|7|5
-highkey|style|하이키|101|101|101|10|8|9|3
-lowkey|style|로우키|99|99|99|10|11|10|16
-sepia_vintage|style|세피아|114|102|80|13|7|8|11
-bleach_bypass|style|블리치 바이패스|102|101|103|11|5|13|16
-blue_hour|style|블루 아워|90|100|112|12|12|9|10
+# 형식: 이름|분류|라벨|R 게인|G 게인|B 게인|색조|채도|선명도|대비|색온도  (게인 중립 100, 나머지 중립 10. 색온도는 WB 색온도 K, 비우면 WB 를 바꾸지 않음)
+# 색온도: 주광용 필름 5500, 텅스텐 필름 3200, 흑백과 일부 스타일은 비움 (nx500ex)
+portra160|neg|Portra 160|105|100|95|10|8|10|8|5500
+portra400|neg|Portra 400|108|100|93|11|6|9|8|5500
+portra400vc|neg|Portra 400VC|111|100|90|11|10|9|9|5500
+portra800|neg|Portra 800|109|101|92|11|7|8|7|5500
+portra800_push|neg|Portra 800 증감|110|102|91|11|8|8|9|5500
+gold200|neg|Gold 200|113|101|87|12|11|9|10|5500
+kodak_gold400|neg|Gold 400|114|100|86|13|12|9|11|5500
+ultramax400|neg|UltraMax 400|106|100|94|12|13|9|11|5500
+colorplus200|neg|ColorPlus 200|112|102|88|12|10|8|9|5500
+proimage100|neg|ProImage 100|112|100|89|11|9|9|9|5500
+ektar100|neg|Ektar 100|115|100|85|11|14|12|12|5500
+vista200|neg|Vista 200|107|100|93|12|14|8|10|5500
+lomo800|neg|Lomo 800|104|100|96|13|15|8|11|5500
+superia400|neg|Superia 400|100|99|101|13|6|9|9|5500
+fuji_superia1600|neg|Superia 1600|99|100|102|13|11|8|11|5500
+fuji400h|neg|Fuji 400H|88|103|112|9|6|8|8|5500
+fuji_natura1600|neg|Natura 1600|100|101|100|12|8|8|10|5500
+c200|neg|Fuji C200|97|103|103|12|10|8|8|5500
+reala100|neg|Reala 100|93|102|108|11|15|10|9|5500
+fuji9000|neg|Fuji 9000|101|101|99|12|9|9|9|5500
+fuji_xtra400|neg|Fuji X-TRA 400|98|102|102|12|7|9|9|5500
+fuji_venus800|neg|Fuji Venus 800|99|100|101|12|12|8|10|5500
+agfa_vista100|neg|Agfa Vista 100|103|100|97|11|13|10|10|5500
+ferrania_solaris400|neg|Solaris 400|103|100|98|12|15|9|11|5500
+konica_centuria400|neg|Centuria 400|102|102|98|12|14|9|10|5500
+rollei_cn200|neg|Rollei CN 200|102|101|99|11|10|10|10|5500
+velvia50|slide|Velvia 50|95|110|106|10|13|11|13|5500
+velvia50_land|slide|Velvia 50 풍경|91|112|109|10|16|12|14|5500
+velvia100|slide|Velvia 100|93|108|108|10|14|11|13|5500
+velvia100f|slide|Velvia 100F|99|106|102|10|17|11|13|5500
+provia100f|slide|Provia 100F|98|102|103|10|13|11|12|5500
+astia100f|slide|Astia 100F|100|103|100|11|9|9|9|5500
+sensia100|slide|Sensia 100|101|102|99|11|10|10|10|5500
+fuji_sensia200|slide|Sensia 200|99|102|101|11|12|10|10|5500
+fuji_fortia|slide|Fortia SP|96|110|104|10|17|12|14|5500
+ektachrome|slide|Ektachrome|90|105|110|12|12|10|11|5500
+ektachrome_cyan|slide|Ektachrome 차가운|88|112|125|13|15|12|14|5500
+e100|slide|Ektachrome E100|94|103|107|11|9|10|10|5500
+elitechrome100|slide|EliteChrome 100|97|104|103|11|10|11|11|5500
+kodachrome25|slide|Kodachrome 25|103|99|97|12|9|13|14|5500
+kodachrome64|slide|Kodachrome 64|112|99|88|12|17|11|13|5500
+agfachrome_ct100|slide|Agfachrome CT100|102|100|99|11|14|11|12|5500
+agfachrome_rsx100|slide|Agfachrome RSX100|103|99|98|12|16|12|13|5500
+trix400|mono|Tri-X 400|107|100|95|10|0|12|12|
+hp5|mono|HP5 Plus|101|100|99|10|0|7|13|
+delta3200|mono|Delta 3200|100|100|100|10|0|6|17|
+tmax100|mono|T-MAX 100|100|100|100|10|0|15|11|
+panf50|mono|Pan F Plus 50|99|100|102|10|0|15|7|
+acros100|mono|Acros 100|95|100|106|10|0|13|9|
+monowarm|mono|흑백 따뜻한|112|100|88|10|0|10|11|
+monocool|mono|흑백 차가운|88|100|114|10|0|10|13|
+cinestill50d|cine|CineStill 50D|100|101|100|11|16|9|10|5500
+cinestill800t|cine|CineStill 800T|89|104|111|13|12|7|10|3200
+vision3_50d|cine|Vision3 50D|98|101|102|11|12|10|10|5500
+vision250d|cine|Vision3 250D|102|101|98|11|7|8|9|5500
+vision500t|cine|Vision3 500T|93|102|107|13|16|8|10|3200
+fuji_eterna500|cine|Eterna 500T|97|101|103|12|7|7|8|3200
+cine_teal|cine|시네 틸|89|104|110|12|11|8|12|
+xpro|style|크로스 프로세스|110|103|88|15|15|10|14|
+teal_orange|style|틸 오렌지|106|97|107|14|13|10|12|
+warm_vintage|style|따뜻한 빈티지|110|100|88|12|9|8|9|6500
+cold_steel|style|차가운 강철|92|100|110|11|9|11|12|4800
+faded_film|style|바랜 필름|102|100|102|11|6|7|5|
+highkey|style|하이키|101|101|101|10|8|9|3|
+lowkey|style|로우키|99|99|99|10|11|10|16|
+sepia_vintage|style|세피아|114|102|80|13|7|8|11|
+bleach_bypass|style|블리치 바이패스|102|101|103|11|5|13|16|
+blue_hour|style|블루 아워|90|100|112|12|12|9|10|4000

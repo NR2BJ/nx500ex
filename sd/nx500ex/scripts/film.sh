@@ -1,8 +1,12 @@
 #!/bin/sh
 # 필름 레시피 (FilmLab): 화면 마법사 사용자 1 에 레시피 값을 쓰고 화면 마법사 목록을 열어 반영한다.
-#   film.sh <레시피 이름>   film/recipes.txt 의 값으로 사용자 1 을 바꾸고 사용자 1 을 고른다
-#   film.sh off             화면 마법사를 해제로
-#   film.sh restore         사용자 1 을 처음 바꾸기 전 값으로 되돌린다 (conf/pw_custom1.bak)
+#   film.sh <레시피 이름>   film/recipes.txt 의 값으로 사용자 1 을 바꾸고 사용자 1 을 고른다. 레시피에 색온도가 있으면 WB 도 그 K 로
+#   film.sh off             화면 마법사를 해제로, WB 를 원래대로
+#   film.sh restore         사용자 1 을 처음 바꾸기 전 값으로 (conf/pw_custom1.bak), WB 를 원래대로
+# WB 는 prefman 에 써도 앱이 자기 값으로 덮어써서(실기) 화면 마법사처럼 키 주입으로 고른다:
+# Fn -> WB 칸 -> 목록(자동 0 ... 색온도 10, 11칸, 커서 = 지금 촬영 쪽 WB) -> 색온도까지 오른쪽 -> 위(세부) -> 슬라이더 터치 -> 좌우로 100K 단위 맞춤 -> OK.
+# 처음 WB 를 바꿀 때 원래 WB (종류, 색온도면 K) 를 conf/film_wb.bak 에 남기고, 색온도 없는 레시피, off, restore 가 되돌린다.
+# scripts/auto/film_nowb.sh 가 있으면 (메뉴 체크박스 "화이트 밸런스 유지") 레시피가 WB 를 바꾸지 않는다.
 # 레시피 값과 prefman 위치는 NXWA (WApaperplane/NXWA-nx500_modding, AGPL-3.0) 의 FilmLab 에서 가져왔다.
 # prefman 에 값을 쓰는 것만으로는 화면과 사진에 반영되지 않고, 카메라 앱이 화면 마법사 목록을 열 때 반영한다 (2026-10-19 실기).
 # 그래서 st key 로 Fn -> 화면 마법사 칸 터치 -> OK (목록) -> 오른쪽 n 번 -> OK 를 누른다.
@@ -13,7 +17,14 @@ PW_TYPE=0xa3d4
 PW_N=13
 PW_TOUCH_X=300   # Fn 패널의 화면 마법사 칸 (P/A/S/M, 실기 M 모드)
 PW_TOUCH_Y=300
+WB_N=11
+WB_TOUCH_X=150   # Fn 패널의 WB 칸
+WB_TOUCH_Y=330
+# 색온도 세부 화면의 슬라이더 (실기 보정: x 208 = 2500K, x 515 = 10000K, 1픽셀 약 24.5K, y 380)
+K_X0=208
+K_Y=380
 BAK="$D/conf/pw_custom1.bak"
+WBBAK="$D/conf/film_wb.bak"
 LOCK=/tmp/nx500ex-film.pid
 
 pget() { prefman get 0 "$1" l 2>/dev/null | tr -d '\000\r' | sed -n 's/.*value = \([-0-9]*\).*/\1/p'; }
@@ -61,20 +72,58 @@ pw_cur() {
     *) echo $((_e + 1)) ;;
   esac
 }
+# Fn 패널을 열고 ($1, $2) 칸을 터치한 뒤 OK (그 칸의 목록이 열린다)
+fn_open() { key click fn; sleep 1; st key touch click $1 $2 > /dev/null 2>&1; sleep 0.5; key click ok; sleep 1; }
+right_n() { _k=$1; while [ $_k -gt 0 ]; do key click right; sleep 0.3; _k=$((_k - 1)); done; }
+# 화면 마법사 종류 $1 을 고른다
 pw_select() {
   _cur=$(pw_cur)
   case "$_cur" in ''|*[!0-9]*) return 1 ;; esac
-  _n=$(( ($1 - _cur + PW_N) % PW_N ))
-  _t=$(touch_get)
-  [ "$_t" = 0 ] && { touch_set 1; reapply_mode; sleep 1; }
-  key click fn; sleep 1
-  st key touch click $PW_TOUCH_X $PW_TOUCH_Y > /dev/null 2>&1; sleep 0.5
+  fn_open $PW_TOUCH_X $PW_TOUCH_Y
+  right_n $(( ($1 - _cur + PW_N) % PW_N ))
   key click ok; sleep 1
-  while [ $_n -gt 0 ]; do key click right; sleep 0.3; _n=$((_n - 1)); done
-  key click ok; sleep 1
-  [ "$_t" = 0 ] && { touch_set 0; reapply_mode; }
   jlog "film select $1 (was $_cur) -> $(pw_cur)"
   [ "$(pw_cur)" = "$1" ]
+}
+# 지금 WB (촬영 쪽: 자동 0 ... 색온도 10) 와 반영된 색온도
+wb_cur() { _w=$(st cap capdtm getusr WB 2>/dev/null | tr -d '\000\r' | sed -n 's/.*(0x6000\([0-9a-f]\)).*/\1/p'); [ -n "$_w" ] && echo $((0x$_w)); }
+wb_k() { st cap capdtm varlist 2>/dev/null | tr -d '\000 ' | grep -a 'WBCOLORTEMP' | cut -d'|' -f5; }
+# WB 종류 $1 을 고른다. 색온도(10)면 $2 = K
+wb_select() {
+  _cur=$(wb_cur)
+  case "$_cur" in ''|*[!0-9]*) return 1 ;; esac
+  fn_open $WB_TOUCH_X $WB_TOUCH_Y
+  right_n $(( ($1 - _cur + WB_N) % WB_N ))
+  if [ "$1" = 10 ] && [ -n "$2" ]; then
+    key click up; sleep 1
+    st key touch click $(( K_X0 + ($2 - 2500) * 10 / 245 )) $K_Y > /dev/null 2>&1; sleep 0.7
+    _try=0
+    while [ $_try -lt 3 ]; do
+      _kk=$(wb_k); [ -n "$_kk" ] || break
+      _d=$(( ($2 - _kk) / 100 ))
+      [ $_d -eq 0 ] && break
+      if [ $_d -gt 0 ]; then right_n $_d; else _d=$((-_d)); while [ $_d -gt 0 ]; do key click left; sleep 0.3; _d=$((_d - 1)); done; fi
+      sleep 0.5; _try=$((_try + 1))
+    done
+  fi
+  key click ok; sleep 1
+  jlog "film wb $1 $2 (was $_cur) -> $(wb_cur) $(wb_k)K"
+  [ "$(wb_cur)" = "$1" ] && { [ "$1" != 10 ] || [ -z "$2" ] || [ "$(wb_k)" = "$2" ]; }
+}
+# 원래 WB 로 (백업이 있을 때)
+wb_restore() {
+  [ -s "$WBBAK" ] || return 0
+  set -- $(cat "$WBBAK")
+  sleep 1
+  if [ "$1" = 10 ]; then wb_select 10 "$2"; else wb_select "$1"; fi && rm -f "$WBBAK"
+}
+# 레시피의 색온도 $1 로 (처음이면 원래 WB 를 백업). 비어 있으면 원래대로
+wb_apply() {
+  [ -f "$D/scripts/auto/film_nowb.sh" ] && return 0
+  [ -n "$1" ] || { wb_restore; return; }
+  [ -s "$WBBAK" ] || { echo "$(wb_cur) $(wb_k)" > "$WBBAK"; sync; jlog "film backup wb $(cat "$WBBAK")"; }
+  sleep 1
+  wb_select 10 "$1"
 }
 
 [ -f $LOCK ] && [ -d /proc/$(cat $LOCK) ] && exit 0
@@ -86,10 +135,16 @@ case "$(dial)" in
   *) popup "P, A, S, M 모드에서 사용" 2; exit 0 ;;
 esac
 sleep 1   # 메뉴가 닫힐 때까지
+# 터치가 꺼져 있으면 키 주입 동안만 켠다
+T0=$(touch_get)
+[ "$T0" = 0 ] && { touch_set 1; reapply_mode; sleep 1; }
+trap 'rm -f $LOCK; [ "$T0" = 0 ] && { touch_set 0; reapply_mode; }' EXIT
 
 case "$1" in
   off)
-    if pw_select 0; then popup "필름 레시피 끔" 2; conf_set film_last ""
+    pw_select 0; R=$?
+    wb_restore
+    if [ $R = 0 ]; then popup "필름 레시피 끔" 2; conf_set film_last ""
     else popup "화면 마법사를 바꾸지 못함<br>다시 해 보세요" 3; fi
     ;;
   restore)
@@ -98,25 +153,30 @@ case "$1" in
     jlog "film restore custom1 $(cat "$BAK")"
     rm -f "$BAK"; conf_set film_last ""
     if [ "$(pw_cur)" = 10 ]; then sleep 2; pw_select 10; fi
+    wb_restore
     popup "사용자 1 원래대로" 2
     ;;
   *)
     L=$(grep "^$1|" "$D/scripts/film/recipes.txt" 2>/dev/null | head -1)
     [ -n "$L" ] || { popup "레시피 없음: $1" 2; exit 0; }
     IFS='|'; set -- $L; unset IFS
-    NAME=$3; shift 3
-    VALS="$*"
+    NAME=$3; WB=${11}
+    VALS="$4 $5 $6 $7 $8 $9 ${10}"
     [ -s "$BAK" ] || { mkdir -p "$D/conf"; c1_get > "$BAK"; sync; jlog "film backup custom1 $(cat "$BAK")"; }
     c1_set $VALS
     jlog "film $NAME custom1 <- $VALS"
     sleep 2
     pw_select 10
     sleep 0.5
-    if isp_match $VALS; then
+    isp_match $VALS; R=$?
+    [ $R = 0 ] || jlog "film not applied: isp $(isp_get)"
+    wb_apply "$WB"; RW=$?
+    if [ $R = 0 ] && [ $RW = 0 ]; then
       conf_set film_last "$NAME"
-      popup "필름: $NAME" 2
+      if [ -n "$WB" ] && [ ! -f "$D/scripts/auto/film_nowb.sh" ]; then popup "필름: $NAME<br>WB ${WB}K" 2; else popup "필름: $NAME" 2; fi
+    elif [ $R = 0 ]; then
+      popup "필름: $NAME<br>WB 를 바꾸지 못함" 3
     else
-      jlog "film not applied: isp $(isp_get)"
       popup "반영 확인 안 됨<br>다시 해 보세요" 3
     fi
     ;;
