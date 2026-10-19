@@ -7,6 +7,9 @@
 #   sh pwtest.sh open      Fn 패널을 열고 화면 마법사 칸을 터치한 뒤 OK (목록 열기)
 #   sh pwtest.sh ok        OK 한 번
 #   sh pwtest.sh go        목록을 열고 사용자 1 까지 오른쪽으로 옮긴 뒤 OK (목록 커서 = 지금 종류, 해제 0 ~ 사용자 3 12 의 13칸, 끝에서 처음으로 돎)
+#   sh pwtest.sh wbinfo    화이트 밸런스: prefman 이름표와 값, 촬영 쪽 WB, 반영된 변수
+#   sh pwtest.sh wbset K A B   prefman 에 WB 종류 = 색온도(10), 색온도 K, 미세 조정 (A<<16)|B 를 쓴다 (중립 7 7)
+#   sh pwtest.sh wbopen    Fn 패널을 열고 WB 칸(AWB)을 터치한 뒤 OK (WB 목록 열기)
 # 값 위치: NXWA filmlab.sh (prefman 0xa3ec = APPPREF_EFFECT_STANDARD_R_COLOR, 항목 간격 52, 종류 간격 4, 사용자 1 = 9번째)
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 PW_TYPE=0xa3d4   # APPPREF_EFFECT_PW_TYPE 추정 (STANDARD_R_COLOR 바로 앞 OFF_* 다섯 개 앞). info 가 이름표로 확인
@@ -63,5 +66,18 @@ case "$1" in
     echo "종류 = $(pget $PW_TYPE)"
     echo "반영된 값 (ISP): $(isp)"
     ;;
-  *) sed -n '2,9p' "$0" ;;
+  wbinfo)
+    echo "이름표:"; prefman info 0 2>/dev/null | tr -d '\000' | grep -a -E 'APPPREF_WB_(TYPE|K_VALUE|K_DETAIL|AUTO_DETAIL)'
+    echo "종류 (0xa390) = $(pget 0xa390)  색온도 (0xa394) = $(pget 0xa394)"
+    _ba=$(pget 0xa3c0); _ba=${_ba:-0}; echo "색온도 미세 (0xa3c0) = $_ba (A=$(( (_ba >> 16) & 0xffff )) B=$(( _ba & 0xffff )))"
+    _ba=$(pget 0xa398); _ba=${_ba:-0}; echo "자동 미세 (0xa398) = $_ba (A=$(( (_ba >> 16) & 0xffff )) B=$(( _ba & 0xffff )))"
+    echo "촬영 쪽: $(st cap capdtm getusr WB 2>/dev/null | tr -d '\000\r')"
+    st cap capdtm varlist 2>/dev/null | tr -d '\000' | grep -a 'WB'
+    ;;
+  wbset)
+    pset 0xa390 10; pset 0xa394 "$2"; pset 0xa3c0 $(( ($3 << 16) | $4 ))
+    echo "종류 = $(pget 0xa390)  색온도 = $(pget 0xa394)  미세 = $(pget 0xa3c0)"
+    ;;
+  wbopen) key click fn; sleep 1; st key touch click 150 330 > /dev/null 2>&1; sleep 0.5; key click ok ;;
+  *) sed -n '2,12p' "$0" ;;
 esac
