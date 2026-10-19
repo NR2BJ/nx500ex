@@ -77,7 +77,7 @@ EV 는 다른 키보다 먼저 누르고 있어야 한다.
 ```
 nx500ex/
   boot.sh              내장 래퍼가 부름
-  bin/                 keyscan, nxmenu, nxpopup, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
+  bin/                 nxkeys, nxmenu, nxpopup, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
   scripts/             키 조합(EV_*.sh), 기능, 메뉴(gui_*.NX500), common.sh
   scripts/auto/        켜 둔 기능 (체크박스가 관리)
   presets/             프로필과 전체 백업 (처음 저장할 때 생김)
@@ -88,9 +88,9 @@ nx500ex/
 
 | 파일 | 출처 | 라이선스 |
 | --- | --- | --- |
-| keyscan, popup_timeout, popup_ok, popup_entry, poker, blackout | Otto Kiksmaler, NX-KS 2.88 에 포함된 빌드 | AGPL-3.0 (상류 ottokiksmaler/nx500_nx1_modding) |
+| popup_timeout, popup_ok, popup_entry, poker, blackout | Otto Kiksmaler, NX-KS 2.88 에 포함된 빌드 | AGPL-3.0 (상류 ottokiksmaler/nx500_nx1_modding) |
 | stapp | ge0rg/nx-ks-mod 의 빌드 | AGPL-3.0 |
-| nxmenu, nxpopup | 이 저장소 tools/nxmenu (mod_gui, popup_timeout 바탕) | AGPL-3.0 |
+| nxmenu, nxpopup, nxkeys | 이 저장소 tools/nxmenu (mod_gui, popup_timeout, keyscan 바탕) | AGPL-3.0 |
 | busybox, telnetd | NX-KS 2.88 에 포함된 빌드 | GPL-2.0 |
 
 ## 첫 확인 순서
@@ -115,8 +115,19 @@ nx500ex/
 
 ## 키 할당 바꾸기
 
-지금 keyscan 이 인식하는 것은 EV 를 누른 채 다른 키를 누르는 순간, 같은 키 1초 안에 두 번, 모드 다이얼이 SAS 를 떠나는 순간뿐이다. 길게 누르기, 누르는 동안, 떼는 순간은 단계 3 의 keyscan2 에서 추가한다.
+키 감지는 bin/nxkeys 다 (tools/nxmenu/nxkeys.c, NX-KS keyscan 바탕). scripts 폴더에 아래 이름의 파일을 만들면 그 이벤트에 실행된다. 파일이 없는 이벤트는 아무 일도 하지 않는다. 스크립트는 백그라운드로 실행되어 도는 동안에도 키 감지가 멈추지 않는다.
 
-scripts 폴더의 파일 이름이 곧 키 할당이다. EV_<키>.sh (EV 를 누른 채 그 키), <키>_<키>.sh (같은 키 두 번) 형식이다.
-키 이름: OK, AEL, UP, DOWN, LEFT, RIGHT, S1(반셔터), S2(셔터), MOBILE(WiFi), FN, DEL, PB(재생), EV.
+| 파일 이름 | 실행 시점 |
+| --- | --- |
+| EV_<키>.sh | EV 를 누른 채 그 키를 누름 (EV 를 누르고 있으면 반복 가능) |
+| <키>_<키>.sh | 같은 키를 1초 안에 두 번 (바로 앞에 누른 키가 같을 때) |
+| <키>_PRESS.sh | 누르는 순간 |
+| <키>_RELEASE.sh | 떼는 순간 |
+| <키>_LONG.sh | 0.8초 이상 누르고 있음 (누르는 동안 한 번) |
+| MODE_SAS.sh | 모드 다이얼이 SAS 를 벗어남 |
+
+키 이름: EV, OK, AEL, UP, DOWN, LEFT, RIGHT, S1(반셔터), S2(셔터), MOBILE(WiFi), FN, DEL, PB(재생), MODE_SAS, MODE_SCENE, MODE_AUTO, MODE_P, MODE_A, MODE_S, MODE_M, MODE_C (모드 다이얼).
+
+카메라 자체의 키 동작은 막을 수 없다. 예를 들어 OK_LONG.sh 를 만들어도 OK 를 누르면 카메라의 OK 동작도 일어난다.
+
 예: 메뉴의 셀프타이머를 EV+반셔터에 걸려면 scripts 에 EV_S1.sh 를 만들고 내용을 sh "$NX500EX/scripts/timer.sh" 한 줄로 한다.

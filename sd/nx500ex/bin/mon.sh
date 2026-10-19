@@ -19,7 +19,7 @@ state() {
   for d in /proc/[0-9]*; do
     c=$(cat $d/comm 2>/dev/null)
     case "$c" in
-      keyscan|bluetoothd*)
+      keyscan|nxkeys|bluetoothd*)
         st=$(sed -n 's/^State:[[:space:]]*\([A-Z]\).*/\1/p' $d/status 2>/dev/null)
         wc=$(cat $d/wchan 2>/dev/null)
         out="$out $c:${d#/proc/}:$st:$wc";;

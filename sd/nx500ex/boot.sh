@@ -25,7 +25,7 @@ if [ -f /tmp/nx500ex-watch.pid ]; then
 fi
 if [ -f /tmp/nx500ex-keyscan.pid ]; then
   k=$(cat /tmp/nx500ex-keyscan.pid)
-  if grep -q keyscan /proc/$k/cmdline 2>/dev/null; then
+  if grep -q -e keyscan -e nxkeys /proc/$k/cmdline 2>/dev/null; then
     kill $k 2>/dev/null
     n=0; while [ -d /proc/$k ] && [ $n -lt 20 ]; do sleep 0.1; n=$((n+1)); done
     log "previous keyscan $k stopped"
@@ -49,7 +49,7 @@ if [ -z "$BTPID" ]; then log "bluetoothd not found, not starting"; exit 0; fi
 n=0
 while st pmu show 2>/dev/null | grep hevc | grep -q ON && [ $n -lt 600 ]; do sleep 1; n=$((n+1)); done
 
-# 4. keyscan 시작 (scripts/auto/*.sh 를 번호 순으로 실행한 뒤 키 감시)
+# 4. 키 감지 시작 (bin/nxkeys, tools/nxmenu/nxkeys.c. scripts/auto/*.sh 를 번호 순으로 실행한 뒤 키 감시)
 # 메뉴, 팝업(EFL 프로그램)이 카메라 앱과 같은 환경에서 뜨도록 NX-KS init.sh 와 같은 변수를 맞춘다
 export HIB=a
 export EVAS_FONT_DPI=72
@@ -76,7 +76,7 @@ export NX500EX=$D
 export PATH=$D/bin:$PATH
 cd /
 [ -n "$DEBUG" ] && echo "=== $(now) keyscan launch" >> /tmp/nx500ex-keyscan.out
-$D/bin/keyscan /dev/event0 /dev/event1 $D/scripts/ $DEBUG >> /tmp/nx500ex-keyscan.out 2>&1 &
+$D/bin/nxkeys /dev/event0 /dev/event1 $D/scripts $DEBUG >> /tmp/nx500ex-keyscan.out 2>&1 &
 KPID=$!
 sleep 1
 if [ -d /proc/$KPID ]; then
