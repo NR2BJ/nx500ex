@@ -2,7 +2,7 @@
 # 설정을 한 장씩 바꿔 가며 연속으로 찍는다 (calib.sh 보정 촬영, rshot.sh 레시피 비교 촬영이 뒤에서 실행한다).
 #   series.sh <태그> <목록 파일>   목록 한 줄: 이름 R G B 색조 채도 선명도 대비 K   (K 는 색온도, auto 는 자동 WB)
 # 장마다 사용자 1 값과 WB 를 쓰고 촬영 모드를 다시 들어가 반영을 확인한 뒤 찍는다.
-# 장마다 "<태그> <이름> <값 8개> -> <파일>" 을 log/jobs.log 에 남긴다 (PC 분석: tools/filmlab/calib_analyze.py, recipe_analyze.py).
+# 장마다 "<태그> <이름> <값 8개> -> <파일>" 을 log/jobs.log 에 남긴다 (PC 분석: tools/film/calib_analyze.py, recipe_analyze.py).
 # 끝나거나 중단되면 (EV 두 번) 사용자 1 값, 화면 마법사 종류, WB 를 처음대로 되돌린다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 . "$D/scripts/film/pw.sh"

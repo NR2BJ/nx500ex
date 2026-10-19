@@ -1,5 +1,5 @@
 #!/bin/sh
-# 필름 레시피 (FilmLab): 화면 마법사 사용자 1 과 화이트 밸런스를 레시피 값으로 바꾼다.
+# 필름 레시피: 화면 마법사 사용자 1 과 화이트 밸런스를 레시피 값으로 바꾼다.
 #   film.sh <레시피 이름>   film/recipes.txt 의 값으로 사용자 1 을 바꾸고 사용자 1 을 고른다. WB 칸이 K 면 색온도, auto 면 자동
 #   film.sh off             사용자 1 의 값, 화면 마법사 종류, WB 를 모두 레시피 전으로 (restore 도 같음)
 # 방법: prefman 에 값을 쓰고 촬영 모드를 다시 들어간다 (st app mode, common.sh reapply_mode). 카메라 앱이 그때 prefman 을 다시 읽어

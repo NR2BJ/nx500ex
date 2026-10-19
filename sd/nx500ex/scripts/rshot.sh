@@ -2,7 +2,7 @@
 # 레시피 비교 촬영: 같은 장면을 기준(중립, 5500K) 한 장과 레시피마다 한 장씩 연속으로 찍는다.
 #   rshot.sh list   film/compare.txt 에 적은 레시피만 (한 줄에 레시피 이름 하나, # 은 주석)
 #   rshot.sh all    film/recipes.txt 의 모든 레시피
-# 색표(tools/filmlab/calib_chart.png)를 찍으면 PC 에서 수치로 재고 (tools/filmlab/recipe_analyze.py), 실제 장면을 찍으면 나란히 놓고 눈으로 본다 (같은 도구가 비교 시트를 만든다).
+# 색표(tools/film/calib_chart.png)를 찍으면 PC 에서 수치로 재고 (tools/film/recipe_analyze.py), 실제 장면을 찍으면 나란히 놓고 눈으로 본다 (같은 도구가 비교 시트를 만든다).
 # 노출이 장마다 같아야 비교가 되므로 M 모드에서. MF, JPEG (또는 RAW+JPEG). 촬영은 film/series.sh, log/jobs.log 에 "rshot <이름> <값> -> <파일>".
 # 끝나면 사용자 1 값, 화면 마법사 종류, WB 를 처음대로. EV 두 번으로 중단.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"

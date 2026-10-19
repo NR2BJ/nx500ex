@@ -1,6 +1,6 @@
 #!/bin/sh
-# 필름 레시피 보정 촬영: 같은 장면(모니터에 띄운 색표, tools/filmlab/calib_chart.png)을 화면 마법사 값 하나씩만 바꿔 연속으로 찍는다.
-# 결과 JPEG 를 PC 에서 칸마다 재서 한 단계가 색을 얼마나, 어느 방향으로 바꾸는지 알아낸다 (tools/filmlab/calib_analyze.py).
+# 필름 레시피 보정 촬영: 같은 장면(모니터에 띄운 색표, tools/film/calib_chart.png)을 화면 마법사 값 하나씩만 바꿔 연속으로 찍는다.
+# 결과 JPEG 를 PC 에서 칸마다 재서 한 단계가 색을 얼마나, 어느 방향으로 바꾸는지 알아낸다 (tools/film/calib_analyze.py).
 # M 모드, MF, JPEG (또는 RAW+JPEG) 에서. WB 는 촬영 동안 색온도 5500K 로 고정하고, 끝나면 사용자 1 값, 화면 마법사 종류, WB 를 되돌린다.
 # 촬영은 film/series.sh (장마다 "calib <이름> <값> -> <파일>" 을 log/jobs.log 에). EV 두 번으로 중단 (되돌림).
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"

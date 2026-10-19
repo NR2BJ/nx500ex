@@ -1,5 +1,5 @@
 #!/bin/sh
-# 화면 마법사(Picture Wizard) 시험 도구 (FilmLab 준비, 텔넷에서 실행)
+# 화면 마법사(Picture Wizard) 시험 도구 (필름 레시피 준비, 텔넷에서 실행)
 #   sh pwtest.sh info      종류 값, 사용자 1 슬롯 값, 실제 반영된 값(ISP) 보기
 #   sh pwtest.sh bw        사용자 1 슬롯을 흑백(채도 0)으로 (처음 한 번 원래 값을 conf/pw_custom1.bak 에 백업)
 #   sh pwtest.sh restore   사용자 1 슬롯을 백업 값으로 되돌림
@@ -13,7 +13,7 @@
 #   sh pwtest.sh wbkopen   WB 목록을 열고 색온도(10)로 옮긴 뒤 위 방향키 (K 조정 화면, 슬라이더)
 #   sh pwtest.sh wbtouch X Y   (K 조정 화면에서) X Y 를 터치하고 반영된 K 를 보여 준다
 #   sh pwtest.sh wbgo T [N]   WB 목록을 열고 종류 T 까지 오른쪽으로 옮긴 뒤 OK (커서 = 지금 종류(촬영 쪽 WB 값), 목록 N 칸, 기본 11)
-# 값 위치: NXWA filmlab.sh (prefman 0xa3ec = APPPREF_EFFECT_STANDARD_R_COLOR, 항목 간격 52, 종류 간격 4, 사용자 1 = 9번째)
+# 값 위치: 상류 Prefman_tool.md (prefman 0xa3ec = APPPREF_EFFECT_STANDARD_R_COLOR, 항목 간격 52, 종류 간격 4, 사용자 1 = 9번째)
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 PW_TYPE=0xa3d4   # APPPREF_EFFECT_PW_TYPE 추정 (STANDARD_R_COLOR 바로 앞 OFF_* 다섯 개 앞). info 가 이름표로 확인
 pget() { prefman get 0 "$1" l 2>/dev/null | tr -d '\000\r' | sed -n 's/.*value = \([-0-9]*\).*/\1/p'; }

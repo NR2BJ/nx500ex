@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # 필름 레시피 메뉴 화면 만들기: sd/nx500ex/scripts/film/recipes.txt -> scripts/gui_film*.NX500
-# 사용: python3 tools/filmlab/gen_pages.py   (recipes.txt 를 바꾼 뒤 다시 실행)
+# 사용: python3 tools/film/gen_pages.py   (recipes.txt 를 바꾼 뒤 다시 실행)
 import os
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'sd', 'nx500ex', 'scripts')
@@ -21,7 +21,7 @@ for name in os.listdir(ROOT):
 
 def write(name, lines):
     with open(os.path.join(ROOT, name + '.NX500'), 'w', encoding='utf-8') as f:
-        f.write('# 자동 생성 (tools/filmlab/gen_pages.py)\n' + '\n'.join(lines) + '\n')
+        f.write('# 자동 생성 (tools/film/gen_pages.py)\n' + '\n'.join(lines) + '\n')
 
 top = ['back|gui_ini']
 for cat, label in CATS:

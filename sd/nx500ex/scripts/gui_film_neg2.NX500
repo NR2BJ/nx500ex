@@ -1,4 +1,4 @@
-# 자동 생성 (tools/filmlab/gen_pages.py)
+# 자동 생성 (tools/film/gen_pages.py)
 back|gui_film_neg1
 button|Ektar 100|film.sh ektar100
 button|Superia X-TRA 400|film.sh superia400

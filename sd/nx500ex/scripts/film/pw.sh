@@ -1,6 +1,6 @@
 # 화면 마법사와 WB 를 prefman 으로 다루는 공용 함수 (film.sh, calib.sh 가 불러 쓴다)
 # 값을 쓴 뒤 촬영 모드를 다시 들어가면(reapply_mode) 카메라 앱이 prefman 을 다시 읽어 적용한다 (2026-10-19 실기).
-# prefman 위치와 반영 확인 방법(varlist)은 NXWA (WApaperplane/NXWA-nx500_modding, AGPL-3.0) 의 FilmLab 에서 가져왔다.
+# prefman 위치는 상류 ottokiksmaler/nx500_nx1_modding 의 Prefman_tool.md, 반영 확인(varlist)은 ST_CAP_CAPDTM.md. 값 환산은 실기로 맞췄다.
 PW_TYPE=0xa3d4   # APPPREF_EFFECT_PW_TYPE: 해제 0, 표준 1 ... 클래식 9, 사용자 1~3 10~12
 WB_TYPE=0xa390   # APPPREF_WB_TYPE: 자동 0 ... 색온도 10
 WB_K=0xa394      # APPPREF_WB_K_VALUE

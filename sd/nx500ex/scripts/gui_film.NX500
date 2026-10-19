@@ -1,4 +1,4 @@
-# 자동 생성 (tools/filmlab/gen_pages.py)
+# 자동 생성 (tools/film/gen_pages.py)
 back|gui_ini
 page|컬러 네거티브 >|gui_film_neg1
 page|슬라이드 >|gui_film_slide1
