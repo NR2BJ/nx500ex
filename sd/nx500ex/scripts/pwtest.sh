@@ -6,6 +6,7 @@
 #   sh pwtest.sh type N    화면 마법사 종류 값을 N 으로 씀 (prefman)
 #   sh pwtest.sh open      Fn 패널을 열고 화면 마법사 칸을 터치한 뒤 OK (목록 열기)
 #   sh pwtest.sh ok        OK 한 번
+#   sh pwtest.sh go        목록을 열고 사용자 1 까지 오른쪽으로 옮긴 뒤 OK (목록 커서 = 지금 종류, 해제 0 ~ 사용자 3 12 의 13칸, 끝에서 처음으로 돎)
 # 값 위치: NXWA filmlab.sh (prefman 0xa3ec = APPPREF_EFFECT_STANDARD_R_COLOR, 항목 간격 52, 종류 간격 4, 사용자 1 = 9번째)
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 PW_TYPE=0xa3d4   # APPPREF_EFFECT_PW_TYPE 추정 (STANDARD_R_COLOR 바로 앞 OFF_* 다섯 개 앞). info 가 이름표로 확인
@@ -51,5 +52,16 @@ case "$1" in
   type) pset $PW_TYPE "$2"; echo "종류 = $(pget $PW_TYPE)" ;;
   open) key click fn; sleep 1; st key touch click 300 300 > /dev/null 2>&1; sleep 0.5; key click ok ;;
   ok) key click ok ;;
+  go)
+    cur=$(pget $PW_TYPE)
+    case "$cur" in ''|*[!0-9]*) echo "종류 값을 읽지 못함"; exit 1 ;; esac
+    n=$(( (10 - cur + 13) % 13 ))
+    echo "지금 종류 $cur -> 오른쪽 $n 번"
+    key click fn; sleep 1; st key touch click 300 300 > /dev/null 2>&1; sleep 0.5; key click ok; sleep 1
+    while [ $n -gt 0 ]; do key click right; sleep 0.3; n=$((n - 1)); done
+    key click ok; sleep 1
+    echo "종류 = $(pget $PW_TYPE)"
+    echo "반영된 값 (ISP): $(isp)"
+    ;;
   *) sed -n '2,9p' "$0" ;;
 esac
