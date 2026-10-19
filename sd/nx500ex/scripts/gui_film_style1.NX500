@@ -3,3 +3,8 @@ back|gui_film
 button|크로스 프로세스|film.sh crossprocess
 button|블리치 바이패스|film.sh bleachbypass
 button|바랜 인화|film.sh faded
+button|Polaroid 600|film.sh polaroid600
+button|Polaroid SX-70|film.sh sx70
+button|Instax|film.sh instax
+button|세피아 토닝|film.sh sepia
+button|셀레늄 토닝|film.sh selenium

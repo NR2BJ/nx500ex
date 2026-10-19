@@ -4,7 +4,7 @@
 import os
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'sd', 'nx500ex', 'scripts')
-CATS = [('neg', '컬러 네거티브'), ('slide', '슬라이드'), ('mono', '흑백'), ('cine', '영화'), ('style', '스타일')]
+CATS = [('neg', '컬러 네거티브'), ('slide', '슬라이드'), ('mono', '흑백'), ('cine', '영화'), ('style', '즉석, 스타일')]
 PER_PAGE = 8   # 메뉴 한 화면의 항목 수 (nxmenu)
 
 recipes = {}

@@ -109,3 +109,46 @@ NXWA 레시피 68개는 근거 없는 근사값이 섞여 있었다 (예: Kodach
 - 채도와 대비는 한 단계가 꽤 커서 처음 값 유지 (Velvia 50 채도 15 = 1.4배).
 - 흑백은 게인을 모두 100 으로 (필터 효과 없음).
 - 색조는 방향과 크기를 알게 됐지만 칸마다 차이가 커서 아직 10 유지.
+
+## 8. 추가 12개 (2026-10-19, 후지 대표와 전설의 필름, 토닝)
+
+7장의 보정 기준(게인 10% = 회색 Lab 약 4, 채도 한 단계 약 8~11%, 대비 한 단계 밝은 쪽 L 약 1.4)으로 값을 정했다. WB 는 6장 원칙대로 모두 5500K.
+
+| 레시피 | 분류 | 특징 (조사) | 값 R G B / 색조 채도 선명도 대비 | 판정 |
+| --- | --- | --- | --- | --- |
+| Fuji Pro 160NS | 네거티브 | 낮은 채도, 부드러운 대비, 약간 시안 쪽의 중립, 후지 녹색 | 100 102 103 / 10 9 10 8 | 이 값으로 충분. 후지 녹색과 하이라이트 롤오프는 LUT |
+| Harman Phoenix 200 | 네거티브 | 강한 대비, 따뜻한 주황 기운, 높은 채도, 할레이션과 거친 입자 | 104 100 92 / 10 12 9 14 | 색은 충분. 할레이션과 입자는 LUT 로도 불가 |
+| LomoChrome Metropolis | 네거티브 | 탈색된 색, 노랑과 녹색이 올리브로, 빨강만 남는 느낌, 강한 대비 | 100 104 92 / 10 4 12 15 | LUT 필요 (색별 선택 채도). 지금은 전체 채도를 낮춘 근사 |
+| Ektachrome E100VS | 슬라이드 | E100 보다 채도가 훨씬 높고 약간 따뜻함, 높은 대비 | 102 100 96 / 10 14 11 13 | 이 값으로 충분 |
+| Ilford XP2 Super | 흑백 | C-41 흑백, 부드러운 계조, 입자 거의 없음 | 100 100 100 / 10 0 10 11 | 이 값으로 충분 |
+| Kodak Double-X 5222 | 흑백 | 영화용, 깊은 블랙과 높은 대비, 선명 | 100 100 100 / 10 0 12 13 | 이 값으로 충분 (입자는 후보정) |
+| Ilford FP4 Plus | 흑백 | 고운 입자, 중간 대비, 고전적 계조 | 100 100 100 / 10 0 11 10 | 이 값으로 충분 |
+| Polaroid 600 | 즉석 | 따뜻한 하이라이트, 녹색 쪽 섀도, 좁은 관용도, 바랜 블랙 | 104 98 95 / 10 9 7 13 | LUT 필요 (스플릿 토닝, 좁은 범위의 톤 곡선) |
+| Polaroid SX-70 | 즉석 | 따뜻하고 마젠타 기운, 낮은 선명도, 몽환적 | 103 97 100 / 10 8 7 14 | LUT 필요 (같은 이유) |
+| Instax | 즉석 | 깨끗하고 약간 차가운 색, 밝은 채도 | 98 100 104 / 10 11 9 12 | 이 값으로 충분 |
+| 세피아 토닝 | 스타일 | 흑백 인화를 갈색으로 토닝 | 108 102 88 / 10 3 10 10 | 시험 필요. 채도를 조금 남기고 게인으로 색을 입히는 방식이 되는지는 보정 촬영 tone_s2, tone_s4 로 확인 |
+| 셀레늄 토닝 | 스타일 | 섀도가 차가운 자주빛, 블랙이 깊어짐 | 104 96 100 / 10 2 10 11 | 근사. 실제는 섀도 위주라 LUT 필요 |
+
+흑백에서는 게인이 필터처럼 작동하지 않아(7장) 흑백 필름의 차이는 선명도와 대비로만 낸다. 토닝은 채도 0 이 아니라 2~4 로 두어 게인으로 기운 색이 남게 했다.
+
+LUT 가 있어야 제대로 나는 것 (로드맵 LUT 항목에 남김)
+
+- LomoChrome Metropolis: 색별 선택 채도 (빨강만 남기고 노랑, 녹색을 탈색)
+- Polaroid 600, SX-70: 하이라이트와 섀도의 색이 다른 스플릿 토닝, 좁은 범위의 톤 곡선
+- 셀레늄과 부분 세피아: 톤별 토닝 (셀레늄은 섀도, 부분 세피아는 하이라이트)
+- Pro 160NS: 후지 녹색 (녹색만 청록 쪽으로)
+- 크로스 프로세스: 섀도의 색 (시안 또는 녹색 섀도)
+- 바랜 인화: 들뜬 블랙 (톤 곡선 바닥 올리기)
+- 할레이션(CineStill, Phoenix)과 입자: LUT 로도 안 된다 (공간 필터 영역)
+
+출처
+
+- Fujicolor Pro: en.wikipedia.org/wiki/Fujicolor_Pro, Fujifilm Pro 160NS 데이터시트 (검색 요약), photrio 160NS vs 400H (검색 요약)
+- E100VS: Kodak E-163 데이터시트 (125px.com/docs/unsorted/kodak/e163.pdf), photrio, shutterbug (검색 요약)
+- Phoenix 200: parallaxphotographic, 35mmc, decafjournal, B&H (검색 요약)
+- Metropolis: emulsive, analog.cafe, kosmofoto, analoguewonderland, botew (일부 검색 요약)
+- Polaroid, Instax: analog.cafe (Polaroid 600, SX-70), parallaxphotographic (Instax Wide), shootitwithfilm, camtecphoto (일부 검색 요약)
+- XP2 Super: analog.cafe, Ilford 데이터시트 (검색 요약), photrio
+- Double-X: japancamerahunter, photrio (검색 요약)
+- FP4 Plus: analog.cafe, adorama (검색 요약)
+- 토닝: en.wikipedia.org/wiki/Photographic_print_toning, firstcall-photographic, photrio (검색 요약)

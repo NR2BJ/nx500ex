@@ -9,7 +9,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | 분류 | 기능 |
 | --- | --- |
 | 촬영 | 무음 셔터, 렌즈 없이 촬영, 셀프타이머, 장노출(30초까지), 인터벌, HDR 5장, 포커스 스태킹, 작업 중 화면 끄기, 재생 화면에서 작업 사진 묶기 |
-| 색 | 필름 레시피 31개 (화면 마법사 사용자 1 과 화이트 밸런스에 적용) |
+| 색 | 필름 레시피 43개 (화면 마법사 사용자 1 과 화이트 밸런스에 적용) |
 | 설정 | UP/DOWN 프로필, 전체 설정 백업/복원, 셔터 횟수, 텔넷/FTP |
 | 조작 | 한글 메뉴 (EV 두 번), 키 설정 (EV 조합, 두 번 누르기, 길게 누르기) |
 
@@ -65,4 +65,4 @@ busybox, telnetd 바이너리는 GPL-2.0 이다.
 
 ## 상표
 
-Samsung, NX500 은 삼성전자의 상표다. 필름 레시피의 이름(Portra, Ektar, Tri-X, Velvia, Provia, Acros, HP5, Delta, CineStill, Vision3 등)은 Eastman Kodak, Fujifilm, Harman Technology (Ilford), CineStill 등 각 회사의 상표이며, 레시피는 그 필름의 느낌을 흉내 낸 설정값일 뿐 각 회사와 관계없다.
+Samsung, NX500 은 삼성전자의 상표다. 필름 레시피의 이름(Portra, Ektar, Tri-X, Velvia, Provia, Acros, HP5, Delta, XP2, FP4, Phoenix, CineStill, Vision3, LomoChrome, Polaroid, Instax 등)은 Eastman Kodak, Fujifilm, Harman Technology (Ilford), CineStill, Lomography, Polaroid 등 각 회사의 상표이며, 레시피는 그 필름의 느낌을 흉내 낸 설정값일 뿐 각 회사와 관계없다.
