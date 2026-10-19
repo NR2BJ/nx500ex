@@ -80,7 +80,7 @@ case "$1" in
     echo "종류 = $(pget 0xa390)  색온도 = $(pget 0xa394)  미세 = $(pget 0xa3c0)"
     ;;
   wbgo)
-    # 지금 위치는 촬영 쪽 값으로 (앱은 prefman 종류 값을 바로 저장하지 않는다: 실기에서 태양광 뒤 계속 3)
+    # 지금 위치는 촬영 쪽 값으로 (prefman 종류 값은 목록에서 OK 로 확정할 때 저장된다)
     cur=$(st cap capdtm getusr WB 2>/dev/null | tr -d '\000\r' | sed -n 's/.*(0x6000\([0-9a-f]\)).*/\1/p'); [ -n "$cur" ] && cur=$((0x$cur)); N=${3:-11}
     case "$cur" in ''|*[!0-9]*) echo "종류 값을 읽지 못함"; exit 1 ;; esac
     n=$(( ($2 - cur + N) % N ))

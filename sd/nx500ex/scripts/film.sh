@@ -49,7 +49,8 @@ isp_match() {
 }
 # 화면 마법사 목록을 열고 종류 $1 을 고른다
 # 화면 마법사 목록에서 지금 위치 (해제 0, 표준 1 ... 클래식 9, 사용자 1~3 10~12).
-# 앱은 prefman 종류 값을 바로 저장하지 않아(WB 실기) 촬영 쪽 값으로 읽고, 해제와 표준(둘 다 PW_STANDARD)만 prefman 으로 가린다
+# 목록에서 커서만 옮기면 촬영 쪽 값은 바로 바뀌고 prefman 은 OK 로 확정할 때 저장된다(WB 실기). 지금 적용된 촬영 쪽 값으로 읽고,
+# 해제와 표준(둘 다 PW_STANDARD)만 prefman 으로 가린다
 pw_cur() {
   _e=$(st cap capdtm getusr PW 2>/dev/null | tr -d '\000\r' | sed -n 's/.*(0x1400\([0-9a-f][0-9a-f]\)).*/\1/p')
   [ -n "$_e" ] || return 1
