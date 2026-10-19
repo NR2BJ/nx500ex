@@ -1,0 +1,6 @@
+# 자동 생성 (키 설정: 길게 누르기 2/2)
+back|gui_keys
+key|Fn 길게|FN_LONG
+key|삭제 길게|DEL_LONG
+key|재생 길게|PB_LONG
+key|EV 길게|EV_LONG

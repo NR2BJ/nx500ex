@@ -1,0 +1,10 @@
+# 자동 생성 (키 설정: EV 조합 1/2)
+back|gui_keys
+key|EV+OK|EV_OK
+key|EV+AEL|EV_AEL
+key|EV+위|EV_UP
+key|EV+아래|EV_DOWN
+key|EV+왼쪽|EV_LEFT
+key|EV+오른쪽|EV_RIGHT
+key|EV+반셔터|EV_S1
+page|다음 >|gui_kev2

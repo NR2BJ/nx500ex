@@ -1,0 +1,20 @@
+# 키에 할당할 수 있는 동작: 스크립트이름|메뉴에 보일 이름 (nxmenu 의 키 설정이 쓴다. 한 칸 둘째 줄에 들어가게 한글 12자 안팎)
+none|없음
+menu_open|메뉴 열기
+timer|셀프타이머
+interval|인터벌 시작
+hdr|HDR 시작
+bulb|장노출 시작
+fs_run|스태킹 시작
+fs_near|가까운 끝 저장
+fs_far|먼 끝 저장
+job_stop|작업 중단
+t_silent|무음 셔터 켬/끔
+t_nolens|렌즈 없이 촬영 켬/끔
+t_screen_dark|작업 중 화면 끄기 켬/끔
+touch_toggle|터치 켬/끔
+af_toggle|AF-S 단사 / AF-C 연사
+load_UP|UP 프로필
+load_DOWN|DOWN 프로필
+net_status|텔넷 상태와 IP
+info|셔터 횟수

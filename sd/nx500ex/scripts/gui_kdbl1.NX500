@@ -1,0 +1,10 @@
+# 자동 생성 (키 설정: 두 번 누르기 1/2)
+back|gui_keys
+key|OK 두 번|OK_OK
+key|AEL 두 번|AEL_AEL
+key|위 두 번|UP_UP
+key|아래 두 번|DOWN_DOWN
+key|왼쪽 두 번|LEFT_LEFT
+key|오른쪽 두 번|RIGHT_RIGHT
+key|WiFi 두 번|MOBILE_MOBILE
+page|다음 >|gui_kdbl2

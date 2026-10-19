@@ -1,5 +1,5 @@
 #!/bin/sh
-# EV+왼쪽: AF-S/단사 와 AF-C/고속연사 전환
+# 동작: AF-S/단사 와 AF-C/고속연사 전환
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 if [ -e /tmp/nx500ex-af-c ]; then
   rm -f /tmp/nx500ex-af-c

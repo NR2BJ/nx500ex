@@ -4,7 +4,8 @@
  * ottokiksmaler/nx500_nx1_modding 의 keyscan.c (AGPL-3.0) 를 바탕으로 새로 작성했다.
  * 사용법: nxkeys <입력 장치0> <입력 장치1> <scripts 폴더> [debug]
  *
- * 키 이벤트마다 <scripts>/<이름>.sh 가 있으면 sh 로 실행한다 (기다리지 않음, 백그라운드).
+ * 키 이벤트마다 <scripts>/../conf/keymap 에 "이벤트=동작" 이 있으면 <scripts>/<동작>.sh 를, 없으면 <scripts>/<이벤트>.sh 가
+ * 있을 때 그것을 sh 로 실행한다 (기다리지 않음, 백그라운드). keymap 은 메뉴의 키 설정이 쓰며, 이벤트마다 다시 읽는다.
  *   EV_<키>.sh       EV 를 누른 채 그 키를 누름. EV 를 계속 누르고 있으면 반복해서 쓸 수 있다 (NX-KS keyscan 빌드와 같음)
  *   <키>_<키>.sh     같은 키를 1초 안에 두 번 누름
  *   <키>_PRESS.sh    누르는 순간
@@ -45,12 +46,36 @@ static long now_ms(void)
 	return ms_of(&t);
 }
 
-/* <scripts>/<name>.sh 가 있으면 백그라운드로 실행 */
+/* keymap 에서 이벤트의 동작을 찾는다 */
+static int keymap_lookup(const char *event, char *out, size_t size)
+{
+	char path[640], line[256];
+	size_t n = strlen(event);
+	FILE *f;
+	snprintf(path, sizeof path, "%s/../conf/keymap", scripts);
+	f = fopen(path, "r");
+	if (!f) return 0;
+	while (fgets(line, sizeof line, f)) {
+		line[strcspn(line, "\r\n")] = 0;
+		if (strncmp(line, event, n) == 0 && line[n] == '=' && line[n + 1]) {
+			snprintf(out, size, "%s", line + n + 1);
+			fclose(f);
+			return 1;
+		}
+	}
+	fclose(f);
+	return 0;
+}
+
+/* 이벤트의 동작(keymap) 또는 <scripts>/<이벤트>.sh 를 백그라운드로 실행 */
 static void fire(const char *name)
 {
-	char path[640];
+	char path[640], action[128];
 	pid_t pid;
-	snprintf(path, sizeof path, "%s/%s.sh", scripts, name);
+	if (keymap_lookup(name, action, sizeof action))
+		snprintf(path, sizeof path, "%s/%s.sh", scripts, action);
+	else
+		snprintf(path, sizeof path, "%s/%s.sh", scripts, name);
 	if (access(path, R_OK) != 0) {
 		if (debug) printf("no %s\n", path);
 		return;

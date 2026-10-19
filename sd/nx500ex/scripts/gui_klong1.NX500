@@ -1,0 +1,10 @@
+# 자동 생성 (키 설정: 길게 누르기 1/2)
+back|gui_keys
+key|OK 길게|OK_LONG
+key|AEL 길게|AEL_LONG
+key|위 길게|UP_LONG
+key|아래 길게|DOWN_LONG
+key|왼쪽 길게|LEFT_LONG
+key|오른쪽 길게|RIGHT_LONG
+key|WiFi 길게|MOBILE_LONG
+page|다음 >|gui_klong2

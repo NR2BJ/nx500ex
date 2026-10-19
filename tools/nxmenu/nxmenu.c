@@ -22,6 +22,8 @@
  *                            단계는 쉼표로 최대 3개 (예: 1,5,10 -> -1 +1 / -5 +5 / -10 +10). 없으면 1,10
  *                            특수값은 "값:라벨" (예: 0:계속) -> 값 옆에 그 값으로 바로 바꾸는 버튼
  *   ip|라벨                  라벨 뒤에 지금 WiFi IP 를 붙여 표시 (누르면 다시 읽음)
+ *   key|라벨|이벤트          키 할당. "라벨: 동작" 으로 보이고, 누르면 동작 고르기 화면 (scripts/actions.list 의 동작들).
+ *                            고른 결과는 <scripts>/../conf/keymap 에 "이벤트=동작" 으로 저장 (nxkeys 가 읽는다)
  *   blank                    빈 칸
  *   back|화면 이름           (항목 아님) 마지막 행 왼쪽 "뒤로" 가 갈 화면. 없으면 빈 칸
  */
@@ -52,7 +54,8 @@
 #define PIDFILE "/tmp/nx500ex-menu.pid"
 #define LASTFILE "/tmp/nx500ex-menu.last"
 
-enum { T_BUTTON, T_KEEP, T_CHECK, T_PAGE, T_NUM, T_IP, T_BLANK, T_BACK, T_CLOSE, T_TEXT, T_STEP, T_OK, T_SPECIAL };
+enum { T_BUTTON, T_KEEP, T_CHECK, T_PAGE, T_NUM, T_IP, T_BLANK, T_BACK, T_CLOSE, T_TEXT, T_STEP, T_OK, T_SPECIAL,
+       T_KEY, T_CHOICE, T_MORE };
 
 typedef struct {
 	int type;
@@ -78,6 +81,7 @@ static Item num_item;
 static int num_value;
 
 static void close_menu(void);
+static void show_chooser(void);
 static void show_page(const char *name);
 static void show_number(void);
 
@@ -173,6 +177,84 @@ static void conf_write(Item *it, int v)
 	sync();
 }
 
+/* ---- 키 할당: <scripts>/actions.list (동작|라벨), <scripts>/../conf/keymap (이벤트=동작) ---- */
+#define MAX_ACTIONS 40
+static char act_id[MAX_ACTIONS][64], act_label[MAX_ACTIONS][128];
+static int n_actions = -1;
+
+static void load_actions(void)
+{
+	char path[640], line[256];
+	FILE *f;
+	if (n_actions >= 0) return;
+	n_actions = 0;
+	snprintf(path, sizeof path, "%s/actions.list", scripts);
+	f = fopen(path, "r");
+	if (!f) return;
+	while (n_actions < MAX_ACTIONS && fgets(line, sizeof line, f)) {
+		char *bar;
+		line[strcspn(line, "\r\n")] = 0;
+		if (!line[0] || line[0] == '#' || !(bar = strchr(line, '|'))) continue;
+		*bar = 0;
+		snprintf(act_id[n_actions], sizeof act_id[0], "%s", line);
+		snprintf(act_label[n_actions], sizeof act_label[0], "%s", bar + 1);
+		n_actions++;
+	}
+	fclose(f);
+}
+
+static const char *action_label(const char *id)
+{
+	int i;
+	load_actions();
+	for (i = 0; i < n_actions; i++)
+		if (strcmp(act_id[i], id) == 0) return act_label[i];
+	return id;
+}
+
+/* 이벤트에 할당된 동작 id. 없으면 "" */
+static void keymap_get(const char *event, char *out, size_t size)
+{
+	char path[640], line[256];
+	size_t n = strlen(event);
+	FILE *f;
+	out[0] = 0;
+	snprintf(path, sizeof path, "%s/../conf/keymap", scripts);
+	f = fopen(path, "r");
+	if (!f) return;
+	while (fgets(line, sizeof line, f)) {
+		line[strcspn(line, "\r\n")] = 0;
+		if (strncmp(line, event, n) == 0 && line[n] == '=') { snprintf(out, size, "%s", line + n + 1); break; }
+	}
+	fclose(f);
+}
+
+/* 이벤트의 동작을 바꾼다 (id 가 "none" 이면 지운다) */
+static void keymap_set(const char *event, const char *id)
+{
+	char path[640], tmp[660], line[256];
+	size_t n = strlen(event);
+	FILE *in, *out;
+	snprintf(path, sizeof path, "%s/../conf", scripts);
+	mkdir(path, 0755);
+	snprintf(path, sizeof path, "%s/../conf/keymap", scripts);
+	snprintf(tmp, sizeof tmp, "%s.new", path);
+	out = fopen(tmp, "w");
+	if (!out) return;
+	in = fopen(path, "r");
+	if (in) {
+		while (fgets(line, sizeof line, in)) {
+			if (strncmp(line, event, n) == 0 && line[n] == '=') continue;
+			fputs(line, out);
+		}
+		fclose(in);
+	}
+	if (strcmp(id, "none") != 0) fprintf(out, "%s=%s\n", event, id);
+	fclose(out);
+	rename(tmp, path);
+	sync();
+}
+
 static int load_page(const char *name)
 {
 	char path[640], line[512];
@@ -211,6 +293,7 @@ static int load_page(const char *name)
 		else if (strcmp(field[0], "page") == 0) it->type = T_PAGE;
 		else if (strcmp(field[0], "num") == 0) it->type = T_NUM;
 		else if (strcmp(field[0], "ip") == 0) it->type = T_IP;
+		else if (strcmp(field[0], "key") == 0) it->type = T_KEY;
 		else if (strcmp(field[0], "blank") == 0) it->type = T_BLANK;
 		else continue;
 		snprintf(it->label, sizeof it->label, "%s", nf > 1 ? field[1] : "");
@@ -245,10 +328,15 @@ static int load_page(const char *name)
 /* 화면 전환은 버튼 콜백이 끝난 뒤에 한다 (콜백 안에서 그 버튼을 지우지 않도록) */
 static char pending[256];
 static int pending_number;
+/* 키 할당 고르기 화면 상태 */
+static Item key_item;
+static int chooser_start;
+
 static void switch_job(void *data)
 {
 	(void)data;
-	if (pending_number) show_number();
+	if (pending_number == 2) show_chooser();
+	else if (pending_number) show_number();
 	else show_page(pending);
 }
 static void switch_later(const char *name)
@@ -321,6 +409,21 @@ static void on_click(void *data, Evas_Object *obj, void *ev)
 		/* 라벨을 그린 뒤 글자를 바꾸면 폭 계산이 틀어져 ... 으로 잘리므로 화면을 다시 그린다 */
 		switch_later(page);
 		break;
+	case T_KEY:
+		key_item = *it;
+		chooser_start = 0;
+		pending_number = 2;
+		ecore_job_add(switch_job, NULL);
+		break;
+	case T_MORE:
+		chooser_start = it->step;
+		pending_number = 2;
+		ecore_job_add(switch_job, NULL);
+		break;
+	case T_CHOICE:
+		keymap_set(key_item.arg, it->arg);
+		switch_later(page);
+		break;
 	}
 }
 
@@ -370,9 +473,18 @@ static Evas_Object *add_cell(Item *it, int col, int row, int span)
 		snprintf(text, sizeof text, "%s %s", it->label, ip);
 	} else if (it->type == T_NUM)
 		value_text(it, conf_read(it), text, sizeof text);
+	else if (it->type == T_KEY) {
+		/* 키 이름과 동작을 두 줄로 (한 줄이면 "오른쪽 두 번: ..." 처럼 길어 잘린다) */
+		char id[64], e1[256], e2[256];
+		keymap_get(it->arg, id, sizeof id);
+		escape_label(it->label, e1, sizeof e1);
+		escape_label(id[0] ? action_label(id) : "-", e2, sizeof e2);
+		snprintf(text, sizeof text, "%s<br>%s", e1, e2);
+	}
 	else
 		snprintf(text, sizeof text, "%s", it->label);
-	set_text(btn, text);
+	if (it->type == T_KEY) elm_object_part_text_set(btn, NULL, text);   /* 이미 바꿔 넣은 글 (<br> 유지) */
+	else set_text(btn, text);
 	evas_object_show(btn);
 	evas_object_size_hint_min_set(btn, w, CELL_H);
 	elm_table_pack(table, btn, col, row, span, 1);
@@ -495,6 +607,49 @@ static void show_number(void)
 	ok.type = T_OK;
 	snprintf(ok.label, sizeof ok.label, "확인");
 	add_cell(&ok, 1, ROWS - 1, 1);
+	show_window();
+}
+
+/* 동작 고르기 화면: 첫 칸 = 어느 키인지, 나머지 칸 = 동작들. 칸이 모자라면 마지막 칸이 "다음 >" (처음으로 돌아감) */
+static void show_chooser(void)
+{
+	static Item title, choices[MAX_ITEMS], more, cancel, blank = { T_BLANK };
+	int slots = MAX_ITEMS - 1, i, n, has_more;
+
+	load_actions();
+	ensure_window();
+	memset(&title, 0, sizeof title);
+	title.type = T_TEXT;
+	snprintf(title.label, sizeof title.label, "%s:", key_item.label);
+	add_cell(&title, 0, 0, 1);
+	if (chooser_start >= n_actions) chooser_start = 0;
+	has_more = n_actions - chooser_start > slots;
+	n = has_more ? slots - 1 : n_actions - chooser_start;
+	for (i = 0; i < slots; i++) {
+		int slot = i + 1;
+		if (i < n) {
+			memset(&choices[i], 0, sizeof choices[i]);
+			choices[i].type = T_CHOICE;
+			snprintf(choices[i].arg, sizeof choices[i].arg, "%s", act_id[chooser_start + i]);
+			snprintf(choices[i].label, sizeof choices[i].label, "%s", act_label[chooser_start + i]);
+			add_cell(&choices[i], slot % COLS, slot / COLS, 1);
+		} else if (i == n && has_more) {
+			memset(&more, 0, sizeof more);
+			more.type = T_MORE;
+			more.step = chooser_start + n;
+			snprintf(more.label, sizeof more.label, "다음 >");
+			add_cell(&more, slot % COLS, slot / COLS, 1);
+		} else
+			add_cell(&blank, slot % COLS, slot / COLS, 1);
+	}
+	memset(&cancel, 0, sizeof cancel);
+	cancel.type = T_PAGE;
+	snprintf(cancel.label, sizeof cancel.label, "취소");
+	snprintf(cancel.arg, sizeof cancel.arg, "%s", page);
+	add_cell(&cancel, 0, ROWS - 1, 1);
+	items[MAX_ITEMS + 1].type = T_CLOSE;
+	snprintf(items[MAX_ITEMS + 1].label, sizeof items[MAX_ITEMS + 1].label, "닫기");
+	add_cell(&items[MAX_ITEMS + 1], 1, ROWS - 1, 1);
 	show_window();
 }
 

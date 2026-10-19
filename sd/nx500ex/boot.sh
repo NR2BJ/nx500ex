@@ -12,6 +12,8 @@ log "boot.sh start"
 
 DEBUG=""
 rm -f $D/debug   # 예전 방식의 표시 파일 정리
+# 예전 판의 고정 키 조합 파일 정리 (키 할당은 메뉴의 키 설정, conf/keymap 으로 옮김. EV_EV.sh 만 고정)
+for f in EV_LEFT EV_RIGHT EV_UP EV_DOWN EV_MOBILE; do rm -f $D/scripts/$f.sh; done
 if [ -e $D/scripts/auto/debug.sh ]; then
   DEBUG=debug
   sh $D/bin/mon.sh </dev/null >/dev/null 2>&1 &

@@ -92,6 +92,18 @@ drive_restore() {
   reapply_mode
   jlog "drive restore pref=$_d -> $(drive_now)"
 }
+# 체크박스 기능 켜고 끄기 (키 할당용, 메뉴의 체크박스와 같은 동작): toggle 스크립트이름 표시이름
+toggle() {
+  if [ -f "$D/scripts/auto/$1.sh" ]; then
+    rm -f "$D/scripts/auto/$1.sh"; sync
+    [ -f "$D/scripts/off_$1.sh" ] && sh "$D/scripts/off_$1.sh"
+    popup "$2 끔" 1
+  else
+    cp "$D/scripts/$1.sh" "$D/scripts/auto/$1.sh"; sync
+    sh "$D/scripts/$1.sh"
+    popup "$2 켬" 1
+  fi
+}
 # 메모리 카드의 사진 파일 수 (첫 장이 실제로 찍혔는지 확인용)
 dcim_count() { find /mnt/mmc/DCIM -type f 2>/dev/null | wc -l; }
 # 새 파일이 생길 때까지 최대 $2 초 기다린다 ($1 = 기다리기 전 파일 수)
