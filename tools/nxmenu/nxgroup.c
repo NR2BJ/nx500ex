@@ -9,13 +9,16 @@
  *
  * 파일 크기를 바꾸지 않고 제자리에서 고친다:
  *   - 메이커노트의 값 위치는 메이커노트 시작 기준이라 IFD 안에서 항목 순서를 바꿔도 값은 그대로다.
- *   - 값이 없는 항목(개수 0) 두 개를 빼고 0x000a 를 번호 순서 자리에 넣는다. 항목 수가 하나 줄어
+ *   - 방법 1 (SRW): 값이 없는 항목(개수 0) 두 개를 빼고 0x000a 를 번호 순서 자리에 넣는다. 항목 수가 하나 줄어
  *     IFD 끝에 남는 12바이트에 다음 IFD 위치(0)와 0x000a 의 값 8바이트를 쓴다. IFD 전체 크기는 그대로다.
+ *   - 방법 2 (개수 0 항목이 없을 때, JPEG): 얼굴 관련 항목(0x00e0~0x0102) 중 값이 모두 0 이고 8바이트 이상인 항목 하나를
+ *     0x000a 로 바꾸고 그 값 자리를 쓴다.
  *   - 이미 0x000a 가 있으면 값만 바꾼다. 조건이 맞지 않는 파일은 건드리지 않는다.
  *
  * 사용법:
  *   nxgroup 파일...      한 묶음으로 만든다 (새 키). 첫 파일과 이름(확장자 앞)이 같은 파일이 첫 장(상태 1), 나머지는 상태 2
  *   nxgroup -l 파일...   0x000a 값을 보여준다
+ *   nxgroup -d 파일...   메이커노트 항목 목록 (구조 확인용)
  *   nxgroup -k 키 파일...  키를 정해서 묶는다 (16진수)
  */
 #include <stdio.h>
@@ -45,6 +48,13 @@ static void p32(unsigned char *p, unsigned v)
 	else { p[0] = v; p[1] = v >> 8; p[2] = v >> 16; p[3] = v >> 24; }
 }
 static int in(long o, long n) { return o >= 0 && n >= 0 && o + n <= len; }
+/* 항목(파일 기준 위치)의 값 바이트 수 */
+static unsigned dsize(long en)
+{
+	static const unsigned char ts[13] = { 0, 1, 1, 2, 4, 8, 1, 1, 2, 4, 8, 4, 8 };
+	unsigned t = u16(en + 2);
+	return t < 13 ? ts[t] * u32(en + 4) : 0;
+}
 
 /* IFD (TIFF 기준 off) 에서 태그를 찾아 항목 위치(파일 기준)를 돌려준다 */
 static long find_tag(unsigned off, unsigned tag)
@@ -111,15 +121,14 @@ static int set(const char *path, unsigned mode, unsigned key)
 {
 	int fd = open(path, O_RDWR);
 	long mn, e;
-	unsigned n, i, j, d1, d2, pos;
-	unsigned char blk[2 + 12 * 500], ins[12];
+	unsigned n, i, j, d1, d2, pos, cnt, data;
+	unsigned char blk[2 + 12 * 500], ins[12], val[8];
 	if (fd < 0) { perror(path); return 1; }
 	mn = makernote(fd);
 	if (mn < 0) { fprintf(stderr, "%s: no samsung makernote\n", path); close(fd); return 1; }
 
 	e = find_tag(mn - base, TAG_CONTI);
 	if (e >= 0) {   /* 이미 있으면 값만 바꾼다 */
-		unsigned char val[8];
 		if (u16(e + 2) != 4 || u32(e + 4) != 2 || !in(mn + u32(e + 8), 8)) {
 			fprintf(stderr, "%s: 0x000a unexpected\n", path); close(fd); return 1;
 		}
@@ -130,7 +139,9 @@ static int set(const char *path, unsigned mode, unsigned key)
 		return 0;
 	}
 
-	/* 뺄 항목 두 개: 값 개수가 0 인 항목 (실기 SRW: 0x00e0, 0x00e1, 0x00e2, 0x0101, 0x0102) */
+	/* 방법 1 (실기 SRW): 값 개수가 0 인 항목 두 개를 빼고 항목 수를 하나 줄여, IFD 끝에 남는 12바이트에 다음 IFD 위치(0)와 값을 쓴다.
+	 * 방법 2 (실기 JPEG, 개수 0 항목 없음): 얼굴 관련 항목(0x00e0~0x0102) 중 값이 IFD 밖에 8바이트 이상 있고 모두 0 인 항목 하나를
+	 * 0x000a 로 바꾸고 그 값 자리를 쓴다. 두 방법 모두 IFD 크기와 파일 크기는 그대로다. */
 	n = u16(mn);
 	d1 = d2 = n;
 	for (i = 0; i < n; i++)
@@ -138,14 +149,30 @@ static int set(const char *path, unsigned mode, unsigned key)
 			if (d1 == n) d1 = i;
 			else { d2 = i; break; }
 		}
-	if (d2 == n) { fprintf(stderr, "%s: no empty entries\n", path); close(fd); return 1; }
+	if (d2 < n) {
+		cnt = n - 1;
+		data = 2 + 12 * (n - 1) + 4;
+	} else {
+		d1 = d2 = n;
+		for (i = 0; i < n && d1 == n; i++) {
+			long en = mn + 2 + 12 * i;
+			unsigned t = u16(en), sz = dsize(en), k;
+			if (t < 0x00e0 || t > 0x0102 || sz < 8 || !in(mn + u32(en + 8), sz)) continue;
+			for (k = 0; k < sz && !buf[mn + u32(en + 8) + k]; k++) ;
+			if (k == sz) d1 = i;
+		}
+		if (d1 == n) { fprintf(stderr, "%s: no room for 0x000a\n", path); close(fd); return 1; }
+		cnt = n;
+		data = u32(mn + 2 + 12 * d1 + 8);
+	}
 
-	/* 새 IFD: 항목 n-1 개 (두 개 빼고 0x000a 를 번호 순서 자리에), 다음 IFD 0, 값 8바이트. 원래 IFD(2 + 12n) 와 크기가 같다 */
+	/* 새 IFD: 뺀 항목 자리 없이 0x000a 를 번호 순서 자리에 넣는다 */
 	p16(ins, TAG_CONTI);
 	p16(ins + 2, 4);
 	p32(ins + 4, 2);
-	p32(ins + 8, 2 + 12 * (n - 1) + 4);   /* 메이커노트 시작 기준 */
-	p16(blk, n - 1);
+	p32(ins + 8, data);   /* 메이커노트 시작 기준 */
+	memcpy(blk, buf + mn, 2 + 12L * n);
+	p16(blk, cnt);
 	pos = 0;
 	for (i = 0, j = 0; i < n; i++) {
 		if (i == d1 || i == d2) continue;
@@ -153,14 +180,44 @@ static int set(const char *path, unsigned mode, unsigned key)
 		memcpy(blk + 2 + 12 * j++, buf + mn + 2 + 12 * i, 12);
 	}
 	if (!pos) memcpy(blk + 2 + 12 * j++, ins, 12);
-	if (j != n - 1) { fprintf(stderr, "%s: internal\n", path); close(fd); return 1; }
-	p32(blk + 2 + 12 * j, 0);
-	p32(blk + 2 + 12 * j + 4, mode);
-	p32(blk + 2 + 12 * j + 8, key);
+	if (j != cnt) { fprintf(stderr, "%s: internal\n", path); close(fd); return 1; }
+	p32(val, mode);
+	p32(val + 4, key);
+	if (cnt < n) {   /* 방법 1: IFD 끝 12바이트 = 다음 IFD 0 + 값 */
+		p32(blk + 2 + 12 * j, 0);
+		memcpy(blk + 2 + 12 * j + 4, val, 8);
+	} else if (pwrite(fd, val, 8, mn + data) != 8) {   /* 방법 2: 값을 먼저 쓴다 (0 이던 자리라 무해) */
+		perror(path); close(fd); return 1;
+	}
 
 	if (pwrite(fd, blk, 2 + 12L * n, mn) != (long)(2 + 12 * n)) { perror(path); close(fd); return 1; }
 	fsync(fd);
 	close(fd);
+	return 0;
+}
+
+/* 메이커노트 항목을 보여준다 (구조 확인용) */
+static int dump(const char *path)
+{
+	int fd = open(path, O_RDONLY);
+	long mn;
+	unsigned n, i;
+	if (fd < 0) { perror(path); return 1; }
+	mn = makernote(fd);
+	close(fd);
+	if (mn < 0) { printf("%s: no samsung makernote\n", path); return 1; }
+	n = u16(mn);
+	printf("%s: %s makernote at %ld, %u entries\n", path, be ? "MM" : "II", mn, n);
+	for (i = 0; i < n; i++) {
+		long en = mn + 2 + 12 * i;
+		unsigned sz = dsize(en), z = 0, k;
+		if (sz > 4 && in(mn + u32(en + 8), sz)) {
+			for (k = 0; k < sz && !buf[mn + u32(en + 8) + k]; k++) ;
+			z = k == sz;
+		}
+		printf("%04x t%u n%u %s %u%s\n", u16(en), u16(en + 2), u32(en + 4), sz > 4 ? "off" : "val",
+		       u32(en + 8), sz > 4 ? (z ? " zero" : "") : "");
+	}
 	return 0;
 }
 
@@ -176,8 +233,12 @@ int main(int argc, char **argv)
 	int i, a = 1, err = 0;
 	unsigned key = 0;
 	if (argc < 2) {
-		fprintf(stderr, "usage: %s [-k key] file... | -l file...\n", argv[0]);
+		fprintf(stderr, "usage: %s [-k key] file... | -l file... | -d file...\n", argv[0]);
 		return 2;
+	}
+	if (strcmp(argv[1], "-d") == 0) {
+		for (i = 2; i < argc; i++) err |= dump(argv[i]);
+		return err;
 	}
 	if (strcmp(argv[1], "-l") == 0) {
 		for (i = 2; i < argc; i++) err |= list(argv[i]);
