@@ -122,6 +122,28 @@ first_shot() {
   _n=$(dcim_count); s2_click
   wait_file $_n "${1:-8}"
 }
+# 재생 화면 묶기 (메뉴 체크박스, auto/group.sh): 작업으로 찍은 사진을 순정 연사처럼 한 묶음으로 보이게 한다 (bin/nxgroup).
+# 작업 시작 때 group_mark 로 있던 파일 목록을 남기고, 끝날 때 group_done 이 새로 생긴 JPG, SRW 를 묶는다.
+# 카드의 파일 시각은 2초 단위라 시각 비교 대신 파일 목록을 비교한다.
+GROUPLIST=/tmp/nx500ex-group.$$   # 작업마다 따로 (작업을 멈추자마자 다음 작업을 시작해도 섞이지 않게)
+group_on() { [ -f "$D/scripts/auto/group.sh" ]; }
+group_mark() { group_on && find /mnt/mmc/DCIM -type f \( -iname '*.JPG' -o -iname '*.SRW' \) 2>/dev/null | sort > $GROUPLIST; }
+group_new() { find /mnt/mmc/DCIM -type f \( -iname '*.JPG' -o -iname '*.SRW' \) 2>/dev/null | sort | grep -vxF -f $GROUPLIST; }
+group_done() {
+  group_on && [ -f $GROUPLIST ] || return 0
+  # 마지막 사진의 저장이 끝날 때까지: 새 파일 목록과 크기가 2초 동안 그대로일 때까지 (최대 20초)
+  _p=; _i=0
+  while [ $_i -lt 20 ]; do
+    _s=$(group_new | xargs -r ls -l 2>/dev/null | md5sum)
+    [ "$_s" = "$_p" ] && break
+    _p=$_s; sleep 2; _i=$((_i + 2))
+  done
+  _f=$(group_new); rm -f $GROUPLIST
+  _n=$(for _x in $_f; do echo "${_x%.*}"; done | sort -u | wc -l)
+  [ "$_n" -ge 2 ] || return 0
+  "$D/bin/nxgroup" $_f >> "$D/log/jobs.log" 2>&1
+  jlog "group $_n shots rc=$?"
+}
 # 숫자 설정은 메뉴(nxmenu 의 num 항목)가 conf/<이름> 에 쓴다. 스크립트는 읽기만 한다
 # conf_get 이름 기본값 [최소 최대]
 conf_get() {

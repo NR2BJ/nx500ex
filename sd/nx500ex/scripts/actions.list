@@ -12,6 +12,7 @@ job_stop|작업 중단
 t_silent|무음 셔터 켬/끔
 t_nolens|렌즈 없이 촬영 켬/끔
 t_screen_dark|작업 중 화면 끄기 켬/끔
+t_group|재생 화면 묶기 켬/끔
 touch_toggle|터치 켬/끔
 af_toggle|AF-S 단사 / AF-C 연사
 load_UP|UP 프로필

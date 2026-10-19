@@ -6,3 +6,4 @@ page|HDR 5장 >|gui_hdr
 page|포커스 스태킹 >|gui_fstack
 button|작업 중단|job_stop.sh
 checkbox|작업 중 화면 끄기|screen_dark.sh
+checkbox|재생 화면 묶기|group.sh

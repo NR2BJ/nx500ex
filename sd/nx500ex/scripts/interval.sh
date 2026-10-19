@@ -17,11 +17,12 @@ else
   popup "M 모드 아님<br>첫 장의 노출로 고정됨" 3
 fi
 (
-  trap 'keys_release; lcd_restore; drive_restore; rm -f $JOBPID; jlog "interval stopped after $k"; exit 0' TERM
+  trap 'trap "" TERM; keys_release; lcd_restore; drive_restore; jlog "interval stopped after $k"; group_done; rm -f $JOBPID; exit 0' TERM
   k=0
   sleep 3
   jlog "interval start every ${G}s count ${C} dial=$(dial)"
   drive_save; drive_single
+  group_mark
   s1_hold; sleep 1
   if ! first_shot 8; then
     keys_release; drive_restore; rm -f $JOBPID; jlog "interval stopped: no photo on first shot (focus failed?)"
@@ -40,7 +41,8 @@ fi
     s2_click; k=$((k + 1))
     jlog "interval shot $k t=$(printf '%d.%02d' $(( (NOW - T0) / 100 )) $(( (NOW - T0) % 100 )))s"
   done
-  keys_release; lcd_restore; drive_restore; rm -f $JOBPID; jlog "interval done $k"
+  keys_release; lcd_restore; drive_restore; jlog "interval done $k"
   popup "인터벌 완료 ${k}장" 3
+  group_done; rm -f $JOBPID
 ) < /dev/null > /dev/null 2>&1 &
 echo $! > $JOBPID

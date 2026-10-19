@@ -17,8 +17,10 @@ nx500ex 의 메뉴 프로그램. NX-KS mod_gui (ottokiksmaler/nx500_nx1_modding,
 필요: Ubuntu 의 gcc-arm-linux-gnueabi, NX500 1.12 펌웨어에서 추출한 루트 파일 시스템 (glibc 2.13, EFL 1.7.99). EFL 헤더 대신 efl_min.h 의 최소 선언을 쓰고, 펌웨어의 라이브러리와 직접 링크한다.
 
 ```
-ROOT=/path/to/rootfs sh build.sh      # -> sd/nx500ex/bin/nxmenu
+ROOT=/path/to/rootfs sh build.sh      # -> sd/nx500ex/bin/nxmenu, nxpopup, nxkeys, nxgroup
 ```
+
+nxgroup 은 화면 없는 파일 도구라 PC 에서도 그대로 빌드해 시험할 수 있다 (gcc -o nxgroup nxgroup.c; nxgroup -l 사진.SRW). 동작은 nxgroup.c 머리말.
 
 build.sh 는 결과물이 카메라 glibc 에 없는 버전 심볼을 요구하면 실패한다.
 

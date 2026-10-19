@@ -31,7 +31,7 @@ EV 두 번만 고정이다: 메뉴 열기 / 닫기, 촬영 작업 중에는 작�
 | 화면 | 항목 |
 | --- | --- |
 | 첫 화면 | 무음 셔터, 렌즈 없이 촬영, 촬영 도구 >, 프로필 >, 설정 > |
-| 촬영 도구 | 셀프타이머 >, 벌브 >, 인터벌 촬영 >, HDR 5장 >, 포커스 스태킹 >, 작업 중단, 작업 중 화면 끄기 |
+| 촬영 도구 | 셀프타이머 >, 벌브 >, 인터벌 촬영 >, HDR 5장 >, 포커스 스태킹 >, 작업 중단, 작업 중 화면 끄기, 재생 화면 묶기 |
 | 셀프타이머 | 셀프타이머 시작, 시간 (2~60초), 타이머 램프 |
 | 벌브 (장노출) | 장노출 시작, 노출 (1~30초) |
 | 인터벌 촬영 | 인터벌 시작, 간격 (2~3600초), 장수 (0 = 중단할 때까지) |
@@ -63,6 +63,7 @@ EV 두 번만 고정이다: 메뉴 열기 / 닫기, 촬영 작업 중에는 작�
 | HDR 5장 | M 모드, ISO 고정(자동이면 거부)에서 가운데 노출을 맞춘 뒤 시작. 무음 셔터면 가장 긴 장이 1/5초보다 느릴 때 거부. 셔터 속도만 바꿔 다섯 장 (30초 ~ 1/6000 범위). 셔터 값을 바꿀 때 반셔터가 풀려 장마다 초점을 다시 잡으므로, AF 면 모든 장에서 초점이 맞아야 한다 (안 맞는 장에서 중단). 삼각대와 MF 를 권장. 끝나면 셔터 복원 |
 | 포커스 스태킹 | AF 렌즈만. 초점 모터를 직접 움직이고, 촬영 서비스의 MF(st cap capt mf on)를 켜서 셔터 때 초점을 다시 잡지 않게 한다 (기계, 무음 모두 확인). 화면의 거리 표시는 한 장씩 늦게 따라온다. 장마다 촬영 전후 초점 위치를 jobs.log 에 남긴다 |
 | 작업 중 화면 끄기 | 벌브, 인터벌, HDR 동안 화면 전체를 검은 창으로 덮는다 (AMOLED 라 꺼진 것과 같음). 팝업은 그 위에 뜬다 |
+| 재생 화면 묶기 | 인터벌, HDR, 포커스 스태킹으로 찍은 사진을 순정 연사처럼 재생 화면에서 한 묶음으로 보이게 한다. 작업이 끝나면(중단 포함) 새로 생긴 JPG, SRW 의 메이커노트에 순정 연사와 같은 묶음 정보(태그 0x000a)를 bin/nxgroup 으로 넣는다. 파일 크기와 사진 데이터는 그대로이고 메이커노트 목록 안의 빈 항목 두 개를 쓴다. 끝난 뒤 저장이 멈출 때까지 2초 이상 기다렸다가 고친다. 기본은 꺼짐 |
 | 텔넷 / FTP | 서버를 켜 둔다 (전원 켤 때마다 자동). WiFi 연결 전에도 서버는 떠 있고 연결되면 접속 가능. IP 는 IP 항목이나 EV+WiFi. 인증 없음, 본인 기기만 있는 네트워크에서만 |
 | 셔터 횟수 | 셔터, 전원, 플래시 횟수. 전원을 끌 때 저장되는 값이라 켜져 있는 동안 찍은 수는 다음 전원 켜기부터 반영 |
 | 진단 기록 | 다음 블루투스 켜기부터 log/mon.log, log/keyscan.out, 바로 다음 동작부터 log/timing.log |
@@ -76,7 +77,7 @@ EV 두 번만 고정이다: 메뉴 열기 / 닫기, 촬영 작업 중에는 작�
 ```
 nx500ex/
   boot.sh              내장 래퍼가 부름
-  bin/                 nxkeys, nxmenu, nxpopup, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
+  bin/                 nxkeys, nxmenu, nxpopup, nxgroup, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
   scripts/             키 조합(EV_*.sh), 기능, 메뉴(gui_*.NX500), common.sh
   scripts/auto/        켜 둔 기능 (체크박스가 관리)
   presets/             프로필과 전체 백업 (처음 저장할 때 생김)
@@ -90,6 +91,7 @@ nx500ex/
 | popup_timeout, popup_ok, popup_entry, poker, blackout | Otto Kiksmaler, NX-KS 2.88 에 포함된 빌드 | AGPL-3.0 (상류 ottokiksmaler/nx500_nx1_modding) |
 | stapp | ge0rg/nx-ks-mod 의 빌드 | AGPL-3.0 |
 | nxmenu, nxpopup, nxkeys | 이 저장소 tools/nxmenu (mod_gui, popup_timeout, keyscan 바탕) | AGPL-3.0 |
+| nxgroup | 이 저장소 tools/nxmenu (새로 작성) | AGPL-3.0 |
 | busybox, telnetd | NX-KS 2.88 에 포함된 빌드 | GPL-2.0 |
 
 ## 첫 확인 순서

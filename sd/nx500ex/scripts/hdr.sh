@@ -21,11 +21,12 @@ if silent_on && [ $((IDX - 2 * 16 * E)) -lt $SILENT_MIN_IDX ]; then
 fi
 popup "HDR ±$((2*E))EV (EV 두번=중단)" 2
 (
-  fin() { keys_release; lcd_restore; shutter_set $IDX; drive_restore; rm -f $JOBPID; }
-  trap 'fin; jlog "hdr stopped"; exit 0' TERM
+  fin() { keys_release; lcd_restore; shutter_set $IDX; drive_restore; }
+  trap 'trap "" TERM; fin; jlog "hdr stopped"; group_done; rm -f $JOBPID; exit 0' TERM
   S=$((16 * E))
   i=0
   drive_save; drive_single
+  group_mark
   jlog "hdr start idx=$IDX step=$S iso=$ISO"
   for e in -2 -1 0 1 2; do
     v=$((IDX - e * S))      # 값이 클수록 빠른 셔터(어두움). e=-2 가 가장 어두운 장
@@ -39,7 +40,7 @@ popup "HDR ±$((2*E))EV (EV 두번=중단)" 2
     s1_hold; sleep 0.5; s2_click; key release s1
     if ! wait_file $n0 $w; then
       fin; jlog "hdr stopped: no photo at ev=$((e * E)) (focus failed?)"
-      popup "사진 없음 (초점 실패?), 중단" 3; exit 0
+      popup "사진 없음 (초점 실패?), 중단" 3; group_done; rm -f $JOBPID; exit 0
     fi
     i=$((i + 1))
     jlog "hdr shot ev=$((e * E)) idx=$v"
@@ -47,5 +48,6 @@ popup "HDR ±$((2*E))EV (EV 두번=중단)" 2
   done
   fin; jlog "hdr done"
   popup "HDR 완료" 2
+  group_done; rm -f $JOBPID
 ) < /dev/null > /dev/null 2>&1 &
 echo $! > $JOBPID

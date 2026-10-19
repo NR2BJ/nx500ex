@@ -12,11 +12,12 @@ NEAR=$(cat /tmp/nx500ex-fs.near 2>/dev/null); FAR=$(cat /tmp/nx500ex-fs.far 2>/d
 F=$(conf_get fs_frames 10 2 200)
 popup "스태킹 ${F}장<br>(EV 두번=중단)" 2
 (
-  fin() { keys_release; st cap capt mf off > /dev/null 2>&1; drive_restore; rm -f $JOBPID; }
-  trap 'fin; jlog "fstack stopped"; exit 0' TERM
+  fin() { keys_release; st cap capt mf off > /dev/null 2>&1; drive_restore; }
+  trap 'trap "" TERM; fin; jlog "fstack stopped"; group_done; rm -f $JOBPID; exit 0' TERM
   pos() { set -- $(st cap iq af pos 2>/dev/null); echo "$3"; }
   jlog "fstack start near=$NEAR far=$FAR frames=$F"
   drive_save; drive_single
+  group_mark
   st cap capt mf on > /dev/null 2>&1
   sleep 1
   k=0
@@ -28,11 +29,12 @@ popup "스태킹 ${F}장<br>(EV 두번=중단)" 2
     B=$(pos)
     n0=$(dcim_count)
     shoot
-    wait_file $n0 8 || { fin; jlog "fstack stopped: no photo at $((k+1))"; popup "사진 없음, 중단" 3; exit 0; }
+    wait_file $n0 8 || { fin; jlog "fstack stopped: no photo at $((k+1))"; popup "사진 없음, 중단" 3; group_done; rm -f $JOBPID; exit 0; }
     jlog "fstack shot $((k+1)) target=$T before=$B after=$(pos)"
     k=$((k+1))
   done
   fin; jlog "fstack done"
   popup "스태킹 완료 ${F}장" 3
+  group_done; rm -f $JOBPID
 ) < /dev/null > /dev/null 2>&1 &
 echo $! > $JOBPID
