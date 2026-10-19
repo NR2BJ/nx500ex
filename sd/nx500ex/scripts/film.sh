@@ -6,7 +6,7 @@
 # 레시피 값과 prefman 위치는 NXWA (WApaperplane/NXWA-nx500_modding, AGPL-3.0) 의 FilmLab 에서 가져왔다.
 # prefman 에 값을 쓰는 것만으로는 화면과 사진에 반영되지 않고, 카메라 앱이 화면 마법사 목록을 열 때 반영한다 (2026-10-19 실기).
 # 그래서 st key 로 Fn -> 화면 마법사 칸 터치 -> OK (목록) -> 오른쪽 n 번 -> OK 를 누른다.
-# 목록 커서는 지금 종류(APPPREF_EFFECT_PW_TYPE: 해제 0, 표준 1 ... 클래식 9, 사용자 1~3 10~12)에 있고 끝에서 처음으로 돈다.
+# 목록 커서는 지금 종류(해제 0, 표준 1 ... 클래식 9, 사용자 1~3 10~12)에 있고 끝에서 처음으로 돈다.
 # 값을 쓴 직후에는 카메라 앱이 바빠 Fn 이 먹히지 않아(실기: 방향키가 AF 위치를 옮김) 2초 기다린다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 PW_TYPE=0xa3d4
@@ -48,8 +48,20 @@ isp_match() {
   for _k in 4 5 6 7; do eval "_a=\$$_k _b=\${$((_k + 7))}"; [ "$_a" = "$_b" ] || return 1; done
 }
 # 화면 마법사 목록을 열고 종류 $1 을 고른다
+# 화면 마법사 목록에서 지금 위치 (해제 0, 표준 1 ... 클래식 9, 사용자 1~3 10~12).
+# 앱은 prefman 종류 값을 바로 저장하지 않아(WB 실기) 촬영 쪽 값으로 읽고, 해제와 표준(둘 다 PW_STANDARD)만 prefman 으로 가린다
+pw_cur() {
+  _e=$(st cap capdtm getusr PW 2>/dev/null | tr -d '\000\r' | sed -n 's/.*(0x1400\([0-9a-f][0-9a-f]\)).*/\1/p')
+  [ -n "$_e" ] || return 1
+  _e=$((0x$_e))
+  case $_e in
+    0) _p=$(pget $PW_TYPE); [ "$_p" = 0 ] && echo 0 || echo 1 ;;
+    12) echo 12 ;;
+    *) echo $((_e + 1)) ;;
+  esac
+}
 pw_select() {
-  _cur=$(pget $PW_TYPE)
+  _cur=$(pw_cur)
   case "$_cur" in ''|*[!0-9]*) return 1 ;; esac
   _n=$(( ($1 - _cur + PW_N) % PW_N ))
   _t=$(touch_get)
@@ -60,8 +72,8 @@ pw_select() {
   while [ $_n -gt 0 ]; do key click right; sleep 0.3; _n=$((_n - 1)); done
   key click ok; sleep 1
   [ "$_t" = 0 ] && { touch_set 0; reapply_mode; }
-  jlog "film select $1 (was $_cur) -> type $(pget $PW_TYPE)"
-  [ "$(pget $PW_TYPE)" = "$1" ]
+  jlog "film select $1 (was $_cur) -> $(pw_cur)"
+  [ "$(pw_cur)" = "$1" ]
 }
 
 [ -f $LOCK ] && [ -d /proc/$(cat $LOCK) ] && exit 0
@@ -84,7 +96,7 @@ case "$1" in
     c1_set $(cat "$BAK")
     jlog "film restore custom1 $(cat "$BAK")"
     rm -f "$BAK"; conf_set film_last ""
-    if [ "$(pget $PW_TYPE)" = 10 ]; then sleep 2; pw_select 10; fi
+    if [ "$(pw_cur)" = 10 ]; then sleep 2; pw_select 10; fi
     popup "사용자 1 원래대로" 2
     ;;
   *)

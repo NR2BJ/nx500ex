@@ -10,7 +10,7 @@
 #   sh pwtest.sh wbinfo    화이트 밸런스: prefman 이름표와 값, 촬영 쪽 WB, 반영된 변수
 #   sh pwtest.sh wbset K A B   prefman 에 WB 종류 = 색온도(10), 색온도 K, 미세 조정 (A<<16)|B 를 쓴다 (중립 7 7)
 #   sh pwtest.sh wbopen    Fn 패널을 열고 WB 칸(AWB)을 터치한 뒤 OK (WB 목록 열기)
-#   sh pwtest.sh wbgo T [N]   WB 목록을 열고 종류 T 까지 오른쪽으로 옮긴 뒤 OK (커서 = 지금 종류 0xa390, 목록 N 칸, 기본 11)
+#   sh pwtest.sh wbgo T [N]   WB 목록을 열고 종류 T 까지 오른쪽으로 옮긴 뒤 OK (커서 = 지금 종류(촬영 쪽 WB 값), 목록 N 칸, 기본 11)
 # 값 위치: NXWA filmlab.sh (prefman 0xa3ec = APPPREF_EFFECT_STANDARD_R_COLOR, 항목 간격 52, 종류 간격 4, 사용자 1 = 9번째)
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 PW_TYPE=0xa3d4   # APPPREF_EFFECT_PW_TYPE 추정 (STANDARD_R_COLOR 바로 앞 OFF_* 다섯 개 앞). info 가 이름표로 확인
@@ -80,7 +80,8 @@ case "$1" in
     echo "종류 = $(pget 0xa390)  색온도 = $(pget 0xa394)  미세 = $(pget 0xa3c0)"
     ;;
   wbgo)
-    cur=$(pget 0xa390); N=${3:-11}
+    # 지금 위치는 촬영 쪽 값으로 (앱은 prefman 종류 값을 바로 저장하지 않는다: 실기에서 태양광 뒤 계속 3)
+    cur=$(st cap capdtm getusr WB 2>/dev/null | tr -d '\000\r' | sed -n 's/.*(0x6000\([0-9a-f]\)).*/\1/p'); [ -n "$cur" ] && cur=$((0x$cur)); N=${3:-11}
     case "$cur" in ''|*[!0-9]*) echo "종류 값을 읽지 못함"; exit 1 ;; esac
     n=$(( ($2 - cur + N) % N ))
     echo "지금 종류 $cur -> 오른쪽 $n 번 (목록 $N 칸)"
