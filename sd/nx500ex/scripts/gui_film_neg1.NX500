@@ -1,0 +1,10 @@
+# 자동 생성 (tools/filmlab/gen_pages.py)
+back|gui_film
+button|Portra 160|film.sh portra160
+button|Portra 400|film.sh portra400
+button|Portra 400VC|film.sh portra400vc
+button|Portra 800|film.sh portra800
+button|Portra 800 증감|film.sh portra800_push
+button|Gold 200|film.sh gold200
+button|Gold 400|film.sh kodak_gold400
+page|다음 >|gui_film_neg2

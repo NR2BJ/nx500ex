@@ -1,0 +1,7 @@
+# 자동 생성 (tools/filmlab/gen_pages.py)
+back|gui_film_neg3
+button|Fuji Venus 800|film.sh fuji_venus800
+button|Agfa Vista 100|film.sh agfa_vista100
+button|Solaris 400|film.sh ferrania_solaris400
+button|Centuria 400|film.sh konica_centuria400
+button|Rollei CN 200|film.sh rollei_cn200

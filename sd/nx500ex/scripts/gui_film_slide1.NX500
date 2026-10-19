@@ -1,0 +1,10 @@
+# 자동 생성 (tools/filmlab/gen_pages.py)
+back|gui_film
+button|Velvia 50|film.sh velvia50
+button|Velvia 50 풍경|film.sh velvia50_land
+button|Velvia 100|film.sh velvia100
+button|Velvia 100F|film.sh velvia100f
+button|Provia 100F|film.sh provia100f
+button|Astia 100F|film.sh astia100f
+button|Sensia 100|film.sh sensia100
+page|다음 >|gui_film_slide2

@@ -1,0 +1,10 @@
+# 자동 생성 (tools/filmlab/gen_pages.py)
+back|gui_film_neg1
+button|UltraMax 400|film.sh ultramax400
+button|ColorPlus 200|film.sh colorplus200
+button|ProImage 100|film.sh proimage100
+button|Ektar 100|film.sh ektar100
+button|Vista 200|film.sh vista200
+button|Lomo 800|film.sh lomo800
+button|Superia 400|film.sh superia400
+page|다음 >|gui_film_neg3

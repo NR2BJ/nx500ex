@@ -1,0 +1,9 @@
+# 자동 생성 (tools/filmlab/gen_pages.py)
+back|gui_ini
+page|컬러 네거티브 >|gui_film_neg1
+page|슬라이드 >|gui_film_slide1
+page|흑백 >|gui_film_mono1
+page|영화 >|gui_film_cine1
+page|스타일 >|gui_film_style1
+button|레시피 끄기|film.sh off
+button|사용자 1 원래대로|film.sh restore
