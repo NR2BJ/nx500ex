@@ -44,5 +44,5 @@ crossprocess|style|크로스 프로세스|100|106|88|10|13|10|15|5500
 bleachbypass|style|블리치 바이패스|100|100|100|10|5|11|15|5500
 faded|style|바랜 인화|105|100|90|10|7|8|7|5500
 polaroid600|style|Polaroid 600|104|100|92|10|9|7|13|5500
-sx70|style|Polaroid SX-70|103|97|96|10|8|7|14|5500
+sx70|style|Polaroid SX-70|103|97|93|10|8|7|14|5500
 instax|style|Instax|98|100|104|10|11|9|12|5500
