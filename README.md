@@ -23,7 +23,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | sd/stage1-install/, sd/stage1-uninstall/ | 내장 래퍼 설치, 완전 제거 |
 | sd/stage0-probe/, sd/stage1-test/ | 진단, 검증용 SD 구성 |
 | tools/nxmenu/ | nxmenu (메뉴), nxpopup (알림), nxkeys (키 감지), nxgroup (재생 화면 묶기) 소스와 빌드 스크립트 |
-| tools/filmlab/ | 필름 레시피 메뉴 화면 생성기 |
+| tools/filmlab/ | 필름 레시피 메뉴 화면 생성기, 보정 색표, 보정 촬영과 비교 촬영 분석 도구 |
 | docs/plan/ | 로드맵, 설계 |
 | docs/research/ | 조사와 실기 검증 기록 |
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # 보정 촬영 분석: calib_chart.png 를 찍은 JPEG 에서 24칸을 찾아 칸마다 평균 색을 재고, 기준 사진과 비교한다.
 # 사용: python3 calib_analyze.py <사진 폴더> <jobs.log>   (jobs.log 의 "calib <이름> <값> -> <파일>" 줄로 사진과 설정을 잇는다)
+# 칸 찾기와 Lab 변환은 recipe_analyze.py 도 가져다 쓴다.
 # 칸 찾기: 밝은 칸(최대 채널 > 문턱)의 가로, 세로 투영으로 표 전체 범위를 잡고 6x4 로 나눈다. 칸 가운데 40% 만 잰다 (렌즈 왜곡, 주변 어두워짐 피함).
 import sys, os, re, math
 import numpy as np
@@ -82,4 +83,5 @@ def main():
             l = lab[n]
             print('  %-10s %s  채도 평균 %.1f' % (n, '  '.join('%s %.1f' % (NAMES[i], l[i, 0]) for i in (14, 13, 12, 15, 2, 1)), chroma(l).mean()))
 
-main()
+if __name__ == '__main__':
+    main()

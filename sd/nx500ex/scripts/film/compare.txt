@@ -1,0 +1,7 @@
+# 레시피 비교 촬영 (rshot.sh list) 목록: 한 줄에 레시피 이름 하나 (recipes.txt 의 첫 칸). 기준(중립) 한 장은 자동으로 먼저 찍는다.
+portra400
+velvia50
+phoenix200
+metropolis
+polaroid600
+sx70
