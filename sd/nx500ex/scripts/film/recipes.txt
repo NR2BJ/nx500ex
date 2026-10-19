@@ -1,35 +1,36 @@
 # 필름 레시피: 화면 마법사 사용자 1 의 7가지 값과 화이트 밸런스 (film.sh 가 읽는다)
 # nx500ex 가 실제 필름 특성 조사(docs/research/2026-10-19-film-stock-profiles.md)를 바탕으로 정한 값. 시험 촬영으로 다듬는다.
+# 숫자 기준: 보정 촬영 (docs/research/2026-10-19-film-stock-profiles.md 7장). 게인 10% = 회색이 Lab 약 4 기움, 채도 한 단계 = 채도 약 8%, 대비 한 단계 = 밝은 쪽 L 약 1.4, 색조 한 단계 = 색상각 약 3.8도 (빨강 -> 노랑 방향). 흑백에서 게인은 필터처럼 작동하지 않아 100.
 # 형식: 이름|분류|라벨|R 게인|G 게인|B 게인|색조|채도|선명도|대비|WB  (게인 중립 100, 나머지 중립 10. WB 는 색온도 K, auto = 자동, 비우면 바꾸지 않음)
 # 원칙: 필름의 밸런스대로 WB 고정 (주광용 필름 5500K, 텅스텐 필름 3200K). 흑백과 스타일도 일관되게 5500K. 색조는 모두 10 (한 단계의 방향과 크기 미확인)
-portra160|neg|Portra 160|103|100|97|10|8|9|8|5500
-portra400|neg|Portra 400|104|100|96|10|9|9|9|5500
-portra800|neg|Portra 800|104|100|96|10|11|8|10|5500
-gold200|neg|Gold 200|107|101|92|10|11|9|11|5500
-ultramax400|neg|UltraMax 400|105|100|95|10|12|9|11|5500
-colorplus200|neg|ColorPlus 200|105|101|94|10|9|9|9|5500
-proimage100|neg|ProImage 100|105|100|95|10|11|10|10|5500
-ektar100|neg|Ektar 100|104|99|99|10|13|11|12|5500
-superia400|neg|Superia X-TRA 400|98|101|101|10|11|9|11|5500
-natura1600|neg|Natura 1600|99|101|100|10|9|8|8|5500
-pro400h|neg|Pro 400H|97|101|102|10|8|9|8|5500
-c200|neg|Fujicolor C200|98|103|99|10|10|9|10|5500
+portra160|neg|Portra 160|101|100|95|10|8|9|8|5500
+portra400|neg|Portra 400|102|100|94|10|9|9|9|5500
+portra800|neg|Portra 800|102|100|94|10|11|8|10|5500
+gold200|neg|Gold 200|104|100|88|10|11|9|11|5500
+ultramax400|neg|UltraMax 400|103|100|91|10|12|9|11|5500
+colorplus200|neg|ColorPlus 200|101|100|90|10|9|9|9|5500
+proimage100|neg|ProImage 100|102|100|92|10|11|10|10|5500
+ektar100|neg|Ektar 100|107|100|96|10|13|11|12|5500
+superia400|neg|Superia X-TRA 400|99|103|104|10|11|9|11|5500
+natura1600|neg|Natura 1600|100|101|102|10|9|8|8|5500
+pro400h|neg|Pro 400H|96|103|108|10|8|9|8|5500
+c200|neg|Fujicolor C200|100|105|102|10|10|9|10|5500
 reala100|neg|Reala 100|100|100|100|10|11|10|10|5500
-velvia50|slide|Velvia 50|102|100|98|10|15|11|13|5500
-velvia100|slide|Velvia 100|100|100|100|10|14|11|13|5500
+velvia50|slide|Velvia 50|102|100|97|10|15|11|13|5500
+velvia100|slide|Velvia 100|100|101|100|10|14|11|13|5500
 provia100f|slide|Provia 100F|100|100|100|10|11|10|12|5500
-astia100f|slide|Astia 100F|102|100|98|10|10|9|9|5500
-e100|slide|Ektachrome E100|98|100|102|10|11|10|11|5500
-kodachrome25|slide|Kodachrome 25|102|100|98|10|11|11|12|5500
-kodachrome64|slide|Kodachrome 64|103|100|97|10|12|10|13|5500
+astia100f|slide|Astia 100F|102|100|97|10|10|9|9|5500
+e100|slide|Ektachrome E100|99|100|103|10|11|10|11|5500
+kodachrome25|slide|Kodachrome 25|102|100|96|10|11|11|12|5500
+kodachrome64|slide|Kodachrome 64|103|100|94|10|12|10|13|5500
 trix400|mono|Tri-X 400|100|100|100|10|0|10|12|5500
-hp5|mono|HP5 Plus|102|100|98|10|0|9|10|5500
+hp5|mono|HP5 Plus|100|100|100|10|0|9|10|5500
 tmax100|mono|T-MAX 100|100|100|100|10|0|11|11|5500
-panf50|mono|Pan F Plus 50|102|100|98|10|0|11|13|5500
-acros100|mono|Acros 100|96|101|103|10|0|11|12|5500
+panf50|mono|Pan F Plus 50|100|100|100|10|0|11|13|5500
+acros100|mono|Acros 100|100|100|100|10|0|11|12|5500
 vision3d|cine|Vision3 50D/250D|101|100|99|10|9|9|8|5500
 cinestill800t|cine|CineStill 800T|100|100|100|10|10|8|9|3200
-eterna500t|cine|Eterna 500T|98|101|101|10|8|8|8|3200
-crossprocess|style|크로스 프로세스|100|106|92|10|14|10|15|5500
-bleachbypass|style|블리치 바이패스|100|100|101|10|5|11|15|5500
-faded|style|바랜 인화|106|101|93|10|7|8|7|5500
+eterna500t|cine|Eterna 500T|99|101|102|10|8|8|8|3200
+crossprocess|style|크로스 프로세스|100|108|85|10|14|10|15|5500
+bleachbypass|style|블리치 바이패스|100|100|100|10|5|11|15|5500
+faded|style|바랜 인화|104|100|92|10|7|8|7|5500
