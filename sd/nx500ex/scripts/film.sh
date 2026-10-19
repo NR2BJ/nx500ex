@@ -75,15 +75,21 @@ pw_cur() {
 # Fn 패널을 열고 ($1, $2) 칸을 터치한 뒤 OK (그 칸의 목록이 열린다)
 fn_open() { key click fn; sleep 1; st key touch click $1 $2 > /dev/null 2>&1; sleep 0.5; key click ok; sleep 1; }
 right_n() { _k=$1; while [ $_k -gt 0 ]; do key click right; sleep 0.3; _k=$((_k - 1)); done; }
+left_n() { _k=$1; while [ $_k -gt 0 ]; do key click left; sleep 0.3; _k=$((_k - 1)); done; }
+# 목록에서 $1 -> $2 로 (전체 $3 칸). 오른쪽은 끝에서 처음으로 돈다(실기). 왼쪽은 돌지 않는 경우에만 (돎은 확인 안 함)
+move_to() { _r=$(( ($2 - $1 + $3) % $3 )); if [ $2 -lt $1 ] && [ $(($1 - $2)) -lt $_r ]; then left_n $(($1 - $2)); else right_n $_r; fi; }
+# 조건이 맞을 때까지 최대 2초 기다린다 (0.2초 간격)
+wait_for() { _w=0; while [ $_w -lt 10 ]; do eval "$1" && return 0; sleep 0.2; _w=$((_w + 1)); done; return 1; }
 # 화면 마법사 종류 $1 을 고른다
 pw_select() {
   _cur=$(pw_cur)
   case "$_cur" in ''|*[!0-9]*) return 1 ;; esac
   fn_open $PW_TOUCH_X $PW_TOUCH_Y
-  right_n $(( ($1 - _cur + PW_N) % PW_N ))
-  key click ok; sleep 1
+  move_to $_cur $1 $PW_N
+  key click ok
+  _tgt=$1; wait_for '[ "$(pw_cur)" = "$_tgt" ]'; _ok=$?
   jlog "film select $1 (was $_cur) -> $(pw_cur)"
-  [ "$(pw_cur)" = "$1" ]
+  return $_ok
 }
 # 지금 WB (촬영 쪽: 자동 0 ... 색온도 10) 와 반영된 색온도
 wb_cur() { _w=$(st cap capdtm getusr WB 2>/dev/null | tr -d '\000\r' | sed -n 's/.*(0x6000\([0-9a-f]\)).*/\1/p'); [ -n "$_w" ] && echo $((0x$_w)); }
@@ -93,7 +99,7 @@ wb_select() {
   _cur=$(wb_cur)
   case "$_cur" in ''|*[!0-9]*) return 1 ;; esac
   fn_open $WB_TOUCH_X $WB_TOUCH_Y
-  right_n $(( ($1 - _cur + WB_N) % WB_N ))
+  move_to $_cur $1 $WB_N
   if [ "$1" = 10 ] && [ -n "$2" ]; then
     key click up; sleep 1
     st key touch click $(( K_X0 + ($2 - 2500) * 10 / 245 )) $K_Y > /dev/null 2>&1; sleep 0.7
@@ -102,11 +108,12 @@ wb_select() {
       _kk=$(wb_k); [ -n "$_kk" ] || break
       _d=$(( ($2 - _kk) / 100 ))
       [ $_d -eq 0 ] && break
-      if [ $_d -gt 0 ]; then right_n $_d; else _d=$((-_d)); while [ $_d -gt 0 ]; do key click left; sleep 0.3; _d=$((_d - 1)); done; fi
-      sleep 0.5; _try=$((_try + 1))
+      if [ $_d -gt 0 ]; then right_n $_d; else left_n $((-_d)); fi
+      sleep 0.3; _try=$((_try + 1))
     done
   fi
-  key click ok; sleep 1
+  key click ok
+  _tgt=$1; wait_for '[ "$(wb_cur)" = "$_tgt" ]'
   jlog "film wb $1 $2 (was $_cur) -> $(wb_cur) $(wb_k)K"
   [ "$(wb_cur)" = "$1" ] && { [ "$1" != 10 ] || [ -z "$2" ] || [ "$(wb_k)" = "$2" ]; }
 }
@@ -114,7 +121,8 @@ wb_select() {
 wb_restore() {
   [ -s "$WBBAK" ] || return 0
   set -- $(cat "$WBBAK")
-  sleep 1
+  if [ "$(wb_cur)" = "$1" ] && { [ "$1" != 10 ] || [ "$(wb_k)" = "$2" ]; }; then rm -f "$WBBAK"; return 0; fi
+  sleep 0.5
   if [ "$1" = 10 ]; then wb_select 10 "$2"; else wb_select "$1"; fi && rm -f "$WBBAK"
 }
 # 레시피의 색온도 $1 로 (처음이면 원래 WB 를 백업). 비어 있으면 원래대로
@@ -122,7 +130,8 @@ wb_apply() {
   [ -f "$D/scripts/auto/film_nowb.sh" ] && return 0
   [ -n "$1" ] || { wb_restore; return; }
   [ -s "$WBBAK" ] || { echo "$(wb_cur) $(wb_k)" > "$WBBAK"; sync; jlog "film backup wb $(cat "$WBBAK")"; }
-  sleep 1
+  [ "$(wb_cur)" = 10 ] && [ "$(wb_k)" = "$1" ] && return 0   # 이미 그 색온도
+  sleep 0.5
   wb_select 10 "$1"
 }
 
@@ -134,7 +143,7 @@ case "$(dial)" in
   DIALMODE_PROGRAM|DIALMODE_APERTURE|DIALMODE_SHUTTERSPEED|DIALMODE_MANUAL) ;;
   *) popup "P, A, S, M 모드에서 사용" 2; exit 0 ;;
 esac
-sleep 1   # 메뉴가 닫힐 때까지
+T_START=$(now_cs)
 # 터치가 꺼져 있으면 키 주입 동안만 켠다
 T0=$(touch_get)
 [ "$T0" = 0 ] && { touch_set 1; reapply_mode; sleep 1; }
@@ -142,6 +151,7 @@ trap 'rm -f $LOCK; [ "$T0" = 0 ] && { touch_set 0; reapply_mode; }' EXIT
 
 case "$1" in
   off)
+    sleep 1   # 메뉴가 닫힐 때까지
     pw_select 0; R=$?
     wb_restore
     if [ $R = 0 ]; then popup "필름 레시피 끔" 2; conf_set film_last ""
@@ -149,6 +159,7 @@ case "$1" in
     ;;
   restore)
     [ -s "$BAK" ] || { popup "바꾼 적 없음" 2; exit 0; }
+    sleep 1   # 메뉴가 닫힐 때까지
     c1_set $(cat "$BAK")
     jlog "film restore custom1 $(cat "$BAK")"
     rm -f "$BAK"; conf_set film_last ""
@@ -165,12 +176,12 @@ case "$1" in
     [ -s "$BAK" ] || { mkdir -p "$D/conf"; c1_get > "$BAK"; sync; jlog "film backup custom1 $(cat "$BAK")"; }
     c1_set $VALS
     jlog "film $NAME custom1 <- $VALS"
-    sleep 2
+    sleep 2   # 메뉴가 닫히고, 값을 쓴 직후 앱이 바쁜 동안 (바로 키를 보내면 Fn 이 먹히지 않았다)
     pw_select 10
-    sleep 0.5
-    isp_match $VALS; R=$?
+    wait_for 'isp_match $VALS'; R=$?
     [ $R = 0 ] || jlog "film not applied: isp $(isp_get)"
     wb_apply "$WB"; RW=$?
+    jlog "film $NAME done in $(( ($(now_cs) - T_START) / 10 ))00ms"
     if [ $R = 0 ] && [ $RW = 0 ]; then
       conf_set film_last "$NAME"
       if [ -n "$WB" ] && [ ! -f "$D/scripts/auto/film_nowb.sh" ]; then popup "필름: $NAME<br>WB ${WB}K" 2; else popup "필름: $NAME" 2; fi

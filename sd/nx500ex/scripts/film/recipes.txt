@@ -2,6 +2,7 @@
 # 출처: WApaperplane/NXWA-nx500_modding scripts/filmlab/recipes.json (AGPL-3.0). 분류와 한국어 이름은 nx500ex
 # 형식: 이름|분류|라벨|R 게인|G 게인|B 게인|색조|채도|선명도|대비|색온도  (게인 중립 100, 나머지 중립 10. 색온도는 WB 색온도 K, 비우면 WB 를 바꾸지 않음)
 # 색온도: 주광용 필름 5500, 텅스텐 필름 3200, 흑백과 일부 스타일은 비움 (nx500ex)
+# nx500ex 수정 (원본 NXWA 값): kodachrome25 103|99|97|12|9|13|14 -> Kodachrome 64 와 같은 방향으로 조금 차분하게, superia400 100|99|101|13|6|9|9 -> 채도와 녹색 기운
 portra160|neg|Portra 160|105|100|95|10|8|10|8|5500
 portra400|neg|Portra 400|108|100|93|11|6|9|8|5500
 portra400vc|neg|Portra 400VC|111|100|90|11|10|9|9|5500
@@ -15,7 +16,7 @@ proimage100|neg|ProImage 100|112|100|89|11|9|9|9|5500
 ektar100|neg|Ektar 100|115|100|85|11|14|12|12|5500
 vista200|neg|Vista 200|107|100|93|12|14|8|10|5500
 lomo800|neg|Lomo 800|104|100|96|13|15|8|11|5500
-superia400|neg|Superia 400|100|99|101|13|6|9|9|5500
+superia400|neg|Superia 400|99|102|99|13|10|9|9|5500
 fuji_superia1600|neg|Superia 1600|99|100|102|13|11|8|11|5500
 fuji400h|neg|Fuji 400H|88|103|112|9|6|8|8|5500
 fuji_natura1600|neg|Natura 1600|100|101|100|12|8|8|10|5500
@@ -41,7 +42,7 @@ ektachrome|slide|Ektachrome|90|105|110|12|12|10|11|5500
 ektachrome_cyan|slide|Ektachrome 차가운|88|112|125|13|15|12|14|5500
 e100|slide|Ektachrome E100|94|103|107|11|9|10|10|5500
 elitechrome100|slide|EliteChrome 100|97|104|103|11|10|11|11|5500
-kodachrome25|slide|Kodachrome 25|103|99|97|12|9|13|14|5500
+kodachrome25|slide|Kodachrome 25|108|99|91|12|13|13|13|5500
 kodachrome64|slide|Kodachrome 64|112|99|88|12|17|11|13|5500
 agfachrome_ct100|slide|Agfachrome CT100|102|100|99|11|14|11|12|5500
 agfachrome_rsx100|slide|Agfachrome RSX100|103|99|98|12|16|12|13|5500
