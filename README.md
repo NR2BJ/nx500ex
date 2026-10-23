@@ -34,6 +34,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 - docs/research/2026-10-18-probe-result.md : 진단 결과
 - docs/research/2026-10-18-stage1-test.md : 실기 검증 기록 (단계 1부터 지금까지)
 - docs/research/2026-10-19-firmware-bt-analysis.md : 공식 펌웨어 분석 (블루투스 켜기/끄기, SD 언마운트 실제 동작)
+- docs/research/2026-10-23-lut-firmware-analysis.md : 색 처리 표(톤 커브, 색 행렬, 3D LUT)를 실행 중에 바꾸는 경로 펌웨어 분석
 - docs/plan/roadmap.md : 로드맵
 - docs/plan/stage1-design.md : 단계 1 설계
 - docs/plan/undecided-explained.md : 보류 항목 설명과 추천
