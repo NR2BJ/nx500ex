@@ -24,6 +24,8 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | sd/stage0-probe/, sd/stage1-test/ | 진단, 검증용 SD 구성 |
 | tools/nxmenu/ | nxmenu (메뉴), nxpopup (알림), nxkeys (키 감지), nxgroup (재생 화면 묶기), nxmem (메모리 조사) 소스와 빌드 스크립트 |
 | tools/film/ | 필름 레시피 메뉴 화면 생성기, 보정 색표, 보정 촬영과 비교 촬영 분석 도구 |
+| tools/lut/ | 3D LUT 덤프 분석기, 표를 이미지에 적용하는 미리보기 |
+| dumps/lut/ | 카메라에서 뜬 LUT 뱅크 덤프와 분석 결과 |
 | docs/plan/ | 로드맵, 설계 |
 | docs/research/ | 조사와 실기 검증 기록 |
 
@@ -35,6 +37,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 - docs/research/2026-10-18-stage1-test.md : 실기 검증 기록 (단계 1부터 지금까지)
 - docs/research/2026-10-19-firmware-bt-analysis.md : 공식 펌웨어 분석 (블루투스 켜기/끄기, SD 언마운트 실제 동작)
 - docs/research/2026-10-23-lut-firmware-analysis.md : 색 처리 표(톤 커브, 색 행렬, 3D LUT)를 실행 중에 바꾸는 경로 펌웨어 분석
+- docs/research/2026-10-25-lut-dump-analysis.md : 3D LUT 뱅크 덤프 분석 (표 42개 위치, YCbCr 8비트 형식, 다섯 가족)
 - docs/plan/roadmap.md : 로드맵
 - docs/plan/stage1-design.md : 단계 1 설계
 - docs/plan/undecided-explained.md : 보류 항목 설명과 추천
