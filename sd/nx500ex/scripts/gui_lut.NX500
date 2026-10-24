@@ -1,4 +1,4 @@
-# 자동 생성 (tools/lut/make_luts.py)
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
 back|gui_ini
 button|항등 (확인용)|lut.sh identity
 button|흑백 (확인용)|lut.sh gray

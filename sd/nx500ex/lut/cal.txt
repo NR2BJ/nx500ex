@@ -1,0 +1,9 @@
+# 검증 룩 순서 (lutcal.sh 가 이 순서로 찍는다). 순정 표 합성 없음
+cal_id|항등
+cal_hue30|색상 +30도
+cal_sat16|채도 1.6
+cal_sat05|채도 0.5
+cal_rgam|R 감마 0.7
+cal_ggam|G 감마 1.3
+cal_bgam|B 감마 1.5
+cal_gam|전체 감마 0.75

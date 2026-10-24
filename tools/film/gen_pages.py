@@ -41,4 +41,4 @@ for cat, label in CATS:
 top += ['button|레시피 끄기|film.sh off', 'checkbox|화이트 밸런스 유지|film_nowb.sh', 'page|촬영 도구 >|gui_film_tools']
 write('gui_film', top)
 write('gui_film_tools', ['back|gui_film', 'button|비교 촬영 (목록)|rshot.sh list', 'button|비교 촬영 (전체)|rshot.sh all',
-                         'button|보정 촬영 (색표)|calib.sh'])
+                         'button|보정 촬영 (색표)|calib.sh', 'button|LUT 검증 촬영|lutcal.sh'])
