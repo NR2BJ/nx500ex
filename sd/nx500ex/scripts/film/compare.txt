@@ -1,7 +1,9 @@
-# 레시피 비교 촬영 (rshot.sh list) 목록: 한 줄에 레시피 이름 하나 (recipes.txt 의 첫 칸). 기준(중립) 한 장은 자동으로 먼저 찍는다.
-portra400
-velvia50
-phoenix200
+# 비교 촬영 목록 (한 줄에 레시피 이름 하나). 2026-10-25: LUT 를 더한 레시피 8개 재확인용
+pro160ns
 metropolis
+crossprocess
+faded
 polaroid600
 sx70
+sepia
+selenium
