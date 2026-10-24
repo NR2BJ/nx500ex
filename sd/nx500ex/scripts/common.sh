@@ -92,13 +92,28 @@ drive_restore() {
   reapply_mode
   jlog "drive restore pref=$_d -> $(drive_now)"
 }
-# 3D LUT 재적재 (lut.sh, off_lut_reapply.sh, lutcal.sh). 라이브 뷰는 AF 가 시작될 때 (반셔터) LUT 를 다시 적재한다.
-# MF 에서는 반셔터로 안 되고 재생 화면에 갔다가 촬영 화면으로 돌아올 때 적재된다 (2026-10-25 실기, luttrig.sh 7번).
-# 포커스 모드를 읽어 AF 가 확실할 때만 반셔터로 끝내고, MF 거나 못 읽으면 재생에 갔다가 반셔터로 돌아온다 (재생에서 나오는 키 주입은 반셔터가 됨).
-# 더 가벼운 재표시 (AF 모드 재설정, LCD 껐다 켜기, 터치, 모드 재진입, AEL, 드라이브, 화면 마법사 토글) 는 모두 안 됐다 (luttrig, luttrig3).
+# 3D LUT 재적재 (lut.sh, off_lut_reapply.sh, lutcal.sh). 표를 바꾼 뒤 카메라가 다시 적재하게 하는 방법:
+# "OLED 색" 설정 (capdtm OLEDCOLOR, 끄기 0x6c0000 / 켜기 0x6c0001) 을 반대로 바꿨다가 되돌리면 라이브 뷰가 표를 다시 적재한다.
+# AF, MF 모두 즉시, 화면 끊김 없음 (2026-10-26 실기. metol 문서에서 본 방법을 우리 실기로 확인해 채택).
+# 그 전 방식 (반셔터 주입은 AF 에서만, MF 는 재생 화면 왕복 약 2초) 은 OLEDCOLOR 를 못 읽을 때의 대비책으로만 남긴다.
+# 안 되는 것 (실기): AF 모드 재설정, LCD 껐다 켜기, 터치, 같은 모드 재진입, AEL, 드라이브, 화면 마법사 토글.
+# 금지 (촬영 서비스가 죽음): 다이얼과 다른 st app mode, st cap capt stop, 렌즈 스위치 MF 에서 st cap iq af mv.
 # AFMODE: AFMODE_MANUAL (MF, 렌즈 스위치 MF 도 포함) / 그 밖의 AFMODE_* (AF). FOCUSMODE 는 없는 이름 (2026-10-25 실기)
 focus_is_af() { _m=$(st cap capdtm getusr AFMODE 2>/dev/null | tr -d '\000\r'); case "$_m" in *AFMODE_MANUAL*) return 1 ;; *AFMODE_*) return 0 ;; *) return 1 ;; esac; }
+oled_get() { st cap capdtm getusr OLEDCOLOR 2>/dev/null | tr -d '\000\r' | sed -n 's/.*(\(0x[0-9a-fA-F]*\)).*/\1/p'; }
 lut_reload() {
+  _o=$(oled_get)
+  case "$_o" in
+    0x6c0000) _t=0x6c0001 ;;
+    0x6c0001) _t=0x6c0000 ;;
+    *) _t= ;;
+  esac
+  if [ -n "$_t" ]; then
+    st cap capdtm setusr OLEDCOLOR $_t > /dev/null 2>&1; sleep 0.5; st cap capdtm setusr OLEDCOLOR $_o > /dev/null 2>&1
+    [ "$(oled_get)" = "$_o" ] || { st cap capdtm setusr OLEDCOLOR $_o > /dev/null 2>&1; jlog "lut_reload: oledcolor restore retried"; }
+    return 0
+  fi
+  jlog "lut_reload: OLEDCOLOR unreadable ($_o), fallback"
   key push s1; sleep 0.4; key release s1
   focus_is_af && return 0
   sleep 0.3; key click pb; sleep 1.2; key push s1; sleep 0.4; key release s1; sleep 0.3
