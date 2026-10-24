@@ -1,2 +1,6 @@
 sd/** text eol=lf
 sd/**/bin/* -text binary
+*.bin binary
+*.png binary
+*.jpg binary
+*.JPG binary
