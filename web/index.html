@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nx500ex LUT 변환기</title>
+<style>
+  :root { --bg: #111; --fg: #e8e8e8; --dim: #9a9a9a; --line: #333; --box: #1b1b1b; --ok: #6fcf97; --bad: #eb5757; --warn: #f2c94c; --accent: #4f8ef7; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 32px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  p, li { color: var(--fg); }
+  .dim { color: var(--dim); }
+  .box { background: var(--box); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+  .drop { border: 2px dashed #555; border-radius: 10px; padding: 28px 16px; text-align: center; cursor: pointer; }
+  .drop.over { border-color: var(--accent); background: #16202f; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  td, th { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #202020; }
+  label { display: block; margin: 10px 0 4px; color: var(--dim); }
+  input[type=text] { width: 100%; padding: 8px; background: #0d0d0d; color: var(--fg); border: 1px solid #444; border-radius: 6px; font-size: 15px; }
+  button { background: var(--accent); color: #fff; border: 0; border-radius: 6px; padding: 10px 18px; font-size: 15px; cursor: pointer; }
+  button:disabled { background: #444; color: #999; cursor: default; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+  canvas { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 6px; background: #000; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 640px) { .row { grid-template-columns: 1fr; } }
+  code { background: #222; padding: 1px 5px; border-radius: 4px; }
+  #log { white-space: pre-wrap; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>nx500ex LUT 변환기</h1>
+  <p class="dim">PC 나 폰의 .cube, HaldCLUT 파일을 Samsung NX500 (nx500ex) 의 3D LUT 표로 바꿉니다. 모든 계산은 이 페이지 안의 JavaScript 로 지금 쓰는 기기에서만 돌고, 파일은 어디에도 전송되지 않습니다.</p>
+
+  <h2>무엇이 되고 무엇이 안 되나</h2>
+  <div class="box">
+    <p>카메라의 LUT 는 사진이 완성된 뒤 마지막 단계에서, JPEG 가 되기 직전의 sRGB 영상에 걸립니다. 그래서 <b>완성된 sRGB 또는 Rec.709 영상에 쓰라고 만든 룩 LUT</b> 만 의도대로 나옵니다. LUT 자체는 바르게 변환되더라도 입력 공간이 다르면 색이 틀어집니다.</p>
+    <table>
+      <tr><th>됨</th><td>
+        .cube 3D (크기 제한 없음, 17, 33, 65 등), .cube 1D (톤 커브), .cube 1D + 3D (셰이퍼 + 3D)<br>
+        HaldCLUT PNG (한 변이 레벨³ 인 정사각형, 예 512x512 = 레벨 8)<br>
+        용도가 "sRGB / Rec.709 영상용 룩", "JPEG 에 적용", "Instagram, Lightroom 스타일" 인 것
+      </td></tr>
+      <tr><th>안 됨</th><td>
+        로그 영상 입력용: F-Log, F-Log2, V-Log, S-Log2/3, N-Log, C-Log, Log-C, HLG 를 Rec.709 로 펴는 변환 LUT (제조사 공식 LUT 대부분이 이것)<br>
+        선형(linear) 입력용, 카메라 RAW 프로파일용 (DCP, ICC), Lightroom 프리셋 (.xmp), .3dl, .look, .mga, .lut<br>
+        DOMAIN 이 0 ~ 1 을 벗어나는 .cube (HDR 이나 장면 참조용)
+      </td></tr>
+    </table>
+    <p class="dim">한계: 카메라 하드웨어 격자가 17 x 17 x 17 이라 아주 급한 LUT 는 보간 오차가 조금 남습니다 (색상 30도 회전 룩에서 RGB 평균 1.5, 최대 8). 변환 계수는 실기 색표로 확인한 BT.601 전범위이고 평균 ΔE 1.3 안에서 재현됩니다. 카메라의 원래 표 (밝은 곳 채도 억제 등) 위에 LUT 를 얹어 순정 처리는 그대로 남습니다.</p>
+  </div>
+
+  <h2>1. 파일 고르기</h2>
+  <div id="drop" class="drop">여기에 .cube 또는 HaldCLUT .png 를 끌어다 놓거나 눌러서 고르세요<br><span class="dim">파일은 이 기기 안에서만 읽습니다</span>
+    <input id="file" type="file" accept=".cube,.png,.CUBE,.PNG" style="display:none"></div>
+  <p class="dim" style="margin:8px 0 0">먼저 써 보려면 <a href="#" id="sample" style="color:var(--accent)">예시 세피아 .cube 로 해 보기</a></p>
+  <div id="check" class="box" style="display:none"></div>
+
+  <h2>2. 이름</h2>
+  <div class="box">
+    <label for="id">파일 id (영문 소문자, 숫자, 밑줄. 카메라가 파일 이름으로 씀)</label>
+    <input id="id" type="text" placeholder="예: my_portra" maxlength="24">
+    <label for="name">메뉴에 보일 이름 (한글 12자 안팎)</label>
+    <input id="name" type="text" placeholder="예: 내 포트라" maxlength="24">
+  </div>
+
+  <h2>3. 변환</h2>
+  <div class="box">
+    <button id="go" disabled>변환</button> <span id="prog" class="dim"></span>
+    <div id="log"></div>
+    <div class="row" style="margin-top:12px">
+      <div><div class="dim">원본</div><canvas id="before" width="680" height="260"></canvas></div>
+      <div><div class="dim">변환한 표를 거친 결과 (카메라와 같은 계산)</div><canvas id="after" width="680" height="260"></canvas></div>
+    </div>
+    <p style="margin-top:12px"><button id="dl" disabled>SD 카드용 zip 저장</button></p>
+  </div>
+
+  <h2>4. 카메라에 넣기</h2>
+  <div class="box">
+    <ol>
+      <li>zip 을 풀면 <code>nx500ex/lut/user/</code> 폴더 안에 <code>&lt;id&gt;_a.bin</code>, <code>&lt;id&gt;_b.bin</code>, <code>&lt;id&gt;.txt</code> 가 있습니다.</li>
+      <li>SD 카드의 <code>nx500ex/lut/user/</code> 에 그대로 넣습니다 (폴더가 없으면 만듭니다).</li>
+      <li>카메라 전원을 켜면 메뉴 (EV 두 번) 의 LUT &gt; 사용자 &gt; 에 나타납니다. 누르면 화면과 사진에 바로 적용되고, 전원을 켤 때마다 다시 적용되며, LUT 끄기나 블루투스 끄기로 순정으로 돌아옵니다.</li>
+    </ol>
+    <p class="dim">nx500ex 와 LUT 의 원리는 <a href="https://github.com/NR2BJ/nx500ex" style="color:var(--accent)">github.com/NR2BJ/nx500ex</a> 에 있습니다 (docs/research/2026-10-25-lut-dump-analysis.md). 이 페이지의 계산은 저장소의 tools/lut/cube2bank.py 와 바이트 단위로 같습니다.</p>
+  </div>
+</main>
+<script src="convert.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const drop = $('#drop'), fileIn = $('#file'), check = $('#check'), idIn = $('#id'), nameIn = $('#name');
+  const go = $('#go'), prog = $('#prog'), log = $('#log'), dl = $('#dl');
+  let stock = null, lut = null, srcName = '', result = null;
+
+  fetch('stock.bin').then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+    .then(b => { stock = new Uint8Array(b); if (stock.length !== NXLUT.SIZE_A + NXLUT.SIZE_B) throw new Error('크기'); update(); })
+    .catch(e => { check.style.display = 'block'; check.innerHTML = '<span class="bad">카메라 원래 표 (stock.bin) 를 못 읽었습니다. 페이지를 새로 고치세요.</span>'; });
+
+  // 시험 이미지 (색상 띠, 회색 계단, 피부 하늘 풀 패치)
+  function drawTest(canvas) {
+    const ctx = canvas.getContext('2d'), W = canvas.width;
+    const rows = [[1, 1], [0.6, 1], [1, 0.6], [0.35, 0.9]];
+    rows.forEach(([s, v], r) => { for (let x = 0; x < W; x++) { ctx.fillStyle = `hsl(${x / W * 360}, ${s * 100}%, ${(v - v * s / 2) * 100}%)`; ctx.fillRect(x, r * 40, 1, 40); } });
+    for (let i = 0; i < 17; i++) { const g = Math.round(i * 255 / 16); ctx.fillStyle = `rgb(${g},${g},${g})`; ctx.fillRect(i * 40, 160, 40, 40); }
+    [[224, 172, 140], [200, 140, 110], [150, 100, 80], [135, 180, 230], [90, 130, 70], [200, 60, 50], [240, 200, 60], [60, 80, 160], [250, 250, 250], [20, 20, 20]]
+      .forEach((c, i) => { ctx.fillStyle = `rgb(${c.join(',')})`; ctx.fillRect(i * 68, 200, 68, 60); });
+  }
+  drawTest($('#before'));
+
+  drop.addEventListener('click', () => fileIn.click());
+  drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('over'); });
+  drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+  drop.addEventListener('drop', (e) => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) load(e.dataTransfer.files[0]); });
+  fileIn.addEventListener('change', () => { if (fileIn.files[0]) load(fileIn.files[0]); });
+  idIn.addEventListener('input', update); nameIn.addEventListener('input', update);
+  $('#sample').addEventListener('click', (e) => { e.preventDefault(); fetch('sample_sepia.cube').then(r => r.text()).then(t => { idIn.value = ''; nameIn.value = ''; load(new File([t], 'sample_sepia.cube', { type: 'text/plain' })); }); });
+
+  const LOG_PAT = /(^|[^a-z])(s-?log[23]?|v-?log|f-?log2?c?|n-?log|c-?log[23]?|log-?c|logc|d-?log|hlg|pq|rec2020|bt2020|linear|_lin[_.]|aces|acescg|slog)([^a-z]|$)/i;
+  function reject(msg) { lut = null; result = null; check.style.display = 'block'; check.innerHTML = `<span class="bad">받을 수 없음</span> ${msg}`; update(); }
+  function accept(msg) { check.style.display = 'block'; check.innerHTML = `<span class="ok">확인</span> ${msg}`; update(); }
+
+  function load(file) {
+    result = null; dl.disabled = true; log.textContent = '';
+    srcName = file.name;
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (ext !== 'cube' && ext !== 'png') return reject(`.${ext} 는 지원하지 않는 형식입니다. .cube (1D, 3D, 1D+3D) 또는 HaldCLUT .png 만 됩니다. .3dl, .look, .xmp, .icc, .dcp 는 변환 대상이 아닙니다.`);
+    if (LOG_PAT.test(file.name)) return reject(`파일 이름 "${file.name}" 이 로그, 선형, HDR 입력용 LUT 로 보입니다. 이런 LUT 는 카메라의 sRGB 영상에 쓰면 색이 틀어집니다. 정말 sRGB/Rec.709 영상용 룩이라면 이름에서 해당 단어를 빼고 다시 고르세요.`);
+    const base = file.name.replace(/\.[^.]+$/, '');
+    if (!idIn.value) idIn.value = base.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 24) || 'user_lut';
+    if (!nameIn.value) nameIn.value = base.slice(0, 24);
+    if (ext === 'cube') {
+      file.text().then(text => {
+        try { lut = NXLUT.parseCube(text); } catch (e) { return reject(`.cube 를 읽지 못함: ${e.message}`); }
+        const m = text.match(/^\s*TITLE\s+"?([^"\n]+)"?/m);
+        if (m && nameIn.value === base.slice(0, 24)) nameIn.value = m[1].trim().slice(0, 24);
+        const out = [];
+        for (const [k, dmin, dmax] of [['1D', lut.dmin1, lut.dmax1], ['3D', lut.dmin, lut.dmax]]) {
+          if ((k === '1D' && !lut.lut1d) || (k === '3D' && !lut.cube)) continue;
+          if (dmin.some(v => v < 0) || dmax.some(v => v > 1)) return reject(`${k} 표의 DOMAIN 이 ${dmin.join(' ')} ~ ${dmax.join(' ')} 로 0 ~ 1 을 벗어납니다. 장면 참조 또는 HDR 용 LUT 라 카메라의 sRGB 영상에는 맞지 않습니다.`);
+        }
+        const what = [lut.lut1d ? `1D ${lut.size1}점` : null, lut.cube ? `3D ${lut.size3}x${lut.size3}x${lut.size3}` : null].filter(Boolean).join(' + ');
+        accept(`.cube ${what}${lut.lut1d && lut.cube ? ' (1D 를 먼저 적용하고 3D)' : ''}. 변환을 누르세요.`);
+      });
+    } else {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const n = img.width * img.height, size = Math.round(Math.cbrt(n));
+        if (size * size * size !== n || img.width !== img.height) return reject(`${img.width}x${img.height} 은 HaldCLUT 크기가 아닙니다 (한 변이 레벨³ 인 정사각형, 예 64, 512, 4096). 보통 PNG 사진은 LUT 가 아닙니다.`);
+        const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+        const ctx = c.getContext('2d', { willReadFrequently: true }); ctx.drawImage(img, 0, 0);
+        const d = ctx.getImageData(0, 0, img.width, img.height).data;
+        const rgb = new Uint8Array(n * 3);
+        for (let i = 0; i < n; i++) { rgb[i * 3] = d[i * 4]; rgb[i * 3 + 1] = d[i * 4 + 1]; rgb[i * 3 + 2] = d[i * 4 + 2]; }
+        try { lut = NXLUT.haldFromPixels(rgb, n); } catch (e) { return reject(e.message); }
+        accept(`HaldCLUT 레벨 ${Math.round(Math.cbrt(size))} (${size}x${size}x${size}). 변환을 누르세요.`);
+      };
+      img.onerror = () => reject('PNG 를 읽지 못했습니다.');
+      img.src = url;
+    }
+  }
+
+  function validId() { return /^[a-z0-9_]{1,24}$/.test(idIn.value) && !idIn.value.startsWith('cal_'); }
+  function update() {
+    idIn.value = idIn.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+    go.disabled = !(stock && lut && validId() && nameIn.value.trim());
+  }
+
+  go.addEventListener('click', () => {
+    go.disabled = true; dl.disabled = true; log.textContent = '';
+    const func = NXLUT.makeLookFunc(lut);
+    const t0 = performance.now();
+    setTimeout(() => {
+      try {
+        result = NXLUT.makeRegions(func, stock, (d, n) => { prog.textContent = `표 ${d} / ${n}`; });
+      } catch (e) { log.innerHTML = `<span class="bad">변환 실패: ${e.message}</span>`; go.disabled = false; return; }
+      prog.textContent = '';
+      // 미리보기: 표 17 자리 (구간 A 의 18번째 표) 를 시험 이미지에 적용
+      const bank = result.a.subarray(17 * NXLUT.BANK, 17 * NXLUT.BANK + NXLUT.TB);
+      const before = $('#before'), after = $('#after');
+      const src = before.getContext('2d').getImageData(0, 0, before.width, before.height);
+      const out = NXLUT.applyBankToPixels(bank, src.data);
+      after.getContext('2d').putImageData(new ImageData(out, before.width, before.height), 0, 0);
+      log.innerHTML = `<span class="ok">변환 끝</span> (${Math.round(performance.now() - t0)} ms). 표 42개, ${result.a.length + result.b.length} 바이트. 아래 버튼으로 zip 을 저장하세요.`;
+      dl.disabled = false; go.disabled = false;
+    }, 20);
+  });
+
+  dl.addEventListener('click', () => {
+    if (!result) return;
+    const id = idIn.value, name = nameIn.value.trim();
+    const enc = new TextEncoder();
+    const readme = enc.encode(
+`nx500ex 사용자 LUT: ${name} (${id})
+원본 파일: ${srcName}
+만든 곳: nx500ex LUT 변환기 (브라우저 안에서 변환, 전송 없음)
+
+넣는 법
+1. 이 zip 안의 nx500ex/lut/user/ 폴더의 파일 세 개를 SD 카드의 nx500ex/lut/user/ 에 넣는다.
+2. 카메라 전원을 켠다. 메뉴 (EV 두 번) > LUT > 사용자 > 에 "${name}" 이 보인다.
+3. 누르면 화면과 사진에 적용된다. LUT 끄기 또는 블루투스 끄기로 순정으로 돌아온다.
+
+파일
+  ${id}_a.bin  표 20개 (카메라 메모리 구간 A, 394,180 바이트)
+  ${id}_b.bin  표 22개 (구간 B, 433,604 바이트)
+  ${id}.txt    메뉴에 보일 이름
+`);
+    const zip = NXLUT.makeZip([
+      { name: `nx500ex/lut/user/${id}_a.bin`, data: result.a },
+      { name: `nx500ex/lut/user/${id}_b.bin`, data: result.b },
+      { name: `nx500ex/lut/user/${id}.txt`, data: enc.encode(name + '\n') },
+      { name: `nx500ex/lut/user/읽어주세요-${id}.txt`, data: readme },
+    ]);
+    const blob = new Blob([zip], { type: 'application/zip' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `nx500ex-lut-${id}.zip`;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  });
+})();
+</script>
+</body>
+</html>

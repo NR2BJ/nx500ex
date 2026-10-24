@@ -1,6 +1,0 @@
-# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
-back|gui_lut
-button|Kodak 2383|lut.sh pr_k2383
-button|Kodak 2393|lut.sh pr_k2393
-button|Fuji 3510|lut.sh pr_f3510
-button|Fuji 3513|lut.sh pr_f3513

@@ -5,6 +5,6 @@ page|코닥 >|gui_lut_kodak
 page|후지 >|gui_lut_fuji
 page|아그파 일포드 롤라이 >|gui_lut_etc
 page|폴라로이드 즉석 >|gui_lut_polaroid
-page|스타일 >|gui_lut_style
-page|영화 인화 >|gui_lut_print
+page|스타일 영화 인화 >|gui_lut_style
+page|사용자 >|gui_lut_user
 button|LUT 끄기|lut.sh off

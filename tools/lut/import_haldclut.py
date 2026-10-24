@@ -115,11 +115,11 @@ PICKS = [
     ("s_zilverbw",   "ZilverFX 빈티지 흑백","style", "picturefx/zilverfx_vintage_b_w"),
     ("s_zilverir",   "ZilverFX 적외선",    "style", "picturefx/zilverfx_infrared"),
     ("s_goldfx",     "GoldFX 여름",        "style", "picturefx/goldfx_bright_summer_heat"),
-    # 영화 인화 필름 (Juan Melara)
-    ("pr_k2383",     "Kodak 2383",        "print", "print/kodak2383_cuspclip"),
-    ("pr_k2393",     "Kodak 2393",        "print", "print/kodak2393_cuspclip"),
-    ("pr_f3510",     "Fuji 3510",         "print", "print/fuji3510_cuspclip"),
-    ("pr_f3513",     "Fuji 3513",         "print", "print/fuji3513_cuspclip"),
+    # 영화 인화 필름 (Juan Melara) - 스타일 화면에
+    ("pr_k2383",     "인화 Kodak 2383",   "style", "print/kodak2383_cuspclip"),
+    ("pr_k2393",     "인화 Kodak 2393",   "style", "print/kodak2393_cuspclip"),
+    ("pr_f3510",     "인화 Fuji 3510",    "style", "print/fuji3510_cuspclip"),
+    ("pr_f3513",     "인화 Fuji 3513",    "style", "print/fuji3513_cuspclip"),
 ]
 
 def main():

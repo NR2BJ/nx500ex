@@ -1,0 +1,3 @@
+# 자동 생성 (scripts/lut_menu.sh, 전원 켤 때 lut/user 를 훑음)
+back|gui_lut
+button|lut/user 폴더가 비어 있음|lut.sh help

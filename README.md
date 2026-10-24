@@ -13,7 +13,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | 설정 | UP/DOWN 프로필, 전체 설정 백업/복원, 셔터 횟수, 텔넷/FTP |
 | 조작 | 한글 메뉴 (EV 두 번), 키 설정 (EV 조합, 두 번 누르기, 길게 누르기) |
 
-사용법은 sd/nx500ex/README.md 에 있다.
+사용법은 sd/nx500ex/README.md 에 있다. 타사 .cube, HaldCLUT 를 카메라용 표로 바꾸는 웹 변환기는 https://nr2bj.github.io/nx500ex/ (설치 없이 브라우저 안에서 변환, 전송 없음. 소스는 web/).
 
 ## 폴더
 
@@ -28,6 +28,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | dumps/lut/ | 카메라에서 뜬 LUT 뱅크 덤프와 분석 결과 |
 | docs/plan/ | 로드맵, 설계 |
 | docs/research/ | 조사와 실기 검증 기록 |
+| web/ | LUT 변환기 웹 페이지 (GitHub Pages, .github/workflows/pages.yml 로 배포). convert.js 는 tools/lut/cube2bank.py 와 바이트 단위로 같은 계산 (tools/lut/web_test.js 로 검사) |
 
 문서
 

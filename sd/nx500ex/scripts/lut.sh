@@ -39,7 +39,18 @@ bank_write() {
   nxmem w $ADDR_B "$2" > /dev/null 2>&1 || return 1
   key push s1; sleep 0.4; key release s1
 }
-name_of() { grep "^$1|" "$D/lut/luts.txt" 2>/dev/null | head -1 | cut -d'|' -f2; }
+name_of() {
+  _n=$(grep "^$1|" "$D/lut/luts.txt" 2>/dev/null | head -1 | cut -d'|' -f2)
+  [ -n "$_n" ] || _n=$(head -n 1 "$D/lut/user/$1.txt" 2>/dev/null | tr -d '\r|')
+  echo "${_n:-$1}"
+}
+# 표 파일 찾기: lut/<id>_a.bin 또는 lut/user/<id>_a.bin (웹 변환기나 add_cube.py 로 만든 사용자 표)
+find_lut() {
+  for _d in "$D/lut" "$D/lut/user"; do
+    [ -f "$_d/$1_a.bin" ] && { echo "$_d"; return 0; }
+  done
+  return 1
+}
 
 case "$1" in
   off)
@@ -51,15 +62,16 @@ case "$1" in
     ;;
   reapply)
     ID=$(cat "$D/conf/lut_last" 2>/dev/null)
-    [ -n "$ID" ] && [ -f "$D/lut/${ID}_a.bin" ] || { rm -f "$AUTO"; exit 0; }
+    LD=$(find_lut "$ID") || { rm -f "$AUTO"; exit 0; }
     rm -f "$ORIG_A" "$ORIG_B"; orig_save || exit 0
-    bank_write "$D/lut/${ID}_a.bin" "$D/lut/${ID}_b.bin" && jlog "lut reapply $ID" || jlog "lut reapply $ID failed"
+    bank_write "$LD/${ID}_a.bin" "$LD/${ID}_b.bin" && jlog "lut reapply $ID" || jlog "lut reapply $ID failed"
     ;;
-  "")
-    say "사용: lut.sh <id>|off" 2
+  ""|help)
+    say "사용자 LUT: PC 에서 변환한 파일을<br>SD 의 nx500ex/lut/user 에 넣고<br>전원을 다시 켜세요" 4
     ;;
   *)
-    FA="$D/lut/$1_a.bin"; FB="$D/lut/$1_b.bin"
+    LD=$(find_lut "$1") || { say "LUT 파일 없음: $1" 2; exit 1; }
+    FA="$LD/$1_a.bin"; FB="$LD/$1_b.bin"
     size_ok "$FA" $((SIZE_A)) && size_ok "$FB" $((SIZE_B)) || { say "LUT 파일 없음: $1" 2; exit 1; }
     orig_save || { say "원래 표를 못 읽음" 2; exit 1; }
     [ -n "$QUIET" ] || sleep 0.5   # 메뉴가 닫힐 때까지

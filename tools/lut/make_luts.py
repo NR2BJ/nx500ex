@@ -32,7 +32,8 @@ PER_PAGE = 8
 
 # 분류 id -> 메뉴 이름 (luts.txt 4번째 칸. recipe 는 필름 레시피가 쓰는 표라 LUT 메뉴에 안 보임)
 CATS = [("basic", "기본"), ("kodak", "코닥"), ("fuji", "후지"), ("etc", "아그파 일포드 롤라이"), ("polaroid", "폴라로이드 즉석"),
-        ("style", "스타일"), ("print", "영화 인화")]
+        ("style", "스타일 영화 인화")]
+# 첫 화면 = 분류 6 + 사용자 > + LUT 끄기 (8칸). 사용자 화면은 카메라가 전원을 켤 때 scripts/lut_menu.sh 로 lut/user 를 훑어 만든다
 HEADER = "# id|메뉴 이름|설명|분류 (tools/lut/make_luts.py 가 만들고 add_cube.py, import_haldclut.py 가 덧붙인다. 표는 lut/<id>_a.bin, _b.bin, 순정 표 합성)"
 
 def read_list(path):
@@ -60,16 +61,16 @@ def pages_of(items, first_room, room):
 def gen_menu():
     """luts.txt -> gui_lut (분류 목록 + LUT 끄기), gui_lut_<분류>, gui_lut_<분류>2, ... (한 화면 8칸)"""
     for name in os.listdir(SCRIPTS):
-        if name.startswith("gui_lut") and name.endswith(".NX500"):
+        if name.startswith("gui_lut") and name.endswith(".NX500") and not name.startswith("gui_lut_user"):
             os.remove(os.path.join(SCRIPTS, name))
     rows = read_list(os.path.join(LUTDIR, "luts.txt"))
     cats = [c for c in CATS if any(r[3] == c[0] for r in rows)]
-    if len(cats) > PER_PAGE - 1:
-        raise SystemExit("분류가 7개를 넘음 (첫 화면 칸 수)")
+    if len(cats) > PER_PAGE - 2:
+        raise SystemExit("분류가 6개를 넘음 (첫 화면 칸 수: 분류 + 사용자 + 끄기)")
     def write(name, lines):
         with open(os.path.join(SCRIPTS, name + ".NX500"), "w", encoding="utf-8") as f:
             f.write("# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)\n" + "\n".join(lines) + "\n")
-    top = ["back|gui_ini"] + [f"page|{label} >|gui_lut_{cid}" for cid, label in cats] + ["button|LUT 끄기|lut.sh off"]
+    top = ["back|gui_ini"] + [f"page|{label} >|gui_lut_{cid}" for cid, label in cats] + ["page|사용자 >|gui_lut_user", "button|LUT 끄기|lut.sh off"]
     write("gui_lut", top)
     for cid, label in cats:
         items = [(r[0], r[1]) for r in rows if r[3] == cid]

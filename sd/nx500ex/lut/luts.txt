@@ -113,7 +113,7 @@ s_sepiafx|AnalogFX 세피아|picturefx/analogfx_sepia_color (CC BY-SA 4.0)|style
 s_zilverbw|ZilverFX 빈티지 흑백|picturefx/zilverfx_vintage_b_w (CC BY-SA 4.0)|style
 s_zilverir|ZilverFX 적외선|picturefx/zilverfx_infrared (CC BY-SA 4.0)|style
 s_goldfx|GoldFX 여름|picturefx/goldfx_bright_summer_heat (CC BY-SA 4.0)|style
-pr_k2383|Kodak 2383|print/kodak2383_cuspclip (CC BY-SA 4.0)|print
-pr_k2393|Kodak 2393|print/kodak2393_cuspclip (CC BY-SA 4.0)|print
-pr_f3510|Fuji 3510|print/fuji3510_cuspclip (CC BY-SA 4.0)|print
-pr_f3513|Fuji 3513|print/fuji3513_cuspclip (CC BY-SA 4.0)|print
+pr_k2383|인화 Kodak 2383|print/kodak2383_cuspclip (CC BY-SA 4.0)|style
+pr_k2393|인화 Kodak 2393|print/kodak2393_cuspclip (CC BY-SA 4.0)|style
+pr_f3510|인화 Fuji 3510|print/fuji3510_cuspclip (CC BY-SA 4.0)|style
+pr_f3513|인화 Fuji 3513|print/fuji3513_cuspclip (CC BY-SA 4.0)|style

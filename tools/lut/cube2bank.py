@@ -11,7 +11,7 @@
      잘라낸 차이는 그 점에서 룩의 기울기(유한 차분)로 밀어 더한다. 항등이면 그대로, 흑백이면 색차가 0 으로 유지된다.
   3. YCbCr 로 되돌려 0~255 로 자른다.
 
-사용: python3 cube2bank.py in.cube|in.png(HaldCLUT) out.bin [--stock t17.bin]
+사용: python3 cube2bank.py in.cube|in.png(HaldCLUT) out.bin [--stock t17.bin]   (.cube 는 1D, 3D, 1D+3D)
       python3 cube2bank.py --identity out.bin [--stock t17.bin]
 """
 import argparse
@@ -52,32 +52,49 @@ def ycc_to_rgb(cr, cb, y, model="601full"):
     return np.stack([r, g, b], -1)
 
 def read_cube(path):
-    size = None; rows = []
-    dmin = np.array([0.0, 0.0, 0.0]); dmax = np.array([1.0, 1.0, 1.0])
+    """.cube 를 읽는다. 돌려주는 것: dict(lut1d=(S1,3) 또는 None, dmin1, dmax1, cube=[b,g,r,3] 또는 None, dmin, dmax).
+    1D 만, 3D 만, 1D + 3D (1D 를 먼저 채널마다 적용하고 3D) 를 지원한다. 1D 와 3D 가 같이 있으면 표 데이터는 1D 가 먼저 온다
+    (Resolve 등의 관례). DOMAIN_MIN/MAX 는 각 표 직전에 적힌 것이 그 표의 것."""
+    size1 = size3 = None; rows = []
+    dom = {"1d": [np.zeros(3), np.ones(3)], "3d": [np.zeros(3), np.ones(3)]}
+    cur = None
     for line in open(path, encoding="utf-8", errors="replace"):
         s = line.strip()
         if not s or s.startswith("#"):
             continue
         t = s.split()
         if t[0] == "LUT_3D_SIZE":
-            size = int(t[1])
+            size3 = int(t[1]); cur = "3d"
         elif t[0] == "LUT_1D_SIZE":
-            raise SystemExit("1D LUT 는 지원하지 않음")
+            size1 = int(t[1]); cur = "1d"
         elif t[0] == "DOMAIN_MIN":
-            dmin = np.array([float(x) for x in t[1:4]])
+            dom[cur or ("1d" if size3 is None and size1 is not None else "3d")][0] = np.array([float(x) for x in t[1:4]])
         elif t[0] == "DOMAIN_MAX":
-            dmax = np.array([float(x) for x in t[1:4]])
-        elif t[0] == "TITLE":
+            dom[cur or ("1d" if size3 is None and size1 is not None else "3d")][1] = np.array([float(x) for x in t[1:4]])
+        elif t[0] in ("TITLE", "LUT_1D_INPUT_RANGE", "LUT_3D_INPUT_RANGE"):
             continue
         else:
             try:
                 rows.append([float(x) for x in t[:3]])
             except ValueError:
                 continue
-    if size is None or len(rows) != size ** 3:
-        raise SystemExit(f"cube 크기 불일치: size={size} rows={len(rows)}")
-    cube = np.array(rows, dtype=np.float64).reshape(size, size, size, 3)   # [b, g, r, 3]
-    return cube, dmin, dmax
+    n1 = size1 or 0; n3 = size3 ** 3 if size3 else 0
+    if (size1 is None and size3 is None) or len(rows) != n1 + n3:
+        raise SystemExit(f"cube 크기 불일치: 1D={size1} 3D={size3} rows={len(rows)} (필요 {n1 + n3})")
+    arr = np.array(rows, dtype=np.float64)
+    lut1d = arr[:n1] if size1 else None
+    cube = arr[n1:].reshape(size3, size3, size3, 3) if size3 else None   # [b, g, r, 3]
+    return dict(lut1d=lut1d, dmin1=dom["1d"][0], dmax1=dom["1d"][1], cube=cube, dmin=dom["3d"][0], dmax=dom["3d"][1])
+
+def apply_1d(lut1d, x):
+    """lut1d: (S, 3) 0..1. x: (..., 3) 0..1. 채널마다 선형 보간"""
+    S = lut1d.shape[0]
+    p = np.clip(x, 0, 1) * (S - 1)
+    i0 = np.clip(np.floor(p).astype(int), 0, S - 2); f = p - i0
+    out = np.empty_like(x)
+    for c in range(3):
+        out[..., c] = lut1d[i0[..., c], c] * (1 - f[..., c]) + lut1d[i0[..., c] + 1, c] * f[..., c]
+    return out
 
 def trilinear_cube(cube, x):
     """cube: [b, g, r, 3] 0..1, x: (..., 3) RGB 0..1 (범위 밖은 잘라서 봄)"""
@@ -92,8 +109,14 @@ def trilinear_cube(cube, x):
           + Cc(0,0,1)*(1-fr)*(1-fg)*fb + Cc(1,0,1)*fr*(1-fg)*fb + Cc(0,1,1)*(1-fr)*fg*fb + Cc(1,1,1)*fr*fg*fb)
 
 def cube_func(path):
-    cube, dmin, dmax = read_cube(path)
-    return lambda x: trilinear_cube(cube, (x - dmin) / (dmax - dmin))
+    c = read_cube(path)
+    def f(x):
+        if c["lut1d"] is not None:
+            x = apply_1d(c["lut1d"], (x - c["dmin1"]) / (c["dmax1"] - c["dmin1"]))
+        if c["cube"] is not None:
+            x = trilinear_cube(c["cube"], (x - c["dmin"]) / (c["dmax"] - c["dmin"]))
+        return x
+    return f
 
 def read_haldclut(path):
     """HaldCLUT PNG (한 변 = 레벨^3 의 정사각형 또는 레벨^3 x 레벨^3 격자). R 이 가장 빠르게 돌고 G, B 순. 반환 [b, g, r, 3] 0..1"""
