@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut
+button|Pro 160C|lut.sh f_160c
+button|Pro 400H|lut.sh f_400h
+button|Pro 800Z|lut.sh f_800z
+button|Superia Reala 100|lut.sh f_reala100
+button|Superia 100|lut.sh f_superia100
+button|Superia 200|lut.sh f_superia200
+button|Superia 400|lut.sh f_superia400
+page|다음 >|gui_lut_fuji2

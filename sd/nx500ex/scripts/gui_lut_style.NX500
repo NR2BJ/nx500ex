@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut
+button|블리치 바이패스|lut.sh s_bleach
+button|60년대|lut.sh s_60s
+button|60년대 바램|lut.sh s_60sfaded
+button|바램|lut.sh s_faded
+button|만료 필름 바램|lut.sh s_expired
+button|골든|lut.sh s_golden
+button|홍콩|lut.sh s_hongkong
+page|다음 >|gui_lut_style2

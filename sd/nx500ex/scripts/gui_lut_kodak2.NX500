@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_kodak
+button|E100 GX|lut.sh k_e100gx
+button|Kodachrome 25|lut.sh k_kodachrome25
+button|Kodachrome 64|lut.sh k_kodachrome64
+button|Kodachrome 200|lut.sh k_kodachrome200
+button|Elite Chrome 200|lut.sh k_elitechrome200
+button|Elite 100 X-Pro|lut.sh k_elite100xpro
+button|Tri-X 400|lut.sh k_trix400
+page|다음 >|gui_lut_kodak3

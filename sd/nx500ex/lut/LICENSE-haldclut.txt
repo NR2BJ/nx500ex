@@ -1,0 +1,11 @@
+이 폴더의 k_*, f_*, a_*, i_*, r_*, l_*, p_*, s_*, pr_* 표는 아래 공개 HaldCLUT 모음을 NX500 뱅크 형식으로 변환한 것이다.
+
+출처: https://github.com/NatronGitHub/clut
+  필름 에뮬레이션 (흑백, 슬라이드, 네거티브, 즉석): Pat David, https://patdavid.net/2013/08/film-emulation-presets-in-gmic-gimp/
+  PictureFX (s_anno1870, s_sepiafx, s_zilverbw, s_zilverir, s_goldfx): Marc Roovers
+  영화 인화 필름 (pr_*): Juan Melara
+라이선스: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0), https://creativecommons.org/licenses/by-sa/4.0/
+변환: tools/lut/import_haldclut.py (각 표는 카메라 원래 표 위에 룩을 얹은 것). 변환 결과도 같은 라이선스로 배포한다.
+
+파일 이름과 메뉴 이름의 필름 상표(Kodak, Fujifilm, Agfa, Ilford, Rollei, Lomography, Polaroid 등)는 어떤 필름을 흉내 냈는지
+알리는 용도일 뿐이며, 각 상표권자와 관계없다.

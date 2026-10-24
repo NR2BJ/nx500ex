@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut
+button|항등 (확인용)|lut.sh identity
+button|흑백 (확인용)|lut.sh gray
+button|비비드 1.5|lut.sh vivid
+button|세피아|lut.sh sepia
+button|셀레늄 토닝|lut.sh selenium
+button|스플릿 토닝|lut.sh split
+button|메트로폴리스|lut.sh metropolis
+page|다음 >|gui_lut_basic2

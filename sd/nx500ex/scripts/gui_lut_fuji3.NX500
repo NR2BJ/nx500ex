@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_fuji2
+button|Provia 400X|lut.sh f_provia400x
+button|Astia 100F|lut.sh f_astia100f
+button|Sensia 100|lut.sh f_sensia100
+button|Superia 200 X-Pro|lut.sh f_superia200xpro
+button|Neopan Acros 100|lut.sh f_acros100
+button|Neopan 1600|lut.sh f_neopan1600
+button|FP-100C 즉석|lut.sh f_fp100c
+button|FP-3000B 즉석|lut.sh f_fp3000b

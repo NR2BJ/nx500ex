@@ -1,0 +1,7 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_polaroid
+button|Polaroid 690|lut.sh p_690
+button|Polaroid 664 흑백|lut.sh p_664
+button|Polaroid 667 흑백|lut.sh p_667
+button|Polaroid 672 흑백|lut.sh p_672
+button|Polachrome|lut.sh p_polachrome

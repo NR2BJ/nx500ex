@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_style2
+button|따뜻함|lut.sh s_warm
+button|맑음|lut.sh s_sunny
+button|여름|lut.sh s_summer
+button|뮤트 시프트|lut.sh s_muteshift
+button|AnalogFX 1870|lut.sh s_anno1870
+button|AnalogFX 세피아|lut.sh s_sepiafx
+button|ZilverFX 빈티지 흑백|lut.sh s_zilverbw
+page|다음 >|gui_lut_style4

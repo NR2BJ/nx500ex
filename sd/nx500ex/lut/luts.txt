@@ -1,12 +1,119 @@
-# id|메뉴 이름|설명 (tools/lut/make_luts.py 가 만들고 add_cube.py 가 덧붙인다. 표는 lut/<id>_a.bin, _b.bin, 순정 표 합성)
-identity|항등 (확인용)|순정 표와 같아야 함
-gray|흑백 (확인용)|색차 0. 표가 쓰이는지 바로 보임
-vivid|비비드 1.5|채도 1.5 배, 대비 조금
-sepia|세피아|흑백 + 따뜻한 갈색
-selenium|셀레늄 토닝|흑백 + 그림자 보랏빛
-split|스플릿 토닝|그림자 차갑게, 하이라이트 따뜻하게
-metropolis|메트로폴리스|빨강 주황만 남기고 나머지 채도 0.3
-crossproc|크로스 프로세스|파랑 들뜸, 빨강 대비, 채도 1.25
-faded|바랜 인화|검정 들뜸, 대비와 채도 낮춤
-fujigreen|후지 녹색|녹색을 청록 쪽으로 18도
-polaroid|폴라로이드|따뜻하고 부드러운 하이라이트
+# id|메뉴 이름|설명|분류 (tools/lut/make_luts.py 가 만들고 add_cube.py, import_haldclut.py 가 덧붙인다. 표는 lut/<id>_a.bin, _b.bin, 순정 표 합성)
+identity|항등 (확인용)|순정 표와 같아야 함|basic
+gray|흑백 (확인용)|색차 0. 표가 쓰이는지 바로 보임|basic
+vivid|비비드 1.5|채도 1.5 배, 대비 조금|basic
+sepia|세피아|흑백 + 따뜻한 갈색|basic
+selenium|셀레늄 토닝|흑백 + 그림자 보랏빛|basic
+split|스플릿 토닝|그림자 차갑게, 하이라이트 따뜻하게|basic
+metropolis|메트로폴리스|빨강 주황만 남기고 나머지 채도 0.3|basic
+crossproc|크로스 프로세스|파랑 들뜸, 빨강 대비, 채도 1.25|basic
+faded|바랜 인화|검정 들뜸, 대비와 채도 낮춤|basic
+fujigreen|후지 녹색|녹색을 청록 쪽으로 18도|basic
+polaroid|폴라로이드|따뜻하고 부드러운 하이라이트|basic
+rl_sepia|세피아 토닝 (레시피)|흑백 위 갈색 토닝|recipe
+rl_selenium|셀레늄 토닝 (레시피)|흑백 위 그림자 자주빛|recipe
+rl_metropolis|Metropolis (레시피)|빨강 주황만 남김|recipe
+rl_polaroid600|Polaroid 600 (레시피)|스플릿 토닝, 바랜 블랙|recipe
+rl_sx70|SX-70 (레시피)|자홍 기운, 몽환적|recipe
+rl_pro160ns|Pro 160NS (레시피)|후지 녹색, 롤오프|recipe
+rl_crossproc|크로스 프로세스 (레시피)|시안 섀도, 노랑 하이라이트|recipe
+rl_faded|바랜 인화 (레시피)|들뜬 블랙|recipe
+k_portra160|Portra 160|negative_new/kodak_portra_160 (CC BY-SA 4.0)|kodak
+k_portra400|Portra 400|negative_new/kodak_portra_400 (CC BY-SA 4.0)|kodak
+k_portra800|Portra 800|negative_new/kodak_portra_800 (CC BY-SA 4.0)|kodak
+k_portra160vc|Portra 160 VC|negative_color/kodak_portra_160_vc (CC BY-SA 4.0)|kodak
+k_portra400uc|Portra 400 UC|negative_old/kodak_portra_400_uc (CC BY-SA 4.0)|kodak
+k_elite200|Elite Color 200|negative_color/kodak_elite_color_200 (CC BY-SA 4.0)|kodak
+k_e100vs|Ektachrome 100 VS|colorslide/kodak_ektachrome_100_vs (CC BY-SA 4.0)|kodak
+k_e100gx|E100 GX|colorslide/kodak_e-100_gx_ektachrome_100 (CC BY-SA 4.0)|kodak
+k_kodachrome25|Kodachrome 25|colorslide/kodak_kodachrome_25 (CC BY-SA 4.0)|kodak
+k_kodachrome64|Kodachrome 64|colorslide/kodak_kodachrome_64 (CC BY-SA 4.0)|kodak
+k_kodachrome200|Kodachrome 200|colorslide/kodak_kodachrome_200 (CC BY-SA 4.0)|kodak
+k_elitechrome200|Elite Chrome 200|colorslide/kodak_elite_chrome_200 (CC BY-SA 4.0)|kodak
+k_elite100xpro|Elite 100 X-Pro|negative_color/kodak_elite_100_xpro (CC BY-SA 4.0)|kodak
+k_trix400|Tri-X 400|bw/kodak_tri-x_400 (CC BY-SA 4.0)|kodak
+k_tmax100|T-Max 100|bw/kodak_t-max_100 (CC BY-SA 4.0)|kodak
+k_tmax400|T-Max 400|bw/kodak_t-max_400 (CC BY-SA 4.0)|kodak
+k_tmax3200|T-Max 3200|bw/kodak_t-max_3200 (CC BY-SA 4.0)|kodak
+k_bw400cn|BW 400CN|bw/kodak_bw_400_cn (CC BY-SA 4.0)|kodak
+k_hie|HIE 적외선|bw/kodak_hie_(hs_infra) (CC BY-SA 4.0)|kodak
+f_160c|Pro 160C|negative_new/fuji_160c (CC BY-SA 4.0)|fuji
+f_400h|Pro 400H|negative_new/fuji_400h (CC BY-SA 4.0)|fuji
+f_800z|Pro 800Z|negative_new/fuji_800z (CC BY-SA 4.0)|fuji
+f_reala100|Superia Reala 100|negative_color/fuji_superia_reala_100 (CC BY-SA 4.0)|fuji
+f_superia100|Superia 100|negative_old/fuji_superia_100 (CC BY-SA 4.0)|fuji
+f_superia200|Superia 200|negative_color/fuji_superia_200 (CC BY-SA 4.0)|fuji
+f_superia400|Superia 400|negative_old/fuji_superia_400 (CC BY-SA 4.0)|fuji
+f_superia800|Superia 800|negative_old/fuji_superia_800 (CC BY-SA 4.0)|fuji
+f_xtra800|Superia X-TRA 800|negative_color/fuji_superia_x-tra_800 (CC BY-SA 4.0)|fuji
+f_superia1600|Superia 1600|negative_old/fuji_superia_1600 (CC BY-SA 4.0)|fuji
+f_hg1600|Superia HG 1600|negative_color/fuji_superia_hg_1600 (CC BY-SA 4.0)|fuji
+f_velvia50|Velvia 50|colorslide/fuji_velvia_50 (CC BY-SA 4.0)|fuji
+f_provia100f|Provia 100F|colorslide/fuji_provia_100f (CC BY-SA 4.0)|fuji
+f_provia400f|Provia 400F|colorslide/fuji_provia_400f (CC BY-SA 4.0)|fuji
+f_provia400x|Provia 400X|colorslide/fuji_provia_400x (CC BY-SA 4.0)|fuji
+f_astia100f|Astia 100F|colorslide/fuji_astia_100f (CC BY-SA 4.0)|fuji
+f_sensia100|Sensia 100|colorslide/fuji_sensia_100 (CC BY-SA 4.0)|fuji
+f_superia200xpro|Superia 200 X-Pro|colorslide/fuji_superia_200_xpro (CC BY-SA 4.0)|fuji
+f_acros100|Neopan Acros 100|bw/fuji_neopan_acros_100 (CC BY-SA 4.0)|fuji
+f_neopan1600|Neopan 1600|bw/fuji_neopan_1600 (CC BY-SA 4.0)|fuji
+f_fp100c|FP-100C 즉석|instant_pro/fuji_fp-100c (CC BY-SA 4.0)|fuji
+f_fp3000b|FP-3000B 즉석|instant_pro/fuji_fp-3000b (CC BY-SA 4.0)|fuji
+a_ultra100|Agfa Ultra 100|negative_color/agfa_ultra_color_100 (CC BY-SA 4.0)|etc
+a_vista200|Agfa Vista 200|negative_color/agfa_vista_200 (CC BY-SA 4.0)|etc
+a_precisa100|Agfa Precisa 100|colorslide/agfa_precisa_100 (CC BY-SA 4.0)|etc
+a_apx100|Agfa APX 100|bw/agfa_apx_100 (CC BY-SA 4.0)|etc
+a_apx25|Agfa APX 25|bw/agfa_apx_25 (CC BY-SA 4.0)|etc
+i_delta100|Ilford Delta 100|bw/ilford_delta_100 (CC BY-SA 4.0)|etc
+i_delta400|Ilford Delta 400|bw/ilford_delta_400 (CC BY-SA 4.0)|etc
+i_delta3200|Ilford Delta 3200|bw/ilford_delta_3200 (CC BY-SA 4.0)|etc
+i_fp4|Ilford FP4 125|bw/ilford_fp4_plus_125 (CC BY-SA 4.0)|etc
+i_hp5|Ilford HP5 400|bw/ilford_hp5_plus_400 (CC BY-SA 4.0)|etc
+i_hps800|Ilford HPS 800|bw/ilford_hps_800 (CC BY-SA 4.0)|etc
+i_panf50|Ilford Pan F 50|bw/ilford_pan_f_plus_50 (CC BY-SA 4.0)|etc
+i_xp2|Ilford XP2|bw/ilford_xp2 (CC BY-SA 4.0)|etc
+r_ir400|Rollei IR 400|bw/rollei_ir_400 (CC BY-SA 4.0)|etc
+r_ortho25|Rollei Ortho 25|bw/rollei_ortho_25 (CC BY-SA 4.0)|etc
+r_retro100|Rollei Retro 100|bw/rollei_retro_100_tonal (CC BY-SA 4.0)|etc
+r_retro80s|Rollei Retro 80S|bw/rollei_retro_80s (CC BY-SA 4.0)|etc
+l_redscale|Lomo Redscale 100|negative_color/lomography_redscale_100 (CC BY-SA 4.0)|etc
+l_xpro200|Lomo X-Pro 200|colorslide/lomography_x-pro_slide_200 (CC BY-SA 4.0)|etc
+p_px70|PX-70|instant_consumer/polaroid_px-70 (CC BY-SA 4.0)|polaroid
+p_px680|PX-680|instant_consumer/polaroid_px-680 (CC BY-SA 4.0)|polaroid
+p_px100warm|PX-100UV+ 따뜻|instant_consumer/polaroid_px-100uv+_warm (CC BY-SA 4.0)|polaroid
+p_px100cold|PX-100UV+ 차가움|instant_consumer/polaroid_px-100uv+_cold (CC BY-SA 4.0)|polaroid
+p_timezero|Time Zero 만료|instant_consumer/polaroid_time_zero_(expired) (CC BY-SA 4.0)|polaroid
+p_665|Polaroid 665|instant_pro/polaroid_665 (CC BY-SA 4.0)|polaroid
+p_669|Polaroid 669|instant_pro/polaroid_669 (CC BY-SA 4.0)|polaroid
+p_690|Polaroid 690|instant_pro/polaroid_690 (CC BY-SA 4.0)|polaroid
+p_664|Polaroid 664 흑백|bw/polaroid_664 (CC BY-SA 4.0)|polaroid
+p_667|Polaroid 667 흑백|bw/polaroid_667 (CC BY-SA 4.0)|polaroid
+p_672|Polaroid 672 흑백|bw/polaroid_672 (CC BY-SA 4.0)|polaroid
+p_polachrome|Polachrome|colorslide/polaroid_polachrome (CC BY-SA 4.0)|polaroid
+s_bleach|블리치 바이패스|various/bleach_bypass (CC BY-SA 4.0)|style
+s_60s|60년대|various/60's (CC BY-SA 4.0)|style
+s_60sfaded|60년대 바램|various/60's_faded (CC BY-SA 4.0)|style
+s_faded|바램|various/faded (CC BY-SA 4.0)|style
+s_expired|만료 필름 바램|various/expired_fade (CC BY-SA 4.0)|style
+s_golden|골든|various/golden (CC BY-SA 4.0)|style
+s_hongkong|홍콩|various/hong_kong (CC BY-SA 4.0)|style
+s_lomo|로모|various/lomo (CC BY-SA 4.0)|style
+s_nostalgic|노스탤직|various/nostalgic (CC BY-SA 4.0)|style
+s_retro|레트로|various/retro (CC BY-SA 4.0)|style
+s_vintage|빈티지|various/vintage (CC BY-SA 4.0)|style
+s_sutro|수트로|various/sutro_fx (CC BY-SA 4.0)|style
+s_solarized|솔라리제이션|various/solarized_color (CC BY-SA 4.0)|style
+s_fauxir|가짜 적외선|various/faux_infrared (CC BY-SA 4.0)|style
+s_warm|따뜻함|various/warm (CC BY-SA 4.0)|style
+s_sunny|맑음|various/sunny (CC BY-SA 4.0)|style
+s_summer|여름|various/summer (CC BY-SA 4.0)|style
+s_muteshift|뮤트 시프트|various/mute_shift (CC BY-SA 4.0)|style
+s_anno1870|AnalogFX 1870|picturefx/analogfx_anno_1870_color (CC BY-SA 4.0)|style
+s_sepiafx|AnalogFX 세피아|picturefx/analogfx_sepia_color (CC BY-SA 4.0)|style
+s_zilverbw|ZilverFX 빈티지 흑백|picturefx/zilverfx_vintage_b_w (CC BY-SA 4.0)|style
+s_zilverir|ZilverFX 적외선|picturefx/zilverfx_infrared (CC BY-SA 4.0)|style
+s_goldfx|GoldFX 여름|picturefx/goldfx_bright_summer_heat (CC BY-SA 4.0)|style
+pr_k2383|Kodak 2383|print/kodak2383_cuspclip (CC BY-SA 4.0)|print
+pr_k2393|Kodak 2393|print/kodak2393_cuspclip (CC BY-SA 4.0)|print
+pr_f3510|Fuji 3510|print/fuji3510_cuspclip (CC BY-SA 4.0)|print
+pr_f3513|Fuji 3513|print/fuji3513_cuspclip (CC BY-SA 4.0)|print

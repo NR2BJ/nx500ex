@@ -1,0 +1,7 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_kodak2
+button|T-Max 100|lut.sh k_tmax100
+button|T-Max 400|lut.sh k_tmax400
+button|T-Max 3200|lut.sh k_tmax3200
+button|BW 400CN|lut.sh k_bw400cn
+button|HIE 적외선|lut.sh k_hie

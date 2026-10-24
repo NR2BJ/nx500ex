@@ -30,38 +30,56 @@ PREVIEW = os.path.join(ROOT, "dumps", "lut", "preview")
 STOCK_ADDR = 0x81115200
 PER_PAGE = 8
 
+# 분류 id -> 메뉴 이름 (luts.txt 4번째 칸. recipe 는 필름 레시피가 쓰는 표라 LUT 메뉴에 안 보임)
+CATS = [("basic", "기본"), ("kodak", "코닥"), ("fuji", "후지"), ("etc", "아그파 일포드 롤라이"), ("polaroid", "폴라로이드 즉석"),
+        ("style", "스타일"), ("print", "영화 인화")]
+HEADER = "# id|메뉴 이름|설명|분류 (tools/lut/make_luts.py 가 만들고 add_cube.py, import_haldclut.py 가 덧붙인다. 표는 lut/<id>_a.bin, _b.bin, 순정 표 합성)"
+
 def read_list(path):
     out = []
     for line in open(path, encoding="utf-8"):
         s = line.strip()
         if s and not s.startswith("#"):
             f = s.split("|")
-            out.append((f[0], f[1], f[2] if len(f) > 2 else ""))
+            out.append((f[0], f[1], f[2] if len(f) > 2 else "", f[3] if len(f) > 3 and f[3] else "basic"))
     return out
 
-def gen_menu():
-    """luts.txt -> gui_lut, gui_lut2, ... (한 화면 8칸: 첫 화면은 룩 6 + 끄기 + 다음, 나머지는 룩 7 + 다음)"""
-    for name in os.listdir(SCRIPTS):
-        if name.startswith("gui_lut") and name.endswith(".NX500"):
-            os.remove(os.path.join(SCRIPTS, name))
-    items = [(i, n) for i, n, _ in read_list(os.path.join(LUTDIR, "luts.txt"))]
+def write_list(rows):
+    with open(os.path.join(LUTDIR, "luts.txt"), "w", encoding="utf-8") as f:
+        f.write(HEADER + "\n" + "\n".join("|".join(r) for r in rows) + "\n")
+
+def pages_of(items, first_room, room):
     pages = []
     first = True
     while items:
-        room = PER_PAGE - 1 if first else PER_PAGE        # 첫 화면은 "LUT 끄기" 자리
-        n = len(items) if len(items) <= room else room - 1   # 넘치면 "다음 >" 자리
+        r = first_room if first else room
+        n = len(items) if len(items) <= r else r - 1   # 넘치면 "다음 >" 자리
         pages.append(items[:n]); items = items[n:]; first = False
-    for k, page in enumerate(pages):
-        back = "gui_ini" if k == 0 else "gui_lut" if k == 1 else f"gui_lut{k}"
-        lines = ["# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)", "back|" + back]
-        lines += [f"button|{lab}|lut.sh {rid}" for rid, lab in page]
-        if k == 0:
-            lines.append("button|LUT 끄기|lut.sh off")
-        if k + 1 < len(pages):
-            lines.append(f"page|다음 >|gui_lut{k + 2}")
-        fname = "gui_lut" if k == 0 else f"gui_lut{k + 1}"
-        with open(os.path.join(SCRIPTS, fname + ".NX500"), "w", encoding="utf-8") as f:
-            f.write("\n".join(lines) + "\n")
+    return pages
+
+def gen_menu():
+    """luts.txt -> gui_lut (분류 목록 + LUT 끄기), gui_lut_<분류>, gui_lut_<분류>2, ... (한 화면 8칸)"""
+    for name in os.listdir(SCRIPTS):
+        if name.startswith("gui_lut") and name.endswith(".NX500"):
+            os.remove(os.path.join(SCRIPTS, name))
+    rows = read_list(os.path.join(LUTDIR, "luts.txt"))
+    cats = [c for c in CATS if any(r[3] == c[0] for r in rows)]
+    if len(cats) > PER_PAGE - 1:
+        raise SystemExit("분류가 7개를 넘음 (첫 화면 칸 수)")
+    def write(name, lines):
+        with open(os.path.join(SCRIPTS, name + ".NX500"), "w", encoding="utf-8") as f:
+            f.write("# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)\n" + "\n".join(lines) + "\n")
+    top = ["back|gui_ini"] + [f"page|{label} >|gui_lut_{cid}" for cid, label in cats] + ["button|LUT 끄기|lut.sh off"]
+    write("gui_lut", top)
+    for cid, label in cats:
+        items = [(r[0], r[1]) for r in rows if r[3] == cid]
+        pages = pages_of(items, PER_PAGE, PER_PAGE)
+        for k, page in enumerate(pages):
+            back = "gui_lut" if k == 0 else f"gui_lut_{cid}" if k == 1 else f"gui_lut_{cid}{k}"
+            lines = ["back|" + back] + [f"button|{lab}|lut.sh {rid}" for rid, lab in page]
+            if k + 1 < len(pages):
+                lines.append(f"page|다음 >|gui_lut_{cid}{k + 2}")
+            write(f"gui_lut_{cid}" if k == 0 else f"gui_lut_{cid}{k + 1}", lines)
 
 def test_image():
     W = 680
@@ -102,20 +120,23 @@ def main():
     open(os.path.join(LUTDIR, "stock17.bin"), "wb").write(dump[off:off + C.TB])
     img = test_image()
     tiles = [("src", img)]
-    lines = ["# id|메뉴 이름|설명 (tools/lut/make_luts.py 가 만들고 add_cube.py 가 덧붙인다. 표는 lut/<id>_a.bin, _b.bin, 순정 표 합성)"]
+    rows = []
     for rid, name, desc, fn in looks.LOOKS:
         tiles.append((rid, write_look(rid, fn, dump, True, img)))
-        lines.append(f"{rid}|{name}|{desc}")
+        rows.append((rid, name, desc, "basic"))
         print(f"{rid:11s} {name}")
-    # 이미 add_cube.py 로 더한 룩은 유지
+    for rid, name, desc, fn in looks.RECIPE_LOOKS:
+        write_look(rid, fn, dump, True, img)
+        rows.append((rid, name, desc, "recipe"))
+        print(f"{rid:11s} {name} (레시피용)")
+    # 이미 add_cube.py, import_haldclut.py 로 더한 룩은 유지
     old = os.path.join(LUTDIR, "luts.txt")
     if os.path.exists(old):
-        known = {l.split("|")[0] for l in lines}
-        for rid, name, desc in read_list(old):
-            if rid not in known and os.path.exists(os.path.join(LUTDIR, rid + "_a.bin")):
-                lines.append(f"{rid}|{name}|{desc}")
-    with open(old, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
+        known = {r[0] for r in rows}
+        for r in read_list(old):
+            if r[0] not in known and os.path.exists(os.path.join(LUTDIR, r[0] + "_a.bin")):
+                rows.append(r)
+    write_list(rows)
     cal_lines = ["# 검증 룩 순서 (lutcal.sh 가 이 순서로 찍는다). 순정 표 합성 없음"]
     for rid, name, fn in looks.CAL:
         write_look(rid, fn, dump, False)

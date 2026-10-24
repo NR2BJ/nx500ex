@@ -141,7 +141,12 @@ BT.601 전범위로 확정. 색상 회전은 행렬(601 과 709)을, 채널 감�
 
 한계: 하드웨어 격자가 17점이라 급한 룩은 보간 오차가 남는다 (색상 30도 회전 룩에서 PC 계산과의 차 RGB 평균 1.5, 최대 8). 어떤 방법으로도 이 아래로는 못 내려간다.
 
-## 7. 다음
+## 7. 레시피 묶기와 공개 LUT (같은 날)
+
+- 레시피 = WB + 화면 마법사 (선명도, 큰 대비와 채도) + LUT (색의 모양). recipes.txt 12번째 칸에 LUT id. film.sh 가 lut.sh 를 quiet 로 불러 같이 쓰고, 레시피 끄기나 LUT 없는 레시피로 바꾸면 레시피가 켰던 LUT 만 끈다 (conf/lut_by_film 표식). 세피아, 셀레늄 토닝 복귀 (채도 0 + 토닝 LUT). Metropolis, Polaroid 600, SX-70, Pro 160NS, 크로스 프로세스, 바랜 인화에 LUT 를 더하고 화면 마법사 값을 조금 줄였다 (LUT 가 맡는 몫만큼). 실제 장면 확인은 남아 있다.
+- 공개 LUT: github.com/NatronGitHub/clut (Pat David 필름 에뮬레이션, PictureFX, Juan Melara 인화 필름, CC BY-SA 4.0, 64단계 HaldCLUT) 에서 기본판 99개를 골라 tools/lut/import_haldclut.py 로 변환, 메뉴 LUT > 회사별. 제조사 공식 LUT (후지 F-Log, 파나 V-Log, 소니 S-Log, 니콘 N-Log) 는 로그 입력용이라 JPEG 에 못 쓴다. abpy/FujifilmCameraProfiles 의 후지 필름 시뮬레이션 .cube 는 라이선스가 없어 저장소에 넣지 않았다 (쓰려면 add_cube.py 로 개인적으로. 선형 프로파일 전제라 JPEG 에는 Provia 변환용 세 개만 맞음).
+
+## 8. 다음
 
 1. 필름 레시피의 LUT 화 (토닝, 색별 채도, 들뜬 블랙). 레시피 = 화면 마법사 값 + WB + LUT 로 묶기.
 2. .cube 파일을 SD 에 넣으면 카메라에서 바로 쓰는 경로 (지금은 PC 의 add_cube.py 로 변환 필요).

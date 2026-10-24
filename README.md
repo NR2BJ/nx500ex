@@ -9,7 +9,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | 분류 | 기능 |
 | --- | --- |
 | 촬영 | 무음 셔터, 렌즈 없이 촬영, 셀프타이머, 장노출(30초까지), 인터벌, HDR 5장, 포커스 스태킹, 작업 중 화면 끄기, 재생 화면에서 작업 사진 묶기 |
-| 색 | 필름 레시피 41개 (화면 마법사 사용자 1 과 화이트 밸런스에 적용), 3D LUT 11개 (이미지 처리 메모리의 색 표를 직접 바꿈. 세피아, 셀레늄, 스플릿 토닝, 메트로폴리스, 크로스 프로세스, 바랜 인화 등) |
+| 색 | 필름 레시피 43개 (화면 마법사 사용자 1 과 화이트 밸런스, 필요한 것은 3D LUT 까지), 3D LUT 110개 (이미지 처리 메모리의 색 표 42개를 직접 바꿈. 자체 룩 11, 공개 필름 에뮬레이션 99: 코닥, 후지, 아그파, 일포드, 롤라이, 로모, 폴라로이드, 스타일, 영화 인화) |
 | 설정 | UP/DOWN 프로필, 전체 설정 백업/복원, 셔터 횟수, 텔넷/FTP |
 | 조작 | 한글 메뉴 (EV 두 번), 키 설정 (EV 조합, 두 번 누르기, 길게 누르기) |
 
@@ -24,7 +24,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | sd/stage0-probe/, sd/stage1-test/ | 진단, 검증용 SD 구성 |
 | tools/nxmenu/ | nxmenu (메뉴), nxpopup (알림), nxkeys (키 감지), nxgroup (재생 화면 묶기), nxmem (메모리 조사) 소스와 빌드 스크립트 |
 | tools/film/ | 필름 레시피 메뉴 화면 생성기, 보정 색표, 보정 촬영과 비교 촬영 분석 도구 |
-| tools/lut/ | 3D LUT 덤프 분석기, .cube -> 뱅크 변환기 (cube2bank), 룩 정의와 생성기 (looks, make_luts), 타사 .cube 추가 (add_cube), 검증 촬영 분석 (lut_verify), 미리보기 (apply_lut) |
+| tools/lut/ | 3D LUT 덤프 분석기, .cube 와 HaldCLUT -> 뱅크 변환기 (cube2bank), 룩 정의와 생성기 (looks, make_luts), 타사 .cube 추가 (add_cube), 공개 필름 에뮬레이션 모음 들여오기 (import_haldclut), 검증 촬영 분석 (lut_verify), 미리보기 (apply_lut) |
 | dumps/lut/ | 카메라에서 뜬 LUT 뱅크 덤프와 분석 결과 |
 | docs/plan/ | 로드맵, 설계 |
 | docs/research/ | 조사와 실기 검증 기록 |
@@ -48,7 +48,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 
 ## 라이선스
 
-GNU Affero General Public License v3.0 (LICENSE). 아래 출처의 AGPL-3.0 코드와 바이너리를 포함하거나 바탕으로 하므로 저장소 전체를 같은 라이선스로 공개한다. 수정본을 배포하거나 네트워크로 제공할 때는 소스를 함께 공개해야 한다.
+GNU Affero General Public License v3.0 (LICENSE). 아래 출처의 AGPL-3.0 코드와 바이너리를 포함하거나 바탕으로 하므로 저장소 전체를 같은 라이선스로 공개한다. sd/nx500ex/lut 의 회사별 LUT 는 CC BY-SA 4.0 (별도 표기). 수정본을 배포하거나 네트워크로 제공할 때는 소스를 함께 공개해야 한다.
 
 busybox, telnetd 바이너리는 GPL-2.0 이다.
 
@@ -63,6 +63,7 @@ busybox, telnetd 바이너리는 GPL-2.0 이다.
 | ge0rg/nx-ks-mod (Georg Lukas) | NX-KS 이력 복원과 유지보수, stapp 바이너리, 벌브 타이머, IP 표시 |
 | mewlips/nx-remote-controller-mod, ajavamind/Multi-NX-Camera-Control, mbriney/nx500_nx1_modding, ge0rg/samsung-nx-hacks | 조사 참고 (원격 제어, 여러 대 제어, 배포본 보존, 모델 정보) |
 | nxfiles.nx.tc | NX-KS 배포본과 공식 펌웨어 미러 |
+| NatronGitHub/clut (Pat David 의 필름 에뮬레이션, Marc Roovers 의 PictureFX, Juan Melara 의 인화 필름 HaldCLUT, CC BY-SA 4.0) | sd/nx500ex/lut 의 회사별 3D LUT 99개의 원본. 변환 결과도 CC BY-SA 4.0 (sd/nx500ex/lut/LICENSE-haldclut.txt) |
 
 각 파일의 머리말과 sd/nx500ex/README.md 의 바이너리 출처 표에 파일별 출처를 적었다.
 

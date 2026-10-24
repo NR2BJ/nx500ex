@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_etc
+button|Ilford Delta 3200|lut.sh i_delta3200
+button|Ilford FP4 125|lut.sh i_fp4
+button|Ilford HP5 400|lut.sh i_hp5
+button|Ilford HPS 800|lut.sh i_hps800
+button|Ilford Pan F 50|lut.sh i_panf50
+button|Ilford XP2|lut.sh i_xp2
+button|Rollei IR 400|lut.sh r_ir400
+page|다음 >|gui_lut_etc3

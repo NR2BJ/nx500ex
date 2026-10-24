@@ -92,6 +92,67 @@ LOOKS = [
     ("polaroid",   "폴라로이드",      "따뜻하고 부드러운 하이라이트", look_polaroid),
 ]
 
+# ---- 필름 레시피용 룩 (recipes.txt 의 12번째 칸. 화면 마법사가 WB, 선명도, 큰 대비와 채도를 맡고 여기서는 색의 모양만) ----
+def rl_sepia(x):
+    """흑백(화면 마법사 채도 0) 에 갈색 토닝. 실제 세피아 인화는 회색이 Lab b +12 ~ +20"""
+    L = luma(x)
+    return np.stack([np.minimum(L * 1.02 + 0.02, 1.0), L * 0.91, L * 0.74], -1)
+def rl_selenium(x):
+    """흑백에 셀레늄 토닝: 그림자가 차가운 자주빛, 검정이 조금 더 깊게"""
+    L = luma(x)
+    L2 = np.clip(L * 1.04 - 0.02, 0, 1)
+    return tint(np.stack([L2, L2, L2], -1), (1 - L2) ** 1.5, (0.035, -0.02, 0.06))
+def rl_metropolis(x):
+    """LomoChrome Metropolis: 빨강 주황만 남기고 노랑 녹색은 올리브로 탈색, 파랑은 반"""
+    def fn(h, s, v):
+        deg = h * 360
+        if deg < 40 or deg > 335:
+            return h, s, v
+        if deg <= 170:
+            w = min(1, (deg - 40) / 20)             # 주황에서 노랑으로 넘어가며 빠르게 탈색
+            return (deg - 8 * w) / 360, s * (1 - 0.65 * w), v
+        return h, s * 0.5, v
+    return hsv_map(x, fn)
+def rl_polaroid600(x):
+    """Polaroid 600: 따뜻한 하이라이트, 녹색 쪽 섀도, 바랜 블랙, 좁은 관용도"""
+    L = luma(x)
+    y = softclip(0.05 + 0.93 * x, 0.8)
+    y = tint(y, (1 - L) ** 1.5, (-0.02, 0.03, -0.01))
+    return tint(y, L ** 2, (0.06, 0.02, -0.04))
+def rl_sx70(x):
+    """Polaroid SX-70: 따뜻한 자홍 기운, 몽환적 (들뜬 블랙, 부드러운 하이라이트, 중간 톤 자홍)"""
+    L = luma(x)
+    y = softclip(0.06 + 0.9 * x, 0.75)
+    return tint(y, 4 * L * (1 - L), (0.03, -0.02, 0.02))
+def rl_pro160ns(x):
+    """Fuji Pro 160NS: 후지 녹색 (녹색만 청록 쪽으로), 하이라이트 롤오프"""
+    def fn(h, s, v):
+        deg = h * 360
+        if 80 <= deg <= 170:
+            w = 1 - abs(deg - 125) / 45
+            return (deg + 15 * w) / 360, min(1, s * (1 + 0.1 * w)), v
+        return h, s, v
+    return softclip(hsv_map(x, fn), 0.85)
+def rl_crossproc(x):
+    """크로스 프로세스: 시안 녹색 섀도, 노랑 하이라이트 (대비와 채도는 화면 마법사)"""
+    L = luma(x)
+    y = tint(x, (1 - L) ** 1.5, (-0.05, 0.03, 0.04))
+    return tint(y, L ** 2, (0.03, 0.02, -0.06))
+def rl_faded(x):
+    """바랜 인화: 들뜬 블랙 (톤 곡선 바닥 올리기)"""
+    return 0.07 + 0.93 * x
+
+RECIPE_LOOKS = [
+    ("rl_sepia",      "세피아 토닝 (레시피)",   "흑백 위 갈색 토닝", rl_sepia),
+    ("rl_selenium",   "셀레늄 토닝 (레시피)",   "흑백 위 그림자 자주빛", rl_selenium),
+    ("rl_metropolis", "Metropolis (레시피)",   "빨강 주황만 남김", rl_metropolis),
+    ("rl_polaroid600","Polaroid 600 (레시피)", "스플릿 토닝, 바랜 블랙", rl_polaroid600),
+    ("rl_sx70",       "SX-70 (레시피)",        "자홍 기운, 몽환적", rl_sx70),
+    ("rl_pro160ns",   "Pro 160NS (레시피)",    "후지 녹색, 롤오프", rl_pro160ns),
+    ("rl_crossproc",  "크로스 프로세스 (레시피)","시안 섀도, 노랑 하이라이트", rl_crossproc),
+    ("rl_faded",      "바랜 인화 (레시피)",     "들뜬 블랙", rl_faded),
+]
+
 # ---- 검증 룩 (lutcal.sh 가 순서대로 찍고 lut_verify.py 가 예측과 비교한다. 순정 표를 합성하지 않은 순수 룩) ----
 def cal_hue30(x):
     return hsv_map(x, lambda h, s, v: (h + 30 / 360, s, v))

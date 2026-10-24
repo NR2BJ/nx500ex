@@ -1,6 +1,5 @@
 # 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
-back|gui_lut
-button|메트로폴리스|lut.sh metropolis
+back|gui_lut_basic
 button|크로스 프로세스|lut.sh crossproc
 button|바랜 인화|lut.sh faded
 button|후지 녹색|lut.sh fujigreen

@@ -1,0 +1,4 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_style3
+button|ZilverFX 적외선|lut.sh s_zilverir
+button|GoldFX 여름|lut.sh s_goldfx

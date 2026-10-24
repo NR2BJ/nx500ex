@@ -1,7 +1,8 @@
 #!/bin/sh
 # 필름 레시피: 화면 마법사 사용자 1 과 화이트 밸런스를 레시피 값으로 바꾼다.
-#   film.sh <레시피 이름>   film/recipes.txt 의 값으로 사용자 1 을 바꾸고 사용자 1 을 고른다. WB 칸이 K 면 색온도, auto 면 자동
-#   film.sh off             사용자 1 의 값, 화면 마법사 종류, WB 를 모두 레시피 전으로 (restore 도 같음)
+#   film.sh <레시피 이름>   film/recipes.txt 의 값으로 사용자 1 을 바꾸고 사용자 1 을 고른다. WB 칸이 K 면 색온도, auto 면 자동.
+#                           LUT 칸(12번째)이 있으면 lut.sh 로 3D LUT 도 쓴다 (conf/lut_by_film 표식). 없으면 레시피가 켰던 LUT 는 끈다
+#   film.sh off             사용자 1 의 값, 화면 마법사 종류, WB 를 모두 레시피 전으로 (restore 도 같음). 레시피가 켰던 LUT 도 끔
 # 방법: prefman 에 값을 쓰고 촬영 모드를 다시 들어간다 (st app mode, common.sh reapply_mode). 카메라 앱이 그때 prefman 을 다시 읽어
 # 화면 마법사와 WB 를 촬영 쪽에 보낸다 (2026-10-19 실기: Fn 패널 없이 둘 다 적용). 값만 쓰면 앱이 메모리 값을 유지해 반영되지 않는다.
 # 처음 바꿀 때 원래 값을 conf 에 남긴다: pw_custom1.bak (사용자 1 의 7가지 값), film_orig.bak (화면 마법사 종류, WB 종류, 색온도 K).
@@ -11,7 +12,17 @@
 . "$D/scripts/film/pw.sh"
 BAK="$D/conf/pw_custom1.bak"
 ORIG="$D/conf/film_orig.bak"
+BYFILM="$D/conf/lut_by_film"
 LOCK=/tmp/nx500ex-film.pid
+# 레시피의 LUT: 있으면 쓰고 표식, 없으면 레시피가 켰던 것만 끈다. 결과 0 = 됨 (없음 포함), 1 = 실패
+lut_apply() {
+  if [ -n "$1" ]; then
+    sh "$D/scripts/lut.sh" "$1" quiet && { mkdir -p "$D/conf"; : > "$BYFILM"; return 0; }
+    return 1
+  fi
+  [ -f "$BYFILM" ] && { sh "$D/scripts/lut.sh" off quiet; rm -f "$BYFILM"; }
+  return 0
+}
 
 # 원래 화면 마법사 종류, WB 종류, K 를 처음 한 번 남긴다
 orig_save() { [ -s "$ORIG" ] || { mkdir -p "$D/conf"; echo "$(pget $PW_TYPE) $(pget $WB_TYPE) $(pget $WB_K)" > "$ORIG"; sync; jlog "film orig $(cat "$ORIG")"; }; }
@@ -40,6 +51,7 @@ case "$1" in
     [ -s "$BAK" ] || [ -s "$ORIG" ] || { popup "레시피를 쓰고 있지 않음" 2; exit 0; }
     [ -s "$BAK" ] && { c1_set $(cat "$BAK"); jlog "film restore custom1 $(cat "$BAK")"; rm -f "$BAK"; }
     orig_put; sleep 1; reapply_mode; conf_set film_last ""
+    lut_apply ""
     jlog "film off"
     popup "필름 레시피 끔" 2
     ;;
@@ -47,7 +59,7 @@ case "$1" in
     L=$(grep "^$1|" "$D/scripts/film/recipes.txt" 2>/dev/null | head -1)
     [ -n "$L" ] || { popup "레시피 없음: $1" 2; exit 0; }
     IFS='|'; set -- $L; unset IFS
-    NAME=$3; WB=${11}
+    NAME=$3; WB=${11}; LUT=${12}
     VALS="$4 $5 $6 $7 $8 $9 ${10}"
     [ -f "$D/scripts/auto/film_nowb.sh" ] && WB=
     [ -s "$BAK" ] || { mkdir -p "$D/conf"; c1_get > "$BAK"; sync; jlog "film backup custom1 $(cat "$BAK")"; }
@@ -72,14 +84,18 @@ case "$1" in
       '') ;;
       *) wait_for '[ "$(wb_k)" = "$WB" ]'; RW=$? ;;
     esac
-    jlog "film $NAME done in $(( ($(now_cs) - T_START) * 10 ))ms isp $(isp_get) k $(wb_k)"
-    if [ $R = 0 ] && [ $RW = 0 ]; then
+    lut_apply "$LUT"; RL=$?
+    jlog "film $NAME done in $(( ($(now_cs) - T_START) * 10 ))ms isp $(isp_get) k $(wb_k) lut ${LUT:-none} rc $RL"
+    if [ $R = 0 ] && [ $RW = 0 ] && [ $RL = 0 ]; then
       conf_set film_last "$NAME"
+      T=${LUT:+ + LUT}
       case "$WB" in
-        auto) popup "필름: $NAME<br>WB 자동" 2 ;;
-        '') popup "필름: $NAME" 2 ;;
-        *) popup "필름: $NAME<br>WB ${WB}K" 2 ;;
+        auto) popup "필름: $NAME$T<br>WB 자동" 2 ;;
+        '') popup "필름: $NAME$T" 2 ;;
+        *) popup "필름: $NAME$T<br>WB ${WB}K" 2 ;;
       esac
+    elif [ $RL != 0 ]; then
+      popup "LUT 쓰기 실패<br>$NAME" 3
     else
       popup "반영 확인 안 됨<br>다시 해 보세요" 3
     fi

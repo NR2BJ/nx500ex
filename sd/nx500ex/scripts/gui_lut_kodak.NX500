@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut
+button|Portra 160|lut.sh k_portra160
+button|Portra 400|lut.sh k_portra400
+button|Portra 800|lut.sh k_portra800
+button|Portra 160 VC|lut.sh k_portra160vc
+button|Portra 400 UC|lut.sh k_portra400uc
+button|Elite Color 200|lut.sh k_elite200
+button|Ektachrome 100 VS|lut.sh k_e100vs
+page|다음 >|gui_lut_kodak2

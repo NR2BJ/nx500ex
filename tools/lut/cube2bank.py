@@ -11,7 +11,7 @@
      잘라낸 차이는 그 점에서 룩의 기울기(유한 차분)로 밀어 더한다. 항등이면 그대로, 흑백이면 색차가 0 으로 유지된다.
   3. YCbCr 로 되돌려 0~255 로 자른다.
 
-사용: python3 cube2bank.py in.cube out.bin [--stock t17.bin]
+사용: python3 cube2bank.py in.cube|in.png(HaldCLUT) out.bin [--stock t17.bin]
       python3 cube2bank.py --identity out.bin [--stock t17.bin]
 """
 import argparse
@@ -95,6 +95,26 @@ def cube_func(path):
     cube, dmin, dmax = read_cube(path)
     return lambda x: trilinear_cube(cube, (x - dmin) / (dmax - dmin))
 
+def read_haldclut(path):
+    """HaldCLUT PNG (한 변 = 레벨^3 의 정사각형 또는 레벨^3 x 레벨^3 격자). R 이 가장 빠르게 돌고 G, B 순. 반환 [b, g, r, 3] 0..1"""
+    from PIL import Image
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    n = w * h
+    size = round(n ** (1 / 3))
+    if size ** 3 != n:
+        raise SystemExit(f"HaldCLUT 크기가 아님: {w}x{h}")
+    a = np.asarray(im, dtype=np.float64).reshape(n, 3) / 255.0
+    return a.reshape(size, size, size, 3)   # 색인 = r + size*g + size*size*b -> [b, g, r]
+
+def hald_func(path):
+    cube = read_haldclut(path)
+    return lambda x: trilinear_cube(cube, x)
+
+def look_func(path):
+    """확장자로 .cube 와 HaldCLUT(.png) 을 가른다"""
+    return hald_func(path) if path.lower().endswith((".png", ".tif", ".tiff")) else cube_func(path)
+
 def load_bank(data_or_path):
     """19652 바이트 (또는 그 이상) -> [Y, Cb, Cr, (Cr, Cb, Y)] float"""
     d = open(data_or_path, "rb").read() if isinstance(data_or_path, str) else data_or_path
@@ -157,7 +177,7 @@ def main():
     ap.add_argument("--identity", action="store_true", help=".cube 없이 항등 표")
     a = ap.parse_args()
     stock = load_bank(a.stock) if a.stock else None
-    func = (lambda x: x) if a.identity else cube_func(a.cube)
+    func = (lambda x: x) if a.identity else look_func(a.cube)
     data = make_bank(func, stock)
     open(a.out, "wb").write(data)
     print(f"{a.out}: {len(data)} 바이트" + (" (원래 표 합성)" if stock is not None else ""))

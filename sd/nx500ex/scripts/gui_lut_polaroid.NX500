@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut
+button|PX-70|lut.sh p_px70
+button|PX-680|lut.sh p_px680
+button|PX-100UV+ 따뜻|lut.sh p_px100warm
+button|PX-100UV+ 차가움|lut.sh p_px100cold
+button|Time Zero 만료|lut.sh p_timezero
+button|Polaroid 665|lut.sh p_665
+button|Polaroid 669|lut.sh p_669
+page|다음 >|gui_lut_polaroid2

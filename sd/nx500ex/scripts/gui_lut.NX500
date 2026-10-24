@@ -1,10 +1,10 @@
 # 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
 back|gui_ini
-button|항등 (확인용)|lut.sh identity
-button|흑백 (확인용)|lut.sh gray
-button|비비드 1.5|lut.sh vivid
-button|세피아|lut.sh sepia
-button|셀레늄 토닝|lut.sh selenium
-button|스플릿 토닝|lut.sh split
+page|기본 >|gui_lut_basic
+page|코닥 >|gui_lut_kodak
+page|후지 >|gui_lut_fuji
+page|아그파 일포드 롤라이 >|gui_lut_etc
+page|폴라로이드 즉석 >|gui_lut_polaroid
+page|스타일 >|gui_lut_style
+page|영화 인화 >|gui_lut_print
 button|LUT 끄기|lut.sh off
-page|다음 >|gui_lut2

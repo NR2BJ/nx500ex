@@ -1,0 +1,7 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_etc2
+button|Rollei Ortho 25|lut.sh r_ortho25
+button|Rollei Retro 100|lut.sh r_retro100
+button|Rollei Retro 80S|lut.sh r_retro80s
+button|Lomo Redscale 100|lut.sh l_redscale
+button|Lomo X-Pro 200|lut.sh l_xpro200

@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut
+button|Agfa Ultra 100|lut.sh a_ultra100
+button|Agfa Vista 200|lut.sh a_vista200
+button|Agfa Precisa 100|lut.sh a_precisa100
+button|Agfa APX 100|lut.sh a_apx100
+button|Agfa APX 25|lut.sh a_apx25
+button|Ilford Delta 100|lut.sh i_delta100
+button|Ilford Delta 400|lut.sh i_delta400
+page|다음 >|gui_lut_etc2

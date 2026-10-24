@@ -1,0 +1,10 @@
+# 자동 생성 (tools/lut/make_luts.py, lut/luts.txt)
+back|gui_lut_style
+button|로모|lut.sh s_lomo
+button|노스탤직|lut.sh s_nostalgic
+button|레트로|lut.sh s_retro
+button|빈티지|lut.sh s_vintage
+button|수트로|lut.sh s_sutro
+button|솔라리제이션|lut.sh s_solarized
+button|가짜 적외선|lut.sh s_fauxir
+page|다음 >|gui_lut_style3
