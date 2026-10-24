@@ -82,8 +82,8 @@
   <h2>4. 카메라에 넣기</h2>
   <div class="box">
     <ol>
-      <li>받은 zip 을 <b>풀지 말고 그대로</b> SD 카드의 <code>nx500ex/lut/user/</code> 폴더에 넣습니다 (폴더가 없으면 만듭니다). SD 카드 맨 위에 두어도 됩니다 (이름이 nx500ex-lut- 로 시작하면 찾습니다). 풀어서 안의 파일 세 개 (<code>&lt;id&gt;_a.bin</code>, <code>&lt;id&gt;_b.bin</code>, <code>&lt;id&gt;.txt</code>) 를 넣어도 됩니다.</li>
-      <li>카메라 전원을 켜면 zip 이 자동으로 풀리고 (다 쓴 zip 은 <code>lut/user/zip/</code> 으로 옮겨짐) 메뉴 (EV 두 번) 의 LUT &gt; 사용자 &gt; 에 나타납니다.</li>
+      <li>받은 zip 을 <b>풀지 말고 그대로</b> SD 카드의 <code>nx500ex/lut/user/</code> 폴더에 넣습니다 (폴더가 없으면 만듭니다). SD 카드 맨 위에 두어도 됩니다 (이름이 nx500ex-lut- 로 시작하면 찾습니다). 풀어서 넣으려면 <code>nx500ex/lut/user/&lt;id&gt;/</code> 폴더를 만들어 그 안에 파일 세 개를 넣습니다.</li>
+      <li>카메라 전원을 켜면 zip 이 <code>lut/user/&lt;id&gt;/</code> 폴더로 풀리고 (zip 은 지워짐, PC 에 원본이 있으니) 메뉴 (EV 두 번) 의 LUT &gt; 사용자 &gt; 에 나타납니다. 지우려면 그 폴더를 지우면 됩니다.</li>
       <li>누르면 화면과 사진에 바로 적용되고, 전원을 켤 때마다 다시 적용되며, LUT 끄기나 블루투스 끄기로 순정으로 돌아옵니다.</li>
     </ol>
     <p class="dim">nx500ex 와 LUT 의 원리는 <a href="https://github.com/NR2BJ/nx500ex" style="color:var(--accent)">github.com/NR2BJ/nx500ex</a> 에 있습니다 (docs/research/2026-10-25-lut-dump-analysis.md). 이 페이지의 계산은 저장소의 tools/lut/cube2bank.py 와 바이트 단위로 같습니다.</p>
@@ -201,8 +201,8 @@
 만든 곳: nx500ex LUT 변환기 (브라우저 안에서 변환, 전송 없음)
 
 넣는 법
-1. 이 zip 을 풀지 말고 그대로 SD 카드의 nx500ex/lut/user/ 에 넣는다 (SD 맨 위에 두어도 됨). 풀어서 파일 세 개를 넣어도 된다.
-2. 카메라 전원을 켠다. zip 이 자동으로 풀리고 메뉴 (EV 두 번) > LUT > 사용자 > 에 "${name}" 이 보인다.
+1. 이 zip 을 풀지 말고 그대로 SD 카드의 nx500ex/lut/user/ 에 넣는다 (SD 맨 위에 두어도 됨).
+2. 카메라 전원을 켠다. zip 이 nx500ex/lut/user/${id}/ 폴더로 풀리고 (zip 은 지워짐) 메뉴 (EV 두 번) > LUT > 사용자 > 에 "${name}" 이 보인다. 지우려면 그 폴더를 지운다.
 3. 누르면 화면과 사진에 적용된다. LUT 끄기 또는 블루투스 끄기로 순정으로 돌아온다.
 
 파일

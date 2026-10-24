@@ -39,17 +39,18 @@ bank_write() {
   nxmem w $ADDR_B "$2" > /dev/null 2>&1 || return 1
   key push s1; sleep 0.4; key release s1
 }
-name_of() {
-  _n=$(grep "^$1|" "$D/lut/luts.txt" 2>/dev/null | head -1 | cut -d'|' -f2)
-  [ -n "$_n" ] || _n=$(head -n 1 "$D/lut/user/$1.txt" 2>/dev/null | tr -d '\r|')
-  echo "${_n:-$1}"
-}
-# 표 파일 찾기: lut/<id>_a.bin 또는 lut/user/<id>_a.bin (웹 변환기나 add_cube.py 로 만든 사용자 표)
+# 표 파일 찾기: lut/<id>_a.bin, 또는 사용자 표 lut/user/*/<id>_a.bin (zip 마다 자기 폴더)
 find_lut() {
-  for _d in "$D/lut" "$D/lut/user"; do
-    [ -f "$_d/$1_a.bin" ] && { echo "$_d"; return 0; }
+  [ -f "$D/lut/$1_a.bin" ] && { echo "$D/lut"; return 0; }
+  for _a in "$D"/lut/user/*/"$1"_a.bin; do
+    [ -f "$_a" ] && { echo "${_a%/*}"; return 0; }
   done
   return 1
+}
+name_of() {
+  _n=$(grep "^$1|" "$D/lut/luts.txt" 2>/dev/null | head -1 | cut -d'|' -f2)
+  [ -n "$_n" ] || { _d=$(find_lut "$1") && _n=$(head -n 1 "$_d/$1.txt" 2>/dev/null | tr -d '\r|'); }
+  echo "${_n:-$1}"
 }
 
 case "$1" in
