@@ -101,7 +101,7 @@ def rl_selenium(x):
     """흑백에 셀레늄 토닝: 그림자가 차가운 자주빛, 검정이 조금 더 깊게"""
     L = luma(x)
     L2 = np.clip(L * 1.04 - 0.02, 0, 1)
-    return tint(np.stack([L2, L2, L2], -1), (1 - L2) ** 1.5, (0.035, -0.02, 0.06))
+    return tint(np.stack([L2, L2, L2], -1), (1 - L2) ** 1.5, (0.025, -0.013, 0.04))
 def rl_metropolis(x):
     """LomoChrome Metropolis: 빨강 주황만 남기고 노랑 녹색은 올리브로 탈색, 파랑은 반"""
     def fn(h, s, v):
@@ -109,7 +109,7 @@ def rl_metropolis(x):
         if deg < 40 or deg > 335:
             return h, s, v
         if deg <= 170:
-            w = min(1, (deg - 40) / 20)             # 주황에서 노랑으로 넘어가며 빠르게 탈색
+            w = min(1, max(0, (deg - 35) / 20))     # 주황에서 노랑으로 넘어가며 빠르게 탈색 (35 ~ 55도)
             return (deg - 8 * w) / 360, s * (1 - 0.65 * w), v
         return h, s * 0.5, v
     return hsv_map(x, fn)
@@ -117,13 +117,13 @@ def rl_polaroid600(x):
     """Polaroid 600: 따뜻한 하이라이트, 녹색 쪽 섀도, 바랜 블랙, 좁은 관용도"""
     L = luma(x)
     y = softclip(0.05 + 0.93 * x, 0.8)
-    y = tint(y, (1 - L) ** 1.5, (-0.02, 0.03, -0.01))
+    y = tint(y, (1 - L) ** 1.5, (-0.015, 0.02, -0.01))
     return tint(y, L ** 2, (0.06, 0.02, -0.04))
 def rl_sx70(x):
     """Polaroid SX-70: 따뜻한 자홍 기운, 몽환적 (들뜬 블랙, 부드러운 하이라이트, 중간 톤 자홍)"""
     L = luma(x)
     y = softclip(0.06 + 0.9 * x, 0.75)
-    return tint(y, 4 * L * (1 - L), (0.03, -0.02, 0.02))
+    return tint(y, 4 * L * (1 - L), (0.025, -0.015, -0.005))   # 따뜻한 자홍 (파랑을 더하면 차가워져 색표에서 b 가 음수였음)
 def rl_pro160ns(x):
     """Fuji Pro 160NS: 후지 녹색 (녹색만 청록 쪽으로), 하이라이트 롤오프"""
     def fn(h, s, v):
@@ -137,7 +137,7 @@ def rl_crossproc(x):
     """크로스 프로세스: 시안 녹색 섀도, 노랑 하이라이트 (대비와 채도는 화면 마법사)"""
     L = luma(x)
     y = tint(x, (1 - L) ** 1.5, (-0.05, 0.03, 0.04))
-    return tint(y, L ** 2, (0.03, 0.02, -0.06))
+    return tint(y, L ** 2, (0.03, 0.02, -0.045))
 def rl_faded(x):
     """바랜 인화: 들뜬 블랙 (톤 곡선 바닥 올리기)"""
     return 0.07 + 0.93 * x
