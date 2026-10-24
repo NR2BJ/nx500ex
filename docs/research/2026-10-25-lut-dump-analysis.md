@@ -149,7 +149,7 @@ BT.601 전범위로 확정. 색상 회전은 행렬(601 과 709)을, 채널 감�
 - 촬영이 끝난 뒤 화면에 마지막 룩이 남았다: series.sh 의 끝처리가 모드 재진입 직후 LUT 를 되돌려 반셔터 주입이 먹지 않은 것. LUT 를 먼저 되돌리고 재진입 뒤 반셔터를 한 번 더 넣도록 고침.
 - 사용자 LUT (같은 날): 웹 변환기 https://nr2bj.github.io/nx500ex/ 의 zip 을 그대로 lut/user 에 넣고 전원을 켜니 풀리고 (boot.log "unzipped ..., user luts: 1") 메뉴 LUT > 사용자 > 에 보이며 누르면 적용됨. 실기 확인.
 - MF 에서는 반셔터로 적재가 안 된다 (사용자 실기). 반셔터의 AF 시작이 라이브 뷰 파이프라인을 다시 초기화하면서 LUT 를 적재하는 것으로 보인다. 1차 후보 (luttrig.sh): 반셔터 주입, 모드 재진입, AEL, capt mf 토글, 드라이브, 화면 마법사 토글은 안 되고, 재생 화면에 갔다가 촬영 화면으로 돌아올 때와 사진 한 장 찍을 때는 된다 (라이브 뷰 재구성). common.sh lut_reload 가 반셔터 뒤 재생 왕복을 한다.
-- 주의: 2차 후보를 한 번에 돌리다 촬영 서비스가 멈췄다 ("Cann't execute capture command over MCB", 버튼과 전원 무반응, 배터리 분리로 복구). 렌즈 스위치 MF 상태에서 st cap iq af mv 를 보낸 것이 유력. st cap iq af mv 와 st cap capt stop 은 트리거 후보에서 뺀다. 3차 (luttrig3.sh) 는 한 번에 하나씩.
+- 주의: 2차 후보를 한 번에 돌리다 촬영 서비스가 멈췄다 ("Cann't execute capture command over MCB", 버튼과 전원 무반응, 배터리 분리로 복구). 팝업은 7번까지 떴고 촬영 명령은 5번 "다이얼은 M 인데 st app mode p" 직후부터 실패했으므로 다이얼과 다른 앱 모드로 보내는 것이 원인이고, 마지막 st cap capt stop 이 프리징을 굳힌 것으로 본다. 금지: 다이얼과 다른 st app mode, st cap capt stop. st cap iq af mv 도 렌즈 스위치 MF 에서는 쓰지 않는다. 3차 (luttrig3.sh) 는 한 번에 하나씩, 안전한 후보만.
 - 공개 LUT: github.com/NatronGitHub/clut (Pat David 필름 에뮬레이션, PictureFX, Juan Melara 인화 필름, CC BY-SA 4.0, 64단계 HaldCLUT) 에서 기본판 99개를 골라 tools/lut/import_haldclut.py 로 변환, 메뉴 LUT > 회사별. 제조사 공식 LUT (후지 F-Log, 파나 V-Log, 소니 S-Log, 니콘 N-Log) 는 로그 입력용이라 JPEG 에 못 쓴다. abpy/FujifilmCameraProfiles 의 후지 필름 시뮬레이션 .cube 는 라이선스가 없어 저장소에 넣지 않았다 (쓰려면 add_cube.py 로 개인적으로. 선형 프로파일 전제라 JPEG 에는 Provia 변환용 세 개만 맞음).
 
 ## 8. 다음
