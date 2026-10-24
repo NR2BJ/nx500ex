@@ -148,7 +148,8 @@ BT.601 전범위로 확정. 색상 회전은 행렬(601 과 709)을, 채널 감�
 - 재촬영 (같은 날, LUT 켜고 9장, dumps/lut/rshot2_swatches.png): 예측과 거의 같다. 회색 기울기 (밝은/중간/어두운 a/b): Pro 160NS 중립, Metropolis -2.1/+2.3, -1.6/+3.0 (따뜻한 올리브), 크로스 프로세스 -6.1/+10.1, -7.2/+7.3, -6.4/-1.2 (노랑 하이라이트, 녹색 섀도, 날아간 칸 9 -> 5), 바랜 인화 +4 노랑과 검정 L 2.9 -> 10.6, Polaroid 600 +9.6/+7.7 따뜻 하이라이트와 섀도 -5.6/+4.3 녹색, SX-70 +3.9/+1.9, +7.0/+2.1 따뜻한 자홍, 세피아 +20.3/+16.3/+4.5, 셀레늄 섀도 +5.4/-5.1. 채도 비: Metropolis 전체 0.56 (빨강 0.79, 노랑 0.73, 녹색 0.36, 파랑 0.40). 이 값으로 확정하고, 남은 것은 실제 장면 확인뿐이다.
 - 촬영이 끝난 뒤 화면에 마지막 룩이 남았다: series.sh 의 끝처리가 모드 재진입 직후 LUT 를 되돌려 반셔터 주입이 먹지 않은 것. LUT 를 먼저 되돌리고 재진입 뒤 반셔터를 한 번 더 넣도록 고침.
 - 사용자 LUT (같은 날): 웹 변환기 https://nr2bj.github.io/nx500ex/ 의 zip 을 그대로 lut/user 에 넣고 전원을 켜니 풀리고 (boot.log "unzipped ..., user luts: 1") 메뉴 LUT > 사용자 > 에 보이며 누르면 적용됨. 실기 확인.
-- MF 에서는 반셔터로 적재가 안 된다 (사용자 실기). 반셔터의 AF 시작이 라이브 뷰 파이프라인을 다시 초기화하면서 LUT 를 적재하는 것으로 보인다. MF 용 트리거는 scripts/luttrig.sh (후보 8개를 차례로) 로 찾는 중.
+- MF 에서는 반셔터로 적재가 안 된다 (사용자 실기). 반셔터의 AF 시작이 라이브 뷰 파이프라인을 다시 초기화하면서 LUT 를 적재하는 것으로 보인다. 1차 후보 (luttrig.sh): 반셔터 주입, 모드 재진입, AEL, capt mf 토글, 드라이브, 화면 마법사 토글은 안 되고, 재생 화면에 갔다가 촬영 화면으로 돌아올 때와 사진 한 장 찍을 때는 된다 (라이브 뷰 재구성). common.sh lut_reload 가 반셔터 뒤 재생 왕복을 한다.
+- 주의: 2차 후보를 한 번에 돌리다 촬영 서비스가 멈췄다 ("Cann't execute capture command over MCB", 버튼과 전원 무반응, 배터리 분리로 복구). 렌즈 스위치 MF 상태에서 st cap iq af mv 를 보낸 것이 유력. st cap iq af mv 와 st cap capt stop 은 트리거 후보에서 뺀다. 3차 (luttrig3.sh) 는 한 번에 하나씩.
 - 공개 LUT: github.com/NatronGitHub/clut (Pat David 필름 에뮬레이션, PictureFX, Juan Melara 인화 필름, CC BY-SA 4.0, 64단계 HaldCLUT) 에서 기본판 99개를 골라 tools/lut/import_haldclut.py 로 변환, 메뉴 LUT > 회사별. 제조사 공식 LUT (후지 F-Log, 파나 V-Log, 소니 S-Log, 니콘 N-Log) 는 로그 입력용이라 JPEG 에 못 쓴다. abpy/FujifilmCameraProfiles 의 후지 필름 시뮬레이션 .cube 는 라이선스가 없어 저장소에 넣지 않았다 (쓰려면 add_cube.py 로 개인적으로. 선형 프로파일 전제라 JPEG 에는 Provia 변환용 세 개만 맞음).
 
 ## 8. 다음
