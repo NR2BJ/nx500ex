@@ -81,7 +81,7 @@ EV 두 번만 고정이다: 메뉴 열기 / 닫기, 촬영 작업 중에는 작�
 ```
 nx500ex/
   boot.sh              내장 래퍼가 부름
-  bin/                 nxkeys, nxmenu, nxpopup, nxgroup, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
+  bin/                 nxkeys, nxmenu, nxpopup, nxgroup, nxmem, popup_*, poker, stapp, blackout, busybox, telnetd, watch.sh, mon.sh
   scripts/             키 조합(EV_*.sh), 기능, 메뉴(gui_*.NX500), common.sh
   scripts/auto/        켜 둔 기능 (체크박스가 관리)
   presets/             프로필과 전체 백업 (처음 저장할 때 생김)
@@ -96,6 +96,7 @@ nx500ex/
 | stapp | ge0rg/nx-ks-mod 의 빌드 | AGPL-3.0 |
 | nxmenu, nxpopup, nxkeys | 이 저장소 tools/nxmenu (mod_gui, popup_timeout, keyscan 바탕) | AGPL-3.0 |
 | nxgroup | 이 저장소 tools/nxmenu (새로 작성) | AGPL-3.0 |
+| nxmem | 이 저장소 tools/nxmenu (새로 작성, /dev/mem 읽기 쓰기, 3D LUT 조사용) | AGPL-3.0 |
 | busybox, telnetd | NX-KS 2.88 에 포함된 빌드 | GPL-2.0 |
 
 라이선스(AGPL-3.0), 전체 출처, 상표 안내는 저장소 맨 위 README.md 와 LICENSE 에 있다.
