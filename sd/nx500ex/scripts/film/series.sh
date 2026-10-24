@@ -21,8 +21,11 @@ lut_set() {
   CUR_LUT=$1
 }
 fin() {
-  c1_set $O_C1; pset $PW_TYPE $O_PW; pset $WB_TYPE $O_WBT; pset $WB_K $O_K; reapply_mode
+  # LUT 를 먼저 되돌리고 모드를 다시 들어간다. 모드 재진입 직후의 반셔터 주입은 먹지 않을 수 있어 (2026-10-25 실기: 마지막 룩이 화면에 남음)
+  # 재진입이 끝난 뒤 반셔터를 한 번 더 넣는다
   lut_set "$O_LUT"; [ $O_BYFILM = 1 ] && [ -n "$O_LUT" ] && : > "$D/conf/lut_by_film"
+  c1_set $O_C1; pset $PW_TYPE $O_PW; pset $WB_TYPE $O_WBT; pset $WB_K $O_K; reapply_mode
+  sleep 1.5; key push s1; sleep 0.3; key release s1
   group_done; rm -f $LIST "$STEPS" $JOBPID
 }
 trap 'trap "" TERM; fin; jlog "$TAG stopped"; exit 0' TERM
