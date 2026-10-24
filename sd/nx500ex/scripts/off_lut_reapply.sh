@@ -4,4 +4,4 @@
 A="$D/conf/lut_orig_a.bin"; B="$D/conf/lut_orig_b.bin"
 [ -s "$A" ] && [ -s "$B" ] || exit 0
 nxmem w 0x810c3500 "$A" > /dev/null 2>&1 && nxmem w 0x81123d00 "$B" > /dev/null 2>&1 && jlog "lut off (bluetooth off)"
-key push s1; sleep 0.4; key release s1
+lut_reload

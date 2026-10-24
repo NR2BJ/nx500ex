@@ -92,6 +92,16 @@ drive_restore() {
   reapply_mode
   jlog "drive restore pref=$_d -> $(drive_now)"
 }
+# 3D LUT 재적재 (lut.sh, off_lut_reapply.sh, lutcal.sh). 라이브 뷰는 AF 가 시작될 때 (반셔터) LUT 를 다시 적재한다.
+# MF 에서는 반셔터로 안 되고 재생 화면에 갔다가 촬영 화면으로 돌아올 때 적재된다 (2026-10-25 실기, luttrig.sh 7번).
+# 포커스 모드를 읽어 AF 가 확실할 때만 반셔터로 끝내고, MF 거나 못 읽으면 재생에 갔다가 반셔터로 돌아온다 (재생에서 나오는 키 주입은 반셔터가 됨).
+focus_is_af() { st cap capdtm getusr FOCUSMODE 2>/dev/null | tr -d '\000\r' | grep -q -i -E "is FOCUSMODE_(AF|SAF|CAF|MAF|AFS|AFC)|is (AF|SAF|CAF)"; }
+lut_reload() {
+  key push s1; sleep 0.4; key release s1
+  focus_is_af && return 0
+  sleep 0.3; key click pb; sleep 1.2; key push s1; sleep 0.4; key release s1; sleep 0.3
+}
+
 # 체크박스 기능 켜고 끄기 (키 할당용, 메뉴의 체크박스와 같은 동작): toggle 스크립트이름 표시이름
 toggle() {
   if [ -f "$D/scripts/auto/$1.sh" ]; then

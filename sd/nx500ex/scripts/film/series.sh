@@ -25,7 +25,7 @@ fin() {
   # 재진입이 끝난 뒤 반셔터를 한 번 더 넣는다
   lut_set "$O_LUT"; [ $O_BYFILM = 1 ] && [ -n "$O_LUT" ] && : > "$D/conf/lut_by_film"
   c1_set $O_C1; pset $PW_TYPE $O_PW; pset $WB_TYPE $O_WBT; pset $WB_K $O_K; reapply_mode
-  sleep 1.5; key push s1; sleep 0.3; key release s1
+  sleep 1.5; lut_reload
   group_done; rm -f $LIST "$STEPS" $JOBPID
 }
 trap 'trap "" TERM; fin; jlog "$TAG stopped"; exit 0' TERM

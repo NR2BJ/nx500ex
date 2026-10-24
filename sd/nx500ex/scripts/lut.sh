@@ -5,7 +5,7 @@
 #   lut.sh off [quiet]   처음에 남긴 원래 표 (conf/lut_orig_a.bin, lut_orig_b.bin) 를 되쓴다
 #   lut.sh reapply   전원을 켤 때 (scripts/auto/lut_reapply.sh): 원래 표를 새로 남기고 마지막 LUT 를 다시 쓴다
 # 근거: docs/research/2026-10-25-lut-dump-analysis.md. 표는 RAM 에만 있어 전원을 끄면 순정으로 돌아온다.
-# 적재는 반셔터 때 일어나고 키 주입(key push s1)으로도 된다 (2026-10-25 실기). 라이브 뷰는 표준에서 표 17 을 쓰지만
+# 적재는 반셔터(AF 시작) 때 일어나고 키 주입으로도 된다. MF 에서는 재생에 갔다 오면 된다 (common.sh lut_reload). 라이브 뷰는 표준에서 표 17 을 쓰지만
 # 정지 사진은 밝기, 색온도에 따라 다른 표를 골라서 (표 17 만 바꾸면 사진이 안 바뀐 경우 있음) 42개 전부를 바꾼다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 ADDR_A=0x810c3500; SIZE_A=0x603c4    # 394180
@@ -37,7 +37,7 @@ orig_save() {
 bank_write() {
   nxmem w $ADDR_A "$1" > /dev/null 2>&1 || return 1
   nxmem w $ADDR_B "$2" > /dev/null 2>&1 || return 1
-  key push s1; sleep 0.4; key release s1
+  lut_reload
 }
 # 표 파일 찾기: lut/<id>_a.bin, 또는 사용자 표 lut/user/*/<id>_a.bin (zip 마다 자기 폴더)
 find_lut() {
