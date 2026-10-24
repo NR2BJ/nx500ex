@@ -18,7 +18,7 @@ popup "LUT 검증 촬영 ${N}장<br>카메라를 움직이지 마세요 (EV 두 
 
 run() {
   LIST=/tmp/nx500ex-lutcal.list
-  size_ok() { [ -s "$1" ] && [ "$(wc -c < "$1")" = "$2" ]; }
+  size_ok() { [ -s "$1" ] && [ "$(wc -c < "$1" | tr -d " ")" = "$2" ]; }
   write2() { nxmem w $ADDR_A "$1" > /dev/null 2>&1 && nxmem w $ADDR_B "$2" > /dev/null 2>&1; key push s1; sleep 0.4; key release s1; }
   if ! size_ok "$ORIG_A" $((SIZE_A)) || ! size_ok "$ORIG_B" $((SIZE_B)); then
     mkdir -p "$D/conf"; nxmem r $ADDR_A $SIZE_A "$ORIG_A" > /dev/null 2>&1; nxmem r $ADDR_B $SIZE_B "$ORIG_B" > /dev/null 2>&1; sync

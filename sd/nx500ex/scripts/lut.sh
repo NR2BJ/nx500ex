@@ -23,7 +23,7 @@ echo $$ > $LOCK
 trap 'rm -f $LOCK' EXIT
 job_running && { say "촬영 작업 중" 2; exit 0; }
 
-size_ok() { [ -s "$1" ] && [ "$(wc -c < "$1")" = "$2" ]; }
+size_ok() { [ -s "$1" ] && [ "$(wc -c < "$1" | tr -d " ")" = "$2" ]; }
 # 원래 표를 처음 한 번 남긴다
 orig_save() {
   size_ok "$ORIG_A" $((SIZE_A)) && size_ok "$ORIG_B" $((SIZE_B)) && return 0
