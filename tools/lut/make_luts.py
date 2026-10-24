@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """시험용 LUT 묶음을 뱅크 파일로 만들고 메뉴 화면을 생성한다.
 
-출력: sd/nx500ex/lut/<id>.bin (19652 바이트), sd/nx500ex/lut/luts.txt (id|이름|설명), scripts/gui_lut*.NX500,
+출력: sd/nx500ex/lut/<id>.bin (표 17 자리 하나, 19652 바이트, 저장소에 둠),
+      sd/nx500ex/lut/<id>_a.bin, <id>_b.bin (42개 표 전부. 구간 A 0x810c3500 부터 20개, 구간 B 0x81123d00 부터 22개.
+      lut.sh 가 쓴다. 크기가 커서 저장소에는 두지 않고 이 스크립트로 다시 만든다),
+      sd/nx500ex/lut/luts.txt (id|이름|설명), scripts/gui_lut*.NX500,
       dumps/lut/preview/<id>.png 와 preview_sheet.png (PC 미리보기, 확정된 (Cr, Cb, Y) 해석).
-모든 표는 카메라 원래 표 17 (dumps/lut/lut_a.bin 의 0x81115200) 을 먼저 거친 뒤 룩을 더한다 (순정 처리 유지).
+모든 표는 카메라 원래 표 (dumps/lut/lut_a.bin) 를 먼저 거친 뒤 룩을 더한다 (순정 처리 유지).
+정지 사진은 밝기, 색온도에 따라 다른 표를 고르므로 (2026-10-25 실기: 표 17 만 바꾸면 화면만 바뀌고 사진은 그대로인 경우 있음)
+42개 표 전부에 같은 룩을 입힌다.
 사용: cd ~/Documents/pixi && pixi run -e toy python ~/Documents/nx500ex/tools/lut/make_luts.py
 """
 import os, sys, colorsys
@@ -23,6 +28,9 @@ DUMP = os.path.join(ROOT, "dumps", "lut", "lut_a.bin")
 PREVIEW = os.path.join(ROOT, "dumps", "lut", "preview")
 STOCK_ADDR = 0x81115200
 BASE = 0x810c3500
+GRID_A = (0x810c3500, 20)   # 시작, 표 수
+GRID_B = (0x81123d00, 22)
+BANK = 0x4d00
 PER_PAGE = 8
 
 # ---- 색 도구 (0..1 RGB 배열) ----
@@ -181,9 +189,21 @@ def main():
     img = test_image()
     tiles = [("src", img)]
     lines = ["# id|메뉴 이름|설명 (tools/lut/make_luts.py 가 만든다. 표는 lut/<id>.bin, 카메라 원래 표 17 을 먼저 거침)"]
+    def region(fn, start, count):
+        """구간의 표 count 개를 각각 자기 원래 표 위에 룩을 얹어 이어 붙인다 (표 사이 60바이트 패딩은 덤프 그대로)"""
+        out = bytearray()
+        for k in range(count):
+            off = start + k * BANK - BASE
+            st = np.frombuffer(d[off:off + C.TB], dtype=np.uint8).reshape(C.N, C.N, C.N, 4)[..., :3].astype(np.float64)
+            out += C.make_bank(fn, st)
+            if k + 1 < count:
+                out += d[off + C.TB:off + BANK]
+        return bytes(out)
     for rid, name, desc, fn in LOOKS:
         data = C.make_bank(fn, stock)
         open(os.path.join(LUTDIR, rid + ".bin"), "wb").write(data)
+        open(os.path.join(LUTDIR, rid + "_a.bin"), "wb").write(region(fn, *GRID_A))
+        open(os.path.join(LUTDIR, rid + "_b.bin"), "wb").write(region(fn, *GRID_B))
         lines.append(f"{rid}|{name}|{desc}")
         g = np.frombuffer(data, dtype=np.uint8).reshape(C.E, 4)[:, :3].astype(np.float32).reshape(C.N, C.N, C.N, 3)
         out = A.apply(g, img, "crcby")
