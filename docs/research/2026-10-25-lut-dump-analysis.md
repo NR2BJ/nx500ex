@@ -153,7 +153,25 @@ BT.601 전범위로 확정. 색상 회전은 행렬(601 과 709)을, 채널 감�
 - 포커스 모드 이름: st cap capdtm getusr AFMODE -> "UserData is AFMODE_MANUAL (0x70003)" (MF, 렌즈 스위치 MF 포함). FOCUSMODE 는 없는 이름. common.sh focus_is_af 가 AFMODE 를 읽어 MANUAL 이 아니면 AF 로 본다. 실기 (2026-10-26): AF 에서는 반셔터만으로 바로, MF 에서는 재생 왕복 뒤 적용. 끄기도 같음. LUT 적용 경로 완료.
 - 공개 LUT: github.com/NatronGitHub/clut (Pat David 필름 에뮬레이션, PictureFX, Juan Melara 인화 필름, CC BY-SA 4.0, 64단계 HaldCLUT) 에서 기본판 99개를 골라 tools/lut/import_haldclut.py 로 변환, 메뉴 LUT > 회사별. 제조사 공식 LUT (후지 F-Log, 파나 V-Log, 소니 S-Log, 니콘 N-Log) 는 로그 입력용이라 JPEG 에 못 쓴다. abpy/FujifilmCameraProfiles 의 후지 필름 시뮬레이션 .cube 는 라이선스가 없어 저장소에 넣지 않았다 (쓰려면 add_cube.py 로 개인적으로. 선형 프로파일 전제라 JPEG 에는 Provia 변환용 세 개만 맞음).
 
-## 8. 다음
+## 8. metol (WApaperplane) 의 LUT 와 비교 (2026-10-26, 자료 조사)
+
+우리 LUT 가 끝난 뒤 metol 저장소의 LUT 문서 (docs/current/LUT_RETARGET_LIVE_2026-10-18.md, LUT_SWITCH_REFRESH_FIX_2026-10-19.md, LUT_COLORSPACE_AUDIT_2026-10-19.md, LUT_CRCBY_FIX_2026-10-19.md, CUBE2LUT_2026-10-18.md) 를 읽고 비교했다. 우리 결론은 그 전에 덤프와 실측으로 다 나온 것이라 (10-25) 영향을 받지 않았다.
+
+| 항목 | metol (10-18 ~ 10-19) | nx500ex (10-25) |
+| --- | --- | --- |
+| 바꾸는 것 | 펌웨어의 표 등록표 (View4 네 항목, Still6 여섯 항목) 가 가리키는 주소를 빈 슬롯 (표 18, 19) 으로 돌리고 거기에 순수 표 하나를 씀 | 등록표는 안 건드리고 42개 표를 제자리에서 전부 덮어씀 |
+| 적용 범위 | 라이브 뷰는 "OLED 색" 설정과 색 공간에 따라 View4 의 0~3 중 하나 (끄기+sRGB = 표 17, 켜기+sRGB = 표 13, AdobeRGB = 표 14/12). sRGB 두 경우와 Still6 만 돌림. AdobeRGB, 스마트 필터 모드는 미지원 | 어느 표가 골라지든 같은 룩 (OLED 색, 색 공간, 밝기, 스마트 필터 무관) |
+| 순정 처리 | 순수 표 하나 (순정 표의 밝은 곳 채도 억제 등 없음) | 표마다 자기 순정 표 위에 룩을 얹음 |
+| 항목 형식 | 처음 RGB 로 보고 심한 색 이상 -> 10-19 에 중립축과 색 방향 목시로 (Cr, Cb, Y) 확정. 격자 L(k) = min(16k, 255) 동일 | 덤프 분석으로 (Cr, Cb, Y), 격자 i x 16, 쓰기 시험으로 축 확정 |
+| 변환 행렬 | BT.601 전범위를 "작업 행렬" 로 채택. 문서에 "정밀 보정과 601/709 정량 비교는 안 했다" 고 명시 | 색표 8장 실측으로 601 전범위 확정 (ΔE 1.25, 709 는 2.3 이상) |
+| 재적재 | 반셔터, 그리고 10-19 부터는 "OLED 색" 설정을 공식 setusr 로 바꿨다 되돌려 P7 이 정상 적재 경로를 타게 함 | AF 반셔터, MF 는 재생 왕복 |
+| 펌웨어 | 패치한 A2 펌웨어에서 검증, 비패치는 미검증 | 순정 1.12 |
+| 변환 | 카메라 안 C 변환기 (PC 불필요), DOMAIN 0~1 만, 1D 거부 | PC 파이썬 + 웹 (브라우저 안, 설치 불필요), 1D/3D/1D+3D, HaldCLUT |
+| 룩 | Pat David HaldCLUT 모음에서 36장 | 자체 11 + 같은 모음에서 99 + 레시피용 8 |
+
+우리가 더 나은 점: 어떤 설정에서도 먹는 전체 교체, 순정 처리 유지, 실측으로 확정한 변환 행렬, 순정 펌웨어. 그쪽이 앞선 점: 카메라 안 변환, UI (NXUI 띠 패널), 그리고 OLED 색 설정 토글로 적재를 일으키는 방법 (MF 에서도 될 가능성, 재생 왕복보다 빠를 수 있음. 시험 후보).
+
+## 9. 다음
 
 1. 필름 레시피의 LUT 화 (토닝, 색별 채도, 들뜬 블랙). 레시피 = 화면 마법사 값 + WB + LUT 로 묶기.
 2. .cube 파일을 SD 에 넣으면 카메라에서 바로 쓰는 경로 (지금은 PC 의 add_cube.py 로 변환 필요).
