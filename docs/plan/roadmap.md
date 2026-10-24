@@ -72,7 +72,7 @@
 | PTP 모드 | U | B | | |
 | 필름 레시피 | 자체 | B | 화면 마법사 사용자 1 과 WB 를 prefman 에 쓰고 촬영 모드 재진입으로 반영. 레시피 41개는 실제 필름 조사와 보정 촬영으로 정함 | 마무리 (2026-10-20). 비교 촬영(rshot.sh)과 분석기로 41개 모두 색표에서 확인. 토닝은 화면 마법사로 안 돼 뺌. 남은 것은 실제 장면 확인(단계 3)과 LUT |
 | Mod Lapse, Wake Lapse, Ramping, 자동 꺼짐 해제 | KS/U | B | 간단한 인터벌 촬영 먼저 구현 | 일부 |
-| 색 처리 표 바꾸기 (톤 커브, 색 행렬, 3D LUT) | 자체 분석 | B | 펌웨어 분석 (docs/research/2026-10-23-lut-firmware-analysis.md): 방법 A 삼성 IPC 디버그 로더 (st cap iq ipc proc debug, SD 의 gamma.txt, color.txt 로 JPEG 톤 커브와 색 행렬), 방법 B 3D LUT RAM 뱅크. 첫 덤프 분석 완료 (docs/research/2026-10-25-lut-dump-analysis.md): 17^3 표 42개, 항목 (Cb/Cr, Cb/Cr, Y, 0) 8비트, 뱅크는 고정 데이터, 다섯 가족. 다음은 쓰기 시험 | LUT 가 되면 다시 넣을 레시피: Metropolis (색별 선택 채도), Polaroid 600/SX-70 (스플릿 토닝, 좁은 톤 곡선), 세피아, 셀레늄 토닝, Pro 160NS 의 후지 녹색, 크로스 프로세스 섀도, 바랜 인화의 들뜬 블랙. 할레이션과 입자는 불가 |
+| 색 처리 표 바꾸기 (톤 커브, 색 행렬, 3D LUT) | 자체 분석 | B | 펌웨어 분석 (docs/research/2026-10-23-lut-firmware-analysis.md): 방법 A 삼성 IPC 디버그 로더 (st cap iq ipc proc debug, SD 의 gamma.txt, color.txt 로 JPEG 톤 커브와 색 행렬), 방법 B 3D LUT RAM 뱅크. 첫 덤프 분석 완료 (docs/research/2026-10-25-lut-dump-analysis.md): 17^3 표 42개, 항목 (Cr, Cb, Y, 0) 8비트, 뱅크는 고정 데이터, 다섯 가족. 쓰기 시험 완료: 표준 화면 마법사의 라이브 뷰와 JPEG 는 표 17 (0x81115200), 반셔터 때 적재. 다음은 .cube 변환기와 적용 스크립트 | LUT 가 되면 다시 넣을 레시피: Metropolis (색별 선택 채도), Polaroid 600/SX-70 (스플릿 토닝, 좁은 톤 곡선), 세피아, 셀레늄 토닝, Pro 160NS 의 후지 녹색, 크로스 프로세스 섀도, 바랜 인화의 들뜬 블랙. 할레이션과 입자는 불가 |
 | 진짜 백버튼 AF | U | C | 실패 가능. 안 되면 포기 | |
 
 개발 도구 (카메라 기능 아님): prefman 덤프 해석기, 공유 라이브러리 함수 직접 호출(nxcalldyn), gdb 원격 디버깅, PNG 버튼 예제, di-camera-app 정적 분석 스크립트.

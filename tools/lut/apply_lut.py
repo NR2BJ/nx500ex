@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """덤프 속 17^3 표 하나를 이미지에 적용해 본다 (PC 미리보기).
 
-해석 선택:
-  --space ycc  : 표의 (c0, c1, c2) = (Cb, Cr, Y). 이미지를 BT.601 전범위 YCbCr 로 바꿔 표를 거치고 RGB 로 되돌린다.
-  --space ycc-swap : (c0, c1, c2) = (Cr, Cb, Y)
-  --space rgb  : (c0, c1, c2) = (R, G, B)
-사용: python3 apply_lut.py lut_a.bin 0x81101e00 in.png out.png --space ycc
+해석 선택 (카메라 쓰기 시험으로 확정된 것은 crcby, 2026-10-25):
+  --space crcby : 표의 (c0, c1, c2) = (Cr, Cb, Y). 이미지를 BT.601 전범위 YCbCr 로 바꿔 표를 거치고 RGB 로 되돌린다. 기본값.
+  --space cbcry : (c0, c1, c2) = (Cb, Cr, Y). 비교용.
+  --space rgb   : (c0, c1, c2) = (R, G, B). 비교용 (틀린 해석).
+사용: python3 apply_lut.py lut_a.bin 0x81115200 in.png out.png
 """
 import sys, argparse
 import numpy as np
@@ -54,9 +54,9 @@ def apply(g, img, space):
     else:
         ycc = rgb_to_ycc(rgb)
         y, cb, cr = ycc[..., 0], ycc[..., 1], ycc[..., 2]
-        x = np.stack([cb, cr, y], -1) if space == "ycc" else np.stack([cr, cb, y], -1)
+        x = np.stack([cb, cr, y], -1) if space == "cbcry" else np.stack([cr, cb, y], -1)
         o = trilinear(g, x)
-        if space == "ycc":
+        if space == "cbcry":
             ycc2 = np.stack([o[..., 2], o[..., 0], o[..., 1]], -1)
         else:
             ycc2 = np.stack([o[..., 2], o[..., 1], o[..., 0]], -1)
@@ -67,7 +67,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("dump"); ap.add_argument("addr", type=lambda x: int(x, 0))
     ap.add_argument("inp"); ap.add_argument("out")
-    ap.add_argument("--space", choices=["ycc", "ycc-swap", "rgb"], default="ycc")
+    ap.add_argument("--space", choices=["crcby", "cbcry", "rgb"], default="crcby")
     ap.add_argument("--base", type=lambda x: int(x, 0), default=BASE)
     a = ap.parse_args()
     g = load_table(a.dump, a.addr, a.base)
