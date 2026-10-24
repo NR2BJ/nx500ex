@@ -95,7 +95,9 @@ drive_restore() {
 # 3D LUT 재적재 (lut.sh, off_lut_reapply.sh, lutcal.sh). 라이브 뷰는 AF 가 시작될 때 (반셔터) LUT 를 다시 적재한다.
 # MF 에서는 반셔터로 안 되고 재생 화면에 갔다가 촬영 화면으로 돌아올 때 적재된다 (2026-10-25 실기, luttrig.sh 7번).
 # 포커스 모드를 읽어 AF 가 확실할 때만 반셔터로 끝내고, MF 거나 못 읽으면 재생에 갔다가 반셔터로 돌아온다 (재생에서 나오는 키 주입은 반셔터가 됨).
-focus_is_af() { st cap capdtm getusr FOCUSMODE 2>/dev/null | tr -d '\000\r' | grep -q -i -E "is FOCUSMODE_(AF|SAF|CAF|MAF|AFS|AFC)|is (AF|SAF|CAF)"; }
+# 더 가벼운 재표시 (AF 모드 재설정, LCD 껐다 켜기, 터치, 모드 재진입, AEL, 드라이브, 화면 마법사 토글) 는 모두 안 됐다 (luttrig, luttrig3).
+# AFMODE: AFMODE_MANUAL (MF, 렌즈 스위치 MF 도 포함) / 그 밖의 AFMODE_* (AF). FOCUSMODE 는 없는 이름 (2026-10-25 실기)
+focus_is_af() { _m=$(st cap capdtm getusr AFMODE 2>/dev/null | tr -d '\000\r'); case "$_m" in *AFMODE_MANUAL*) return 1 ;; *AFMODE_*) return 0 ;; *) return 1 ;; esac; }
 lut_reload() {
   key push s1; sleep 0.4; key release s1
   focus_is_af && return 0
