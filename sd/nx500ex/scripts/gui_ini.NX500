@@ -3,5 +3,6 @@ checkbox|무음 셔터|silent.sh
 checkbox|렌즈 없이 촬영|nolens.sh
 page|촬영 도구 >|gui_shoot
 page|필름 레시피 >|gui_film
+page|LUT >|gui_lut
 page|프로필 >|gui_profile
 page|설정 >|gui_more

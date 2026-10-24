@@ -5,7 +5,8 @@
   --space crcby : 표의 (c0, c1, c2) = (Cr, Cb, Y). 이미지를 BT.601 전범위 YCbCr 로 바꿔 표를 거치고 RGB 로 되돌린다. 기본값.
   --space cbcry : (c0, c1, c2) = (Cb, Cr, Y). 비교용.
   --space rgb   : (c0, c1, c2) = (R, G, B). 비교용 (틀린 해석).
-사용: python3 apply_lut.py lut_a.bin 0x81115200 in.png out.png
+사용: python3 apply_lut.py lut_a.bin 0x81115200 in.png out.png      (덤프 속 표)
+      python3 apply_lut.py sd/nx500ex/lut/sepia.bin 0 in.png out.png  (뱅크 파일)
 """
 import sys, argparse
 import numpy as np
@@ -15,8 +16,9 @@ N = 17; E = N ** 3; TB = E * 4
 BASE = 0x810c3500
 
 def load_table(dump, addr, base=BASE):
+    """덤프 속 주소의 표, 또는 dump 가 19652 바이트 뱅크 파일이면 그 파일 자체 (addr 무시)."""
     d = open(dump, "rb").read()
-    off = addr - base
+    off = 0 if len(d) == TB else addr - base
     return np.frombuffer(d[off:off + TB], dtype=np.uint8).reshape(E, 4)[:, :3].astype(np.float32).reshape(N, N, N, 3)
 
 def trilinear(g, x):
