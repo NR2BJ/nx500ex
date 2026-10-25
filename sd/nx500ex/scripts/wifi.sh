@@ -32,6 +32,18 @@ services() {
 connected_name() { services | awk -F'|' '$3 == "online" || $3 == "ready" { print $2; exit }'; }
 wait_ip() { _n=0; while [ $_n -lt ${1:-20} ] && [ -z "$(wifi_ip)" ]; do sleep 1; _n=$((_n + 1)); done; [ -n "$(wifi_ip)" ]; }
 
+# 저장된 네트워크 화면 scripts/gui_wifi.NX500 을 다시 만든다 (팝업 없음). N 에 개수
+make_list() {
+  F="$D/scripts/gui_wifi.NX500"
+  { echo "# 자동 생성 (wifi.sh). 저장된 네트워크. * = 연결됨"
+    echo "back|gui_more"
+    echo "button|목록 새로 고침|wifi.sh list"
+    services | awk -F'|' '$4 == "yes" && $2 != "" { mark = ($3 == "online" || $3 == "ready") ? "* " : ""; print "button|" mark $2 "|wifi.sh connect " $1 }' | head -6
+    echo "button|WiFi 끄기|wifi.sh off"
+  } > "$F"; sync
+  N=$(grep -c "wifi.sh connect" "$F")
+  wl "list: $N favorites"
+}
 first_favorite() { services | awk -F'|' '$4 == "yes" && $2 != "" { print $1; exit }'; }
 name_of() { services | awk -F'|' -v p="$1" '$1 == p { print $2 }'; }
 
@@ -48,7 +60,7 @@ wifi_on() {
   # 켜진 것만으로는 저장된 네트워크에 안 붙었다 (2026-10-25 실기: LoadDriver 성공 뒤 25 초 동안 IP 없음, 직접 Connect 는 1 초 만에 연결).
   # 검색을 한 번 시키고 자동 연결을 잠깐 기다린 뒤, 안 붙으면 첫 즐겨찾기 (ConnMan 이 마지막에 쓴 것을 앞에 둔다) 에 직접 연결한다.
   R=$($DB --dest=net.connman /net/connman/technology/wifi net.connman.Technology.Scan 2>&1 | tail -1); wl "on: Scan -> $R"
-  wait_ip 5 && return 0
+  wait_ip 1 && return 0
   P=$(first_favorite)
   if [ -n "$P" ]; then
     wl "on: Connect $(name_of "$P") ($P)"
@@ -68,10 +80,12 @@ case "${1:-on}" in
     wl "on start (if=$([ -d /sys/class/net/mlan0 ] && echo yes || echo no) from=$0)"
     if wifi_on; then wl "on done ip=$(wifi_ip) name=$(connected_name)"; popup "WiFi 켜짐: $(connected_name)<br>IP $(wifi_ip)" 4
     else wl "on failed (no ip)"; popup "WiFi 연결 안 됨<br>WiFi 네트워크 > 에서 고르세요" 4; fi
+    make_list
     ;;
   off)
     R=$($DB --dest=net.netconfig /net/netconfig/wifi net.netconfig.wifi.RemoveDriver 2>&1 | tail -1)
     wl "off: RemoveDriver -> $R"
+    sed -i 's/^button|\* /button|/' "$D/scripts/gui_wifi.NX500" 2>/dev/null; sync
     popup "WiFi 끔" 2
     ;;
   status)
@@ -81,15 +95,7 @@ case "${1:-on}" in
   list)
     # 저장된 네트워크 (즐겨찾기) 를 화면으로. 꺼져 있으면 먼저 켠다 (목록을 읽으려면 ConnMan 이 켜져 있어야 함)
     powered || { wl "list: powering on"; wifi_on > /dev/null; }
-    F="$D/scripts/gui_wifi.NX500"
-    { echo "# 자동 생성 (wifi.sh list). 저장된 네트워크. 상태: online/ready = 연결됨"
-      echo "back|gui_more"
-      echo "button|목록 새로 고침|wifi.sh list"
-      services | awk -F'|' '$4 == "yes" && $2 != "" { mark = ($3 == "online" || $3 == "ready") ? "* " : ""; print "button|" mark $2 "|wifi.sh connect " $1 }' | head -6
-      echo "button|WiFi 끄기|wifi.sh off"
-    } > "$F"; sync
-    N=$(grep -c "wifi.sh connect" "$F")
-    wl "list: $N favorites"
+    make_list
     popup "저장된 네트워크 ${N}개<br>WiFi 네트워크 > 를 다시 여세요" 3
     ;;
   connect)
@@ -98,8 +104,9 @@ case "${1:-on}" in
     NAME=$(name_of "$2")
     wl "connect $NAME ($2)"
     R=$($DB --dest=net.connman "$2" net.connman.Service.Connect 2>&1 | tail -1); wl "  Connect -> $R"
-    if wait_ip 20 && [ "$(connected_name)" = "$NAME" ]; then popup "WiFi: $NAME<br>IP $(wifi_ip)" 4; sh "$D/scripts/wifi.sh" list > /dev/null 2>&1
+    if wait_ip 20 && [ "$(connected_name)" = "$NAME" ]; then popup "WiFi: $NAME<br>IP $(wifi_ip)" 4
     else popup "연결 안 됨: $NAME<br>log/wifi.log 확인" 4; fi
+    make_list
     ;;
   *) popup "wifi.sh on|off|list|connect|status" 3 ;;
 esac

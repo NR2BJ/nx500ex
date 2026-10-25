@@ -51,6 +51,13 @@ if [ -z "$BTPID" ]; then log "bluetoothd not found, not starting"; exit 0; fi
 n=0
 while st pmu show 2>/dev/null | grep hevc | grep -q ON && [ $n -lt 600 ]; do sleep 1; n=$((n+1)); done
 
+# 3a. 켜 둔 기능의 사본 갱신: 체크박스는 scripts/X.sh 를 scripts/auto/X.sh 로 복사해 두므로, 스크립트를 고쳐도 사본은 옛것으로 남는다
+#     (2026-10-26 실기: wifi.sh 를 고친 뒤 첫 전원에서 옛 사본이 돌아 연결이 안 됐음). 전원 켤 때마다 원본으로 덮는다.
+for f in $D/scripts/auto/*.sh; do
+  [ -f "$f" ] && [ -f "$D/scripts/${f##*/}" ] && cp "$D/scripts/${f##*/}" "$f"
+done
+sync
+
 # 3b. 사용자 LUT 메뉴 (lut/user 를 훑어 scripts/gui_lut_user*.NX500 생성)
 sh $D/scripts/lut_menu.sh >> $LOG 2>&1
 
