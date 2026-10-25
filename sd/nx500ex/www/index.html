@@ -71,7 +71,8 @@
 </section>
 
 <section id="gallery" class="tab">
-  <div id="gtools"><button id="greload">새로 고침</button> <span id="gcount"></span></div>
+  <div id="gtools"><button id="greload">새로 고침</button> <button id="gsel">선택 모드</button> <button id="gdl" class="hidden">선택한 것 내려받기 (tar)</button> <button id="gclear" class="hidden">선택 해제</button> <span id="gcount"></span></div>
+  <p id="ghint" class="hidden">선택 모드에서는 누르면 고르고 다시 누르면 풀립니다. 내려받기는 고른 파일을 tar 하나로 묶어 줍니다 (Mac 은 더블클릭, Windows 는 7-Zip 등으로 풉니다).</p>
   <div id="grid"></div>
   <div id="viewer" class="hidden"><img id="big" alt=""><div id="bigname"></div><a id="dl" download>원본 내려받기</a><button id="close">닫기</button></div>
 </section>

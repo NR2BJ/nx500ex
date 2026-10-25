@@ -121,6 +121,7 @@ case "${1:-on}" in
     wl "on start (if=$(driver_up && echo yes || echo no) from=$0)"
     if wifi_on; then
       wl "on done ip=$(wifi_ip) name=$(connected_name)"; watch_start; make_list
+      sh "$D/scripts/time.sh" quiet < /dev/null > /dev/null 2>&1 &   # 붙으면 시각 맞추기
       case "$0" in */auto/*) sleep 3 ;; esac   # 전원 켤 때는 카메라 화면이 다 뜬 뒤에
       menu_popup "WiFi 켜짐: $(connected_name)<br>IP $(wifi_ip)" 4
     else wl "on failed (no ip)"; make_list; menu_popup "WiFi 연결 안 됨<br>WiFi 네트워크 > 에서 고르세요" 4; fi
@@ -154,7 +155,7 @@ case "${1:-on}" in
     fi
     wl "connect (menu) $NAME ($ID)"
     R=$($DB --dest=net.connman "$P" net.connman.Service.Connect 2>&1 | tail -1); wl "  Connect -> $R"
-    if wait_ip 20 && [ "$(connected_name)" = "$NAME" ]; then watch_start; make_list; popup "WiFi: $NAME<br>IP $(wifi_ip)" 4
+    if wait_ip 20 && [ "$(connected_name)" = "$NAME" ]; then watch_start; make_list; popup "WiFi: $NAME<br>IP $(wifi_ip)" 4; sh "$D/scripts/time.sh" quiet < /dev/null > /dev/null 2>&1 &
     else make_list; popup "연결 안 됨: $NAME<br>log/wifi.log 확인" 4; fi
     ;;
   watch)
@@ -165,7 +166,7 @@ case "${1:-on}" in
       sleep 5
       driver_up || { wl "watch: driver gone, stop"; popup "WiFi 꺼짐" 2; break; }
       if [ -n "$(wifi_ip)" ]; then
-        if [ "$had" = 0 ]; then had=1; lastname=$(connected_name); wl "watch: reconnected $(wifi_ip) $lastname"; popup "WiFi 다시 연결: $lastname<br>IP $(wifi_ip)" 3; make_list; fi
+        if [ "$had" = 0 ]; then had=1; lastname=$(connected_name); wl "watch: reconnected $(wifi_ip) $lastname"; popup "WiFi 다시 연결: $lastname<br>IP $(wifi_ip)" 3; make_list; sh "$D/scripts/time.sh" quiet < /dev/null > /dev/null 2>&1 & fi
       else
         if [ "$had" = 1 ]; then had=0; wl "watch: lost ($lastname)"; popup "WiFi 끊김: $lastname<br>다시 연결 시도 중" 3; fi
         $DB --dest=net.connman /net/connman/technology/wifi net.connman.Technology.Scan > /dev/null 2>&1

@@ -128,10 +128,34 @@ async function loadGallery() {
     const d = document.createElement('div'); d.className = 'it';
     const isJpg = /\.jpg$/i.test(f.n);
     d.innerHTML = `${isJpg ? `<img loading="lazy" src="/dcim/${f.n}?thumb=1">` : `<div style="height:90px;line-height:90px">${f.n.split('.').pop()}</div>`}<div>${f.n.split('/').pop()}<br>${(f.s / 1048576).toFixed(1)} MB</div>`;
-    d.onclick = () => { $('#big').src = isJpg ? `/dcim/${f.n}` : ''; $('#bigname').textContent = f.n; $('#dl').href = `/dcim/${f.n}`; $('#dl').download = f.n.split('/').pop(); $('#viewer').classList.remove('hidden'); };
+    d.dataset.name = f.n;
+    d.onclick = () => {
+      if (selMode) { d.classList.toggle('sel'); updateSel(); return; }
+      $('#big').src = isJpg ? `/dcim/${f.n}` : ''; $('#bigname').textContent = f.n; $('#dl').href = `/dcim/${f.n}`; $('#dl').download = f.n.split('/').pop(); $('#viewer').classList.remove('hidden');
+    };
     g.appendChild(d);
   }
 }
+// 여러 장 고르기: 선택 모드에서 누르면 고르고, 고른 것을 tar 하나로 내려받는다 (/tar?f=a,b,c)
+let selMode = false;
+function updateSel() {
+  const n = document.querySelectorAll('#grid .it.sel').length;
+  $('#gdl').textContent = `선택한 ${n}개 내려받기 (tar)`;
+  $('#gdl').classList.toggle('hidden', n === 0); $('#gclear').classList.toggle('hidden', n === 0);
+}
+$('#gsel').onclick = () => {
+  selMode = !selMode;
+  $('#gsel').textContent = selMode ? '선택 모드 끝' : '선택 모드';
+  $('#ghint').classList.toggle('hidden', !selMode);
+  document.querySelectorAll('#grid .it').forEach(d => { d.classList.toggle('selmode', selMode); if (!selMode) d.classList.remove('sel'); });
+  updateSel();
+};
+$('#gclear').onclick = () => { document.querySelectorAll('#grid .it.sel').forEach(d => d.classList.remove('sel')); updateSel(); };
+$('#gdl').onclick = () => {
+  const names = Array.from(document.querySelectorAll('#grid .it.sel')).map(d => d.dataset.name);
+  if (!names.length) return;
+  window.location.href = '/tar?f=' + encodeURIComponent(names.join(','));
+};
 $('#greload').onclick = loadGallery;
 $('#close').onclick = () => $('#viewer').classList.add('hidden');
 

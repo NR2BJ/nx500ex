@@ -8,7 +8,7 @@ echo $! > /tmp/nx500ex-web.pid
 sleep 1
 if [ -d /proc/$(cat /tmp/nx500ex-web.pid) ]; then
   echo "$(date '+%Y-%m-%d %H:%M:%S') web start ip=$(wifi_ip) pid=$(cat /tmp/nx500ex-web.pid)" >> "$D/log/boot.log"; sync
-  case "$0" in */auto/*) ;; *) popup "웹 원격 켜짐<br>http://$(wifi_ip)/" 3 ;; esac
+  case "$0" in */auto/*) ;; *) [ "$NXQUIET" = 1 ] || popup "웹 원격 켜짐<br>http://$(wifi_ip)/" 3 ;; esac   # NXQUIET=1 은 PC 에서 올리고 다시 켤 때
 else
   echo "$(date '+%Y-%m-%d %H:%M:%S') web failed: $(tail -n 2 "$D/log/web.log" | tr '\n' ' ')" >> "$D/log/boot.log"; sync
   popup "웹 원격 시작 실패<br>log/web.log 확인" 4

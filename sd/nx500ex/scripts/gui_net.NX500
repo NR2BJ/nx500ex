@@ -5,3 +5,4 @@ checkbox|텔넷 / FTP|telnet.sh
 checkbox|SSH / SFTP|ssh.sh
 checkbox|웹 원격|web.sh
 ip|IP
+button|시각 맞추기|time.sh

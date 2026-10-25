@@ -16,6 +16,7 @@
  *   /actions       <scripts>/actions.list 그대로 (웹 화면의 동작 버튼 목록)
  *   /dcim          JSON: /mnt/mmc/DCIM 의 최근 파일 (최대 200), 새 것부터
  *   /dcim/<폴더>/<파일>          그 파일 (JPG, SRW, MP4). ?thumb=1 이면 JPG 안의 EXIF 미리보기 (작고 빠름)
+ *   /tar?f=<폴더/파일>,<폴더/파일>,...   고른 파일들을 tar 하나로 (압축 없음, 브라우저에서 한 번에 내려받기). 최대 64개
  *
  * 라이브 뷰 원리 (상류 nx-remote-controller-mod 의 liveview.c 와 같음): 카메라 앱이 표시용 NV12 프레임을 고정된 물리 주소 네 곳에
  * 번갈아 쓴다. /dev/mem 으로 네 곳을 매핑해 두고, 요청 때마다 첫 두 줄의 합이 바뀐 버퍼 (방금 쓰인 것) 를 고른다.
@@ -452,6 +453,76 @@ static void handle_file(int fd, const char *rel, int thumb)
 	close(f);
 }
 
+/* 고른 파일들을 tar (ustar, 압축 없음) 로 묶어 보낸다. JPEG 와 RAW 는 압축이 안 되므로 그대로가 가장 빠르다 */
+static void tar_header(unsigned char *h, const char *name, long size, long mtime)
+{
+	unsigned sum = 0, i;
+	memset(h, 0, 512);
+	snprintf((char *)h, 100, "%s", name);
+	memcpy(h + 100, "0000644\0", 8); memcpy(h + 108, "0000000\0", 8); memcpy(h + 116, "0000000\0", 8);
+	snprintf((char *)h + 124, 12, "%011lo", size);
+	snprintf((char *)h + 136, 12, "%011lo", mtime);
+	memset(h + 148, ' ', 8);
+	h[156] = '0';
+	memcpy(h + 257, "ustar\0" "00", 8);
+	for (i = 0; i < 512; i++) sum += h[i];
+	snprintf((char *)h + 148, 8, "%06o", sum); h[155] = ' ';
+}
+
+static void handle_tar(int fd, const char *list)
+{
+	char names[64][96];
+	long sizes[64], mtimes[64], total = 0;
+	int n = 0, i;
+	const char *p = list;
+	static unsigned char buf[65536];
+	unsigned char h[512];
+	char extra[128];
+	while (*p && n < 64) {
+		const char *e = strchr(p, ',');
+		size_t l = e ? (size_t)(e - p) : strlen(p);
+		char path[1024];
+		struct stat st;
+		if (l > 0 && l < sizeof names[0]) {
+			memcpy(names[n], p, l); names[n][l] = 0;
+			if (!strstr(names[n], "..") && names[n][0] != '/') {
+				snprintf(path, sizeof path, "%s/%s", DCIM, names[n]);
+				if (stat(path, &st) == 0 && S_ISREG(st.st_mode)) {
+					sizes[n] = (long)st.st_size; mtimes[n] = (long)st.st_mtime;
+					total += 512 + ((sizes[n] + 511) / 512) * 512;
+					n++;
+				}
+			}
+		}
+		if (!e) break;
+		p = e + 1;
+	}
+	if (n == 0) { send_text(fd, 404, "text/plain", "no files"); return; }
+	total += 1024;
+	snprintf(extra, sizeof extra, "Content-Disposition: attachment; filename=\"nx500-%ld.tar\"\r\n", (long)time(NULL));
+	send_head(fd, 200, "application/x-tar", total, extra);
+	for (i = 0; i < n; i++) {
+		char path[1024];
+		int f;
+		long left = sizes[i], pad;
+		snprintf(path, sizeof path, "%s/%s", DCIM, names[i]);
+		tar_header(h, names[i], sizes[i], mtimes[i]);
+		if (send_all(fd, h, 512) < 0) return;
+		f = open(path, O_RDONLY);
+		while (left > 0) {
+			int r = f >= 0 ? read(f, buf, left < (long)sizeof buf ? (size_t)left : sizeof buf) : 0;
+			if (r <= 0) { memset(buf, 0, sizeof buf); r = left < (long)sizeof buf ? (int)left : (int)sizeof buf; }
+			if (send_all(fd, buf, r) < 0) { if (f >= 0) close(f); return; }
+			left -= r;
+		}
+		if (f >= 0) close(f);
+		pad = (512 - sizes[i] % 512) % 512;
+		if (pad) { memset(buf, 0, pad); if (send_all(fd, buf, pad) < 0) return; }
+	}
+	memset(buf, 0, 1024);
+	send_all(fd, buf, 1024);
+}
+
 static void handle_static_path(int fd, const char *path, const char *ctype)
 {
 	int f;
@@ -548,6 +619,7 @@ static void handle(int fd)
 	else if (!strcmp(path, "/actions")) { char p2[1024]; snprintf(p2, sizeof p2, "%s/actions.list", scripts); handle_static_path(fd, p2, "text/plain; charset=utf-8"); }
 	else if (!strcmp(path, "/dcim")) handle_dcim(fd);
 	else if (!strncmp(path, "/dcim/", 6)) handle_file(fd, path + 6, query_get(q, "thumb", v1, sizeof v1)[0] == '1');
+	else if (!strcmp(path, "/tar")) { static char lst[8192]; handle_tar(fd, query_get(q, "f", lst, sizeof lst)); }
 	else handle_static(fd, path + 1);
 }
 
