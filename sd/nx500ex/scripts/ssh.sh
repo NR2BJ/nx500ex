@@ -25,7 +25,7 @@ for f in /mnt/mmc/authorized_keys /mnt/mmc/*.pub; do
   grep -E '^(ssh-|ecdsa-|sk-)' "$f" >> "$CONF/authorized_keys" && rm -f "$f"
 done
 sync
-OPTS="-F -E -R -p 22 -D $CONF -K 60"
+OPTS="-F -R -p 22 -D $CONF -K 60"   # syslog 없이 빌드해 기록은 늘 stderr (-E 옵션 없음)
 if [ -s "$CONF/authorized_keys" ]; then OPTS="$OPTS -s"; AUTH="공개키 $(grep -c -E '^(ssh-|ecdsa-|sk-)' "$CONF/authorized_keys")개"
 else OPTS="$OPTS -B"; AUTH="공개키 없음, 비밀번호 없이 허용"; fi
 "$D/bin/dropbearmulti" dropbear $OPTS >> "$D/log/ssh.log" 2>&1 < /dev/null &
