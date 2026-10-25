@@ -32,16 +32,33 @@ services() {
 connected_name() { services | awk -F'|' '$3 == "online" || $3 == "ready" { print $2; exit }'; }
 wait_ip() { _n=0; while [ $_n -lt ${1:-20} ] && [ -z "$(wifi_ip)" ]; do sleep 1; _n=$((_n + 1)); done; [ -n "$(wifi_ip)" ]; }
 
+first_favorite() { services | awk -F'|' '$4 == "yes" && $2 != "" { print $1; exit }'; }
+name_of() { services | awk -F'|' -v p="$1" '$1 == p { print $2 }'; }
+
 wifi_on() {
   if [ -n "$(wifi_ip)" ]; then wl "on: already connected $(wifi_ip)"; return 0; fi
   if ! powered || [ ! -d /sys/class/net/mlan0 ]; then
     R=$($DB --dest=net.netconfig /net/netconfig/wifi net.netconfig.wifi.LoadDriver boolean:false 2>&1 | tail -1)
     case "$R" in *UnknownMethod*|*Invalid*) R=$($DB --dest=net.netconfig /net/netconfig/wifi net.netconfig.wifi.LoadDriver 2>&1 | tail -1) ;; esac
     wl "on: LoadDriver -> $R"
+    _n=0; while [ $_n -lt 10 ] && ! powered; do sleep 1; _n=$((_n + 1)); done
   else
-    wl "on: already powered, waiting for connection"
+    wl "on: already powered"
   fi
-  wait_ip 25
+  # 켜진 것만으로는 저장된 네트워크에 안 붙었다 (2026-10-25 실기: LoadDriver 성공 뒤 25 초 동안 IP 없음, 직접 Connect 는 1 초 만에 연결).
+  # 검색을 한 번 시키고 자동 연결을 잠깐 기다린 뒤, 안 붙으면 첫 즐겨찾기 (ConnMan 이 마지막에 쓴 것을 앞에 둔다) 에 직접 연결한다.
+  R=$($DB --dest=net.connman /net/connman/technology/wifi net.connman.Technology.Scan 2>&1 | tail -1); wl "on: Scan -> $R"
+  wait_ip 5 && return 0
+  P=$(first_favorite)
+  if [ -n "$P" ]; then
+    wl "on: Connect $(name_of "$P") ($P)"
+    R=$($DB --dest=net.connman "$P" net.connman.Service.Connect 2>&1 | tail -1); wl "  Connect -> $R"
+    wait_ip 15 && return 0
+  else
+    wl "on: no favorite service"
+  fi
+  wl "on: services: $(services | tr '\n' ' ')"
+  return 1
 }
 
 case "${1:-on}" in
@@ -78,7 +95,7 @@ case "${1:-on}" in
   connect)
     [ -n "$2" ] || { popup "네트워크 경로 없음" 2; exit 1; }
     powered || wifi_on > /dev/null
-    NAME=$(services | awk -F'|' -v p="$2" '$1 == p { print $2 }')
+    NAME=$(name_of "$2")
     wl "connect $NAME ($2)"
     R=$($DB --dest=net.connman "$2" net.connman.Service.Connect 2>&1 | tail -1); wl "  Connect -> $R"
     if wait_ip 20 && [ "$(connected_name)" = "$NAME" ]; then popup "WiFi: $NAME<br>IP $(wifi_ip)" 4; sh "$D/scripts/wifi.sh" list > /dev/null 2>&1
