@@ -31,7 +31,9 @@ sec "wlan.sh 내용"; cat /usr/bin/wlan.sh 2>&1 | head -120
 sec "net-config (Tizen 네트워크 설정 데몬) D-Bus 인터페이스"; for o in /net/netconfig/wifi /net/netconfig/network /net/netconfig/statistics; do echo "--- $o"; dbus-send --system --print-reply --dest=net.netconfig $o org.freedesktop.DBus.Introspectable.Introspect 2>&1 | grep -E "interface name|method name|property name|arg " | head -120; done
 sec "connman Manager 인터페이스"; dbus-send --system --print-reply --dest=net.connman / org.freedesktop.DBus.Introspectable.Introspect 2>&1 | grep -E "method name" | head -40
 sec "connman 기술 목록"; dbus-send --system --print-reply --dest=net.connman / net.connman.Manager.GetTechnologies 2>&1 | head -60
-sec "connman 서비스 전체 (값 포함, 앞 200줄)"; dbus-send --system --print-reply --dest=net.connman / net.connman.Manager.GetServices 2>&1 | head -200
+sec "connman 서비스 전체 (값 포함)"; dbus-send --system --print-reply --dest=net.connman / net.connman.Manager.GetServices 2>&1 | grep -v -E "^\s*(byte|int32|uint16) " | head -600
+sec "connman 저장 위치 찾기 (settings 파일)"; find / -xdev \( -name settings -o -name "*.config" \) -path "*connman*" 2>/dev/null | head; find /opt /var /tmp -xdev -type d -name connman 2>/dev/null | head; ls -la /opt/var/lib/connman/ /opt/etc/connman/ 2>&1 | head -30; for f in /opt/var/lib/connman/*/settings; do [ -f "$f" ] && { echo "--- $f"; sed "s/\(Passphrase=\).*/\1(숨김)/" "$f"; }; done
+sec "nxpopup 프로세스 (남아 있는 것)"; ps 2>/dev/null | grep -E "nxpopup|popup_" | grep -v grep
 sec "프로세스 (busybox ps, 인자 포함)"; "$D/bin/busybox" ps -o pid,args 2>/dev/null | grep -i -E "connman|net-config|wpa|dhcp|wlan|hostapd|dbus|wifi" | grep -v grep
 sec "로그 꼬리: connman.log"; tail -n 60 /var/log/connman.log 2>&1
 sec "로그 꼬리: netconfig.log"; tail -n 80 /var/log/netconfig.log 2>&1

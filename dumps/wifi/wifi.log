@@ -33,3 +33,11 @@
 2026-10-26 00:05:35 on: Connect TP107_24 (/net/connman/service/wifi_183f47e022fe_54503130375f3234_managed_psk)
 2026-10-26 00:05:36   Connect -> method return sender=:1.28 -> dest=:1.185 reply_serial=2
 2026-10-26 00:05:36 on done ip=192.168.1.66 name=TP107_24
+2026-10-26 00:26:45 on start (if=no from=/mnt/mmc/nx500ex/scripts/auto/wifi.sh)
+2026-10-26 00:26:46 on: LoadDriver -> method return sender=:1.29 -> dest=:1.196 reply_serial=2
+2026-10-26 00:26:46 on: Scan -> method return sender=:1.28 -> dest=:1.199 reply_serial=2
+2026-10-26 00:26:48 connect: TP107_24 (/net/connman/service/wifi_183f47e022fe_54503130375f3234_managed_psk)
+2026-10-26 00:26:49   Connect -> method return sender=:1.28 -> dest=:1.202 reply_serial=2
+2026-10-26 00:26:49 on done ip=192.168.1.66 name=TP107_24
+2026-10-26 00:26:50 list: 1 favorites
+2026-10-26 00:27:08 off: RemoveDriver -> method return sender=:1.29 -> dest=:1.207 reply_serial=2
