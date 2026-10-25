@@ -9,3 +9,5 @@ dumps/lut/cal1/
 dumps/lut/rshot1/
 dumps/lut/rshot1_pred/
 dumps/lut/rshot2/
+dumps/lut/real1/
+dumps/lut/*.cube
