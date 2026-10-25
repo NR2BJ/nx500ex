@@ -57,6 +57,21 @@ now_cs() { read _u _r < /proc/uptime; echo "${_u%.*}${_u#*.}"; }
 shutter_idx() { _s=$(prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'); [ -n "$_s" ] && [ "$_s" -gt 32767 ] && _s=$((_s - 65536)); echo "$_s"; }
 shutter_set() { _s=$1; [ "$_s" -lt 0 ] && _s=$((_s + 65536)); prefman set 0 0xa340 l $_s > /dev/null 2>&1; st app mode m > /dev/null 2>&1; }
 BULB_IDX=-96
+# 셔터 버튼을 하드웨어 수준에서 누르기 (bin/nxgpio, tools/nxgpio): 버튼이 연결된 GPIO 선을 출력 0 으로 (= 버튼이 GND 로 당김), 뗌은 입력으로.
+# st key 와 evdev 주입은 카메라 앱의 벌브 종료 판정 (드라이버에 버튼 상태를 묻는 폴링) 을 못 속이지만 이 방법은 물리 버튼과 같다 (2026-10-26 실기).
+# 반셔터 = gpio-59 (gpio7 블록 0x10020000 선 3), 셔터 = gpio-27 (gpio3 블록 0x10003000 선 3). 켜져 있는 동안 반드시 뗀다 (trap).
+hw_s1() { "$D/bin/nxgpio" 10020000 3 "$1" > /dev/null 2>&1; }
+hw_s2() { "$D/bin/nxgpio" 10003000 3 "$1" > /dev/null 2>&1; }
+hw_release_all() { hw_s2 release; hw_s1 release; }
+# 앞 다이얼 (jog1) 을 돌려 셔터 값을 목표 idx 로 (M 모드). st key jog 는 앱을 거치므로 BULB 까지 앱 상태가 제대로 바뀐다 (prefman 으로 BULB 를 쓰면 30초 장노출로 동작)
+jog_shutter_to() {
+  _n=0
+  while [ "$(shutter_idx)" != "$1" ] && [ $_n -lt 70 ]; do
+    if [ "$(shutter_idx)" -gt "$1" ] 2>/dev/null; then st key jog jog1_ccw > /dev/null 2>&1; else st key jog jog1_cw > /dev/null 2>&1; fi
+    _n=$((_n + 1)); sleep 0.3
+  done
+  [ "$(shutter_idx)" = "$1" ]
+}
 # 무음 셔터: 실제 노출이 약 0.2 초에서 멈춘다. 1/5 까지는 맞고, 1/4 는 약 0.2 스톱 모자라고, 그보다 느리면 모두 약 0.2 초,
 # 수 초 이상은 사진이 깨진다 (2026-10-19 RAW 실측, ISO 100 F22 1/10 ~ 2초 14장). 1/5 (셔터 값 37) 보다 느리면 거부
 SILENT_MIN_IDX=37
