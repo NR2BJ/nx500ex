@@ -117,3 +117,45 @@ def guess_space(filename, cube_text=None):
         if re.search(pat, n):
             return sp
     return "srgb"
+
+# ---- LUT 내용으로 입력 공간 판별 ----
+# 회색 램프를 각 후보 공간으로 바꿔 LUT 에 넣었을 때 출력 밝기가 입력 램프와 가장 비슷한 공간이 그 LUT 의 입력 공간이다.
+# 로그용 LUT 에 sRGB 를 그대로 넣으면 (sRGB 0.3 은 로그로 2~3 스톱 아래) 대비가 폭주해 오차가 크다. 로그끼리는 곡선이 비슷해 구분이 약하므로
+# 1위와 2위 차이로 확신도를 같이 돌려준다. 이름 힌트가 있으면 그쪽을 우선한다 (페이지에서).
+DETECT_SPACES = ["srgb", "vlog", "slog3cine", "flog", "flog2", "nlog", "clog3", "logc3", "logc4", "linear"]
+
+# 색 패치 (피부, 하늘, 잎, 빨강, 노랑, 파랑, 자홍, 청록): 색 영역이 다르면 회색은 맞아도 색이 어긋나므로 로그끼리 구분에 쓴다 (가중치 0.5)
+DETECT_PATCHES = np.array([[224, 172, 140], [135, 180, 230], [90, 130, 70], [200, 60, 50], [240, 200, 60], [60, 80, 160], [180, 90, 160], [60, 170, 170]], dtype=np.float64) / 255.0
+DETECT_GRAY = np.linspace(0.08, 1.0, 12)
+
+def detect_space(func_of_space, spaces=DETECT_SPACES):
+    """func_of_space(space) -> 룩 함수 (sRGB 0..1 -> RGB 0..1). 반환: [(space, 오차), ...] 오차 오름차순.
+    오차 = 회색 램프 밝기의 RMS 오차 + 0.5 x 색 패치 RGB 의 RMS 오차 (+0.5 회색이 뒤집힐 때)"""
+    xs = DETECT_GRAY
+    gray = np.stack([xs, xs, xs], -1)
+    out = []
+    for sp in spaces:
+        f = func_of_space(sp)
+        y = np.clip(f(gray), 0, 1)
+        Y = 0.2126 * y[:, 0] + 0.7152 * y[:, 1] + 0.0722 * y[:, 2]
+        err = float(np.sqrt(np.mean((Y - xs) ** 2)))
+        if np.any(np.diff(Y) < -0.02):
+            err += 0.5
+        pc = np.clip(f(DETECT_PATCHES), 0, 1)
+        err += 0.5 * float(np.sqrt(np.mean((pc - DETECT_PATCHES) ** 2)))
+        out.append((sp, err))
+    out.sort(key=lambda t: t[1])
+    return out
+
+def detect_summary(ranked):
+    """(최선 공간, 확신 '높음'/'낮음', 설명)"""
+    best, e1 = ranked[0]
+    second, e2 = ranked[1] if len(ranked) > 1 else (None, e1 + 1)
+    margin = e2 - e1
+    if best == "srgb":
+        return best, ("높음" if margin > 0.03 else "낮음"), f"회색 램프 오차 {e1:.3f}, 다음 후보 {second} {e2:.3f}"
+    # 로그끼리는 가까우므로 '로그 계열' 임은 확실해도 어느 로그인지는 낮음일 수 있다
+    srgb_err = dict(ranked).get("srgb", 1.0)
+    sure_log = srgb_err - e1 > 0.05
+    conf = "높음" if (sure_log and margin > 0.02) else "낮음"
+    return best, conf, f"회색 램프 오차 {e1:.3f} (sRGB 로 넣으면 {srgb_err:.3f}), 다음 후보 {second} {e2:.3f}"

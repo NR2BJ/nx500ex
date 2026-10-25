@@ -330,7 +330,17 @@ def main():
     if a.identity:
         func = lambda x: x
     else:
-        space = a.space or inspace.guess_space(a.cube, open(a.cube, encoding="utf-8", errors="replace").read(4000) if a.cube.lower().endswith(".cube") else None)
+        space = a.space
+        if space is None:
+            text = open(a.cube, encoding="utf-8", errors="replace").read(4000) if a.cube.lower().endswith(".cube") else None
+            space = inspace.guess_space(a.cube, text)
+            if space == "srgb" and not a.cube.lower().endswith((".png", ".tif", ".tiff")):
+                c = read_lut(a.cube)
+                ranked = inspace.detect_space(lambda sp: lut_func(c, sp, 0.0))
+                best, conf, why = inspace.detect_summary(ranked)
+                if best != "srgb":
+                    print(f"내용 분석: 입력 공간 {inspace.SPACES[best][0]} 로 보임 (확신 {conf}, {why}). --space 로 바꿀 수 있음")
+                    space = best
         if space != "srgb":
             print(f"입력 공간: {inspace.SPACES[space][0]}" + (f", 노출 {a.ev:+.2f} 스톱" if a.ev else ""))
         func = look_func(a.cube, space, a.ev)

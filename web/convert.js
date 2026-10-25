@@ -150,6 +150,40 @@
     return 'srgb';
   }
 
+  // LUT 내용으로 입력 공간 판별 (inspace.py detect_space 와 같음): 회색 램프와 색 패치를 각 후보 공간으로 넣어 결과가 입력과 가장 비슷한 공간
+  const DETECT_SPACES = ['srgb', 'vlog', 'slog3cine', 'flog', 'flog2', 'nlog', 'clog3', 'logc3', 'logc4', 'linear'];
+  const DETECT_PATCHES = [[224, 172, 140], [135, 180, 230], [90, 130, 70], [200, 60, 50], [240, 200, 60], [60, 80, 160], [180, 90, 160], [60, 170, 170]].map(p => p.map(v => v / 255.0));
+  const DETECT_GRAY = Array.from({ length: 12 }, (_, i) => 0.08 + (1.0 - 0.08) * i / 11);
+  function detectSpace(lut) {
+    const out = [];
+    for (const sp of DETECT_SPACES) {
+      const f = makeLookFunc(lut, sp, 0);
+      let se = 0, flip = false, prevY = -1;
+      for (const x of DETECT_GRAY) {
+        const y = f([x, x, x]).map(v => clamp(v, 0, 1));
+        const Y = 0.2126 * y[0] + 0.7152 * y[1] + 0.0722 * y[2];
+        se += (Y - x) * (Y - x);
+        if (prevY >= 0 && Y - prevY < -0.02) flip = true;
+        prevY = Y;
+      }
+      let err = Math.sqrt(se / DETECT_GRAY.length) + (flip ? 0.5 : 0);
+      let ce = 0;
+      for (const p of DETECT_PATCHES) { const y = f(p).map(v => clamp(v, 0, 1)); for (let c = 0; c < 3; c++) ce += (y[c] - p[c]) * (y[c] - p[c]); }
+      err += 0.5 * Math.sqrt(ce / (DETECT_PATCHES.length * 3));
+      out.push([sp, err]);
+    }
+    out.sort((a, b) => a[1] - b[1]);
+    return out;
+  }
+  function detectSummary(ranked) {
+    const [best, e1] = ranked[0]; const [second, e2] = ranked[1] || [null, e1 + 1];
+    const margin = e2 - e1;
+    const srgbErr = (ranked.find(r => r[0] === 'srgb') || [null, 1])[1];
+    if (best === 'srgb') return { best, conf: margin > 0.03 ? '높음' : '낮음', why: `회색 램프 오차 ${e1.toFixed(3)}, 다음 후보 ${second} ${e2.toFixed(3)}` };
+    const sureLog = srgbErr - e1 > 0.05;
+    return { best, conf: (sureLog && margin > 0.02) ? '높음' : '낮음', why: `오차 ${e1.toFixed(3)} (sRGB 로 넣으면 ${srgbErr.toFixed(3)}), 다음 후보 ${second} ${e2.toFixed(3)}` };
+  }
+
   // ---- 다른 표 형식 ----
   function numLines(text) {
     const out = [];
@@ -350,6 +384,6 @@
     return out;
   }
 
-  const api = { N, E, TB, BANK, SIZE_A, SIZE_B, parseCube, parseLut, parse3dl, parseVlt, parseCsp, haldFromPixels, makeLookFunc, makeBank, makeRegions, applyBankToPixels, makeZip, rint, yccToRgb, rgbToYcc, SPACES, toSpace, guessSpace };
+  const api = { N, E, TB, BANK, SIZE_A, SIZE_B, parseCube, parseLut, parse3dl, parseVlt, parseCsp, haldFromPixels, makeLookFunc, makeBank, makeRegions, applyBankToPixels, makeZip, rint, yccToRgb, rgbToYcc, SPACES, toSpace, guessSpace, detectSpace, detectSummary };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.NXLUT = api;
 })(typeof self !== 'undefined' ? self : this);

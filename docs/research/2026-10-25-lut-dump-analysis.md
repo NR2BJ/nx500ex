@@ -185,6 +185,7 @@ BT.601 전범위로 확정. 색상 회전은 행렬(601 과 709)을, 채널 감�
 - 형식: .3dl (Autodesk, 빨강이 가장 느림, 정수 비트 깊이 추정 또는 Mesh 줄), .vlt (Panasonic VariCam, 12비트 정수, .cube 순서), .csp (Cinespace, 채널별 프리 LUT 를 선형 보간으로 먼저 적용). 1D cube 와 LUMIX Lab 태그는 앞서.
 - 입력 공간 추정: LUMIX Lab 태그 (VLOG -> vlog, 그 외 -> srgb), 파일 이름 (slog3, vlog, flog2, flog, nlog, clog3, logc4, logc, hlg, pq, linear), DOMAIN 이 0~1 밖이면 linear. 페이지에서 고칠 수 있다.
 - 검증: web/convert.js 와 cube2bank.py 가 vlog, slog3cine, logc4 (노출 +0.5), .3dl, .vlt, .csp 여섯 경우 모두 구간 A, B 바이트 일치 (web_test.js).
+- 이름도 태그도 없는 LUT 의 입력 공간 판별 (inspace.detect_space, convert.js detectSpace): 회색 램프 12점과 색 패치 8개를 후보 공간 10개 (srgb, vlog, slog3cine, flog, flog2, nlog, clog3, logc3, logc4, linear) 로 각각 넣어 출력이 입력과 가장 비슷한 공간을 고른다 (오차 = 회색 밝기 RMS + 0.5 x 색 패치 RGB RMS, 회색이 뒤집히면 +0.5). 로그용 LUT 에 sRGB 를 그대로 넣으면 대비가 폭주해 오차 0.12 이상, 맞는 공간이면 0.01 안팎. 합성 "로그 -> 709" 변환 LUT 여섯 종 (colour-science 의 디코딩으로 만든 것) 전부 정답, 완성 영상용 룩 (세피아, 채도, 항등) 은 srgb. 색 패치 없이 회색만으로는 C-Log3 가 N-Log 로 잘못 잡혔다. 로그끼리의 확신은 1위와 2위 차이로 "높음/낮음" 을 보이고, 이름 힌트가 있으면 그쪽을 우선하되 내용과 어긋나면 주의를 띄운다.
 
 ## 11. 다음
 
