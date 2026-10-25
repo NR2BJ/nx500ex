@@ -78,9 +78,15 @@ jog_shutter_to() {
   _n=0
   while [ "$(shutter_idx)" != "$1" ] && [ $_n -lt 70 ]; do
     if [ "$(shutter_idx)" -gt "$1" ] 2>/dev/null; then st key jog jog1_ccw > /dev/null 2>&1; else st key jog jog1_cw > /dev/null 2>&1; fi
-    _n=$((_n + 1)); sleep 0.3
+    _n=$((_n + 1)); sleep 0.2
   done
   [ "$(shutter_idx)" = "$1" ]
+}
+# 화면 끄기 (screen_off.sh 의 검은 창) 가 떠 있으면 걷는다. 검은 창이 있으면 다이얼 클릭 (st key jog) 이 안 먹는다 (2026-10-26 실기)
+screen_wake() {
+  for _p in /proc/[0-9]*; do grep -q -a "bin/blackout" $_p/cmdline 2>/dev/null && kill ${_p#/proc/} 2>/dev/null; done
+  [ -f /tmp/nx500ex-screenoff.pid ] && kill $(cat /tmp/nx500ex-screenoff.pid) 2>/dev/null
+  rm -f /tmp/nx500ex-screenoff.pid /tmp/nx500ex-blackout.pid
 }
 # 무음 셔터: 실제 노출이 약 0.2 초에서 멈춘다. 1/5 까지는 맞고, 1/4 는 약 0.2 스톱 모자라고, 그보다 느리면 모두 약 0.2 초,
 # 수 초 이상은 사진이 깨진다 (2026-10-19 RAW 실측, ISO 100 F22 1/10 ~ 2초 14장). 1/5 (셔터 값 37) 보다 느리면 거부
