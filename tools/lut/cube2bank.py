@@ -60,6 +60,12 @@ def read_cube(path):
     cur = None
     for line in open(path, encoding="utf-8", errors="replace"):
         s = line.strip()
+        if s.upper().replace(" ", "").startswith("#LUMIXPHOTOSTYLE"):
+            base = s.split()[-1]
+            if "LOG" in base.upper():
+                raise SystemExit(f"LUMIX Lab LUT 의 기준 포토 스타일이 {base} (V-Log): 로그 입력용이라 이 카메라에 맞지 않음")
+            print(f"LUMIX Lab LUT, 기준 포토 스타일 {base}")
+            continue
         if not s or s.startswith("#"):
             continue
         t = s.split()

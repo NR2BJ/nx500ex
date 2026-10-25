@@ -43,7 +43,8 @@
       <tr><th>됨</th><td>
         .cube 3D (크기 제한 없음, 17, 33, 65 등), .cube 1D (톤 커브), .cube 1D + 3D (셰이퍼 + 3D)<br>
         HaldCLUT PNG (한 변이 레벨³ 인 정사각형, 예 512x512 = 레벨 8)<br>
-        용도가 "sRGB / Rec.709 영상용 룩", "JPEG 에 적용", "Instagram, Lightroom 스타일" 인 것
+        용도가 "sRGB / Rec.709 영상용 룩", "JPEG 에 적용", "Instagram, Lightroom 스타일" 인 것<br>
+        파나소닉 LUMIX Lab 의 .cube 중 기준 포토 스타일이 Standard, Natural 등인 것 (파일 안 #LUMIXPHOTOSTYLE 태그로 자동 판별. V-Log 기준은 거절)
       </td></tr>
       <tr><th>안 됨</th><td>
         로그 영상 입력용: F-Log, F-Log2, V-Log, S-Log2/3, N-Log, C-Log, Log-C, HLG 를 Rec.709 로 펴는 변환 LUT (제조사 공식 LUT 대부분이 이것)<br>
@@ -144,7 +145,15 @@
           if (dmin.some(v => v < 0) || dmax.some(v => v > 1)) return reject(`${k} 표의 DOMAIN 이 ${dmin.join(' ')} ~ ${dmax.join(' ')} 로 0 ~ 1 을 벗어납니다. 장면 참조 또는 HDR 용 LUT 라 카메라의 sRGB 영상에는 맞지 않습니다.`);
         }
         const what = [lut.lut1d ? `1D ${lut.size1}점` : null, lut.cube ? `3D ${lut.size3}x${lut.size3}x${lut.size3}` : null].filter(Boolean).join(' + ');
-        accept(`.cube ${what}${lut.lut1d && lut.cube ? ' (1D 를 먼저 적용하고 3D)' : ''}. 변환을 누르세요.`);
+        // 파나소닉 LUMIX Lab .cube: 기준 포토 스타일 태그. V-Log 기준이면 로그 입력용이라 안 맞고, Standard/Natural 등은 완성 영상용이라 맞는다
+        const ps = text.match(/^\s*#\s*LUMIXPHOTOSTYLE\s+(\S+)/mi);
+        let note = '';
+        if (ps) {
+          const base = ps[1].toUpperCase();
+          if (base.includes('LOG')) return reject(`LUMIX Lab LUT 인데 기준 포토 스타일이 ${ps[1]} (V-Log) 입니다. 로그 영상 입력용이라 이 카메라의 sRGB 영상에는 맞지 않습니다. 같은 룩의 Standard 또는 Natural 기준 판이 있으면 그것을 쓰세요.`);
+          note = ` LUMIX Lab LUT, 기준 포토 스타일 ${ps[1]} (완성 영상용이라 맞음. 파나소닉 ${ps[1]} 과 이 카메라의 표준 톤이 조금 달라 대비가 약간 다를 수 있음).`;
+        }
+        accept(`.cube ${what}${lut.lut1d && lut.cube ? ' (1D 를 먼저 적용하고 3D)' : ''}.${note} 변환을 누르세요.`);
       });
     } else {
       const url = URL.createObjectURL(file), img = new Image();
