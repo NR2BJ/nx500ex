@@ -1,5 +1,6 @@
 back|gui_ini
 page|네트워크 >|gui_net
 button|셔터 횟수|info.sh
+button|화면 끄기|screen_off.sh
 checkbox|진단 기록|debug.sh
 page|키 설정 >|gui_keys
