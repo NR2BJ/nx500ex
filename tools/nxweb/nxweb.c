@@ -6,7 +6,9 @@
  * API (모두 GET, 응답에 Access-Control-Allow-Origin: *):
  *   /lv            라이브 뷰 한 장, NV12 원본 720x480 (518400 바이트). /lv?low=1 은 Y 를 가로세로 반으로 줄인 259200 바이트
  *                  (Y 360x240 + 원래 UV 360x240). 헤더 X-Width, X-Height. 라이브 뷰가 없으면 204.
- *   /fb            /dev/fb0 원본 (화면 겹침 글자 OSD 시험용). 헤더 X-Width, X-Height, X-Bpp, X-Stride
+ *   /osd           카메라 화면 (X 루트 창, xwd) 의 UI 겹침. 투명 픽셀을 건너뛰는 RLE: [u32 건너뛸 픽셀 수][u32 픽셀 수][BGRA...] 반복.
+ *                  헤더 X-Width, X-Height. 카메라 UI 는 투명 바탕 위에 그려져 있어 (실기: 345600 중 불투명 5천~2만) 수십 KB 로 줄어든다.
+ *   /fb            /dev/fb0 원본 (64x64 라 OSD 아님, 시험용). 헤더 X-Width, X-Height, X-Bpp, X-Stride
  *   /key?k=이름[&a=click|push|release]   카메라 키 (st key <a> <이름>). 기본 click
  *   /run?s=이름    <scripts>/<이름>.sh 를 뒤에서 실행 (메뉴 동작과 같음)
  *   /status        JSON: 다이얼, 드라이브, 배터리, 동영상, IP, 가동 시간, 부하
@@ -182,6 +184,50 @@ static void handle_fb(int fd)
 		total -= n;
 	}
 	close(fb);
+}
+
+/* ---------- OSD (X 화면) ---------- */
+#define XWD_MAX (4 * 1024 * 1024)
+static unsigned char xwd_buf[XWD_MAX];
+static unsigned char osd_buf[XWD_MAX];
+
+static unsigned be32(const unsigned char *p) { return ((unsigned)p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3]; }
+
+static void handle_osd(int fd)
+{
+	FILE *f = popen("xwd -root -display :0 -silent 2>/dev/null", "r");
+	size_t n = 0, out = 0;
+	unsigned hs, ncol, w, h, bpl, bpp, off, x, y, skip = 0;
+	char extra[64];
+	if (!f) { send_text(fd, 500, "text/plain", "xwd failed"); return; }
+	while (n < XWD_MAX) {
+		size_t r = fread(xwd_buf + n, 1, XWD_MAX - n, f);
+		if (r == 0) break;
+		n += r;
+	}
+	pclose(f);
+	if (n < 100) { send_head(fd, 204, NULL, 0, NULL); return; }
+	hs = be32(xwd_buf); w = be32(xwd_buf + 16); h = be32(xwd_buf + 20); bpp = be32(xwd_buf + 44); bpl = be32(xwd_buf + 48); ncol = be32(xwd_buf + 76);
+	off = hs + ncol * 12;
+	if (bpp != 32 || w > 2000 || h > 2000 || off + (size_t)bpl * h > n) { send_text(fd, 500, "text/plain", "xwd format"); return; }
+	/* RLE: 알파 0 인 픽셀은 건너뛴 수로 세고, 불투명 픽셀은 행 안에서 이어지는 만큼 묶어 [skip][run][BGRA*run] */
+	for (y = 0; y < h; y++) {
+		const unsigned char *row = xwd_buf + off + (size_t)y * bpl;
+		x = 0;
+		while (x < w) {
+			unsigned run;
+			if (row[x * 4 + 3] == 0) { skip++; x++; continue; }
+			run = 0;
+			while (x + run < w && row[(x + run) * 4 + 3] != 0) run++;
+			if (out + 8 + run * 4 > XWD_MAX) break;
+			memcpy(osd_buf + out, &skip, 4); memcpy(osd_buf + out + 4, &run, 4); out += 8;
+			memcpy(osd_buf + out, row + x * 4, run * 4); out += run * 4;
+			skip = 0; x += run;
+		}
+	}
+	snprintf(extra, sizeof extra, "X-Width: %u\r\nX-Height: %u\r\n", w, h);
+	send_head(fd, 200, "application/octet-stream", (long)out, extra);
+	send_all(fd, osd_buf, out);
 }
 
 /* ---------- 명령 실행 ---------- */
@@ -482,6 +528,7 @@ static void handle(int fd)
 
 	if (!strcmp(path, "/lv")) handle_lv(fd, query_get(q, "low", v1, sizeof v1)[0] == '1');
 	else if (!strcmp(path, "/fb")) handle_fb(fd);
+	else if (!strcmp(path, "/osd")) handle_osd(fd);
 	else if (!strcmp(path, "/key")) { query_get(q, "k", v1, sizeof v1); query_get(q, "a", v2, sizeof v2); handle_key(fd, v1, v2[0] ? v2 : "click"); }
 	else if (!strcmp(path, "/run")) handle_run(fd, query_get(q, "s", v1, sizeof v1));
 	else if (!strcmp(path, "/status")) handle_status(fd);

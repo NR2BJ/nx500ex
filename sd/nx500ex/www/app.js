@@ -63,6 +63,38 @@ async function lvLoop() {
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+// 화면 글자 (OSD): /osd 의 RLE ([u32 건너뜀][u32 개수][BGRA...]) 를 투명 캔버스에 그린다
+const ocv = $('#osd'), octx = ocv.getContext('2d');
+const oimg = octx.createImageData(W, H);
+async function osdLoop() {
+  for (;;) {
+    if (!$('#showosd').checked) { octx.clearRect(0, 0, W, H); ocv.style.display = 'none'; await sleep(500); continue; }
+    ocv.style.display = '';
+    if (busy) { await sleep(50); continue; }
+    busy = true;
+    try {
+      const r = await fetch('/osd', { cache: 'no-store' });
+      if (r.status === 200) {
+        const b = new Uint8Array(await r.arrayBuffer());
+        const dv = new DataView(b.buffer);
+        const d = oimg.data; d.fill(0);
+        let p = 0, pix = 0;
+        while (p + 8 <= b.length) {
+          const skip = dv.getUint32(p, true), run = dv.getUint32(p + 4, true); p += 8;
+          pix += skip;
+          for (let i = 0; i < run && p + 4 <= b.length; i++, pix++, p += 4) {
+            const o = pix * 4;
+            d[o] = b[p + 2]; d[o + 1] = b[p + 1]; d[o + 2] = b[p]; d[o + 3] = b[p + 3];
+          }
+        }
+        octx.putImageData(oimg, 0, 0);
+      }
+    } catch (e) {}
+    busy = false;
+    await sleep(600);
+  }
+}
+
 // 키
 async function key(k, a) { try { await fetch(`/key?k=${k}&a=${a || 'click'}`); } catch (e) {} }
 document.querySelectorAll('#pad button[data-key]').forEach(b => b.onclick = () => key(b.dataset.key, b.dataset.act || 'click'));
@@ -112,4 +144,4 @@ async function loadActions() {
   }
 }
 
-lvLoop(); statusLoop();
+lvLoop(); osdLoop(); statusLoop();
