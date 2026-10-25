@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nx500ex 원격</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <span id="title">nx500ex</span>
+  <span id="status">연결 중</span>
+  <nav>
+    <button data-tab="live" class="on">라이브 뷰</button>
+    <button data-tab="gallery">사진</button>
+    <button data-tab="actions">동작</button>
+  </nav>
+</header>
+
+<section id="live" class="tab on">
+  <div id="view">
+    <canvas id="lv" width="720" height="480"></canvas>
+    <div id="lvinfo"></div>
+  </div>
+  <div id="lvopts">
+    <label><input type="checkbox" id="lowq"> 저화질 (빠름)</label>
+    <label><input type="checkbox" id="pause"> 멈춤</label>
+    <label><input type="checkbox" id="fullrange" checked> 풀 레인지</label>
+  </div>
+  <div id="pad">
+    <div class="row">
+      <button data-key="menu">MENU</button>
+      <button data-key="fn">Fn</button>
+      <button data-key="ev">EV</button>
+      <button data-key="ael">AEL</button>
+      <button data-key="rec">REC</button>
+    </div>
+    <div class="cross">
+      <button data-key="up" class="up">▲</button>
+      <button data-key="left" class="left">◀</button>
+      <button data-key="ok" class="ok">OK</button>
+      <button data-key="right" class="right">▶</button>
+      <button data-key="down" class="down">▼</button>
+    </div>
+    <div class="row">
+      <button data-key="pb">재생</button>
+      <button data-key="del">삭제</button>
+      <button data-key="mobile">WiFi</button>
+    </div>
+    <div class="row shutter">
+      <button id="s1hold">반셔터 유지</button>
+      <button id="s1rel">반셔터 놓기</button>
+      <button id="shoot" class="big">촬영</button>
+    </div>
+  </div>
+</section>
+
+<section id="gallery" class="tab">
+  <div id="gtools"><button id="greload">새로 고침</button> <span id="gcount"></span></div>
+  <div id="grid"></div>
+  <div id="viewer" class="hidden"><img id="big" alt=""><div id="bigname"></div><a id="dl" download>원본 내려받기</a><button id="close">닫기</button></div>
+</section>
+
+<section id="actions" class="tab">
+  <p>메뉴의 키 설정에서 고르는 동작과 같다. 누르면 카메라에서 바로 실행된다.</p>
+  <div id="alist"></div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>

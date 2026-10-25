@@ -22,4 +22,5 @@ net_status|텔넷 상태와 IP
 wifi_status|WiFi 상태와 IP
 t_wifi|WiFi 켬/끔
 t_ssh|SSH 켬/끔
+t_web|웹 원격 켬/끔
 info|셔터 횟수

@@ -79,7 +79,7 @@ try_connect() {
 make_list() {
   _sv=$(services)
   { echo "# 자동 생성 (wifi.sh). 저장된 네트워크 (/opt/var/lib/connman). * = 연결됨, (안 보임) = 지금 검색에 없음"
-    echo "back|gui_more"
+    echo "back|gui_net"
     echo "button|목록 새로 고침|wifi.sh list"
     saved | while IFS='|' read -r _id _nm; do
       _st=$(echo "$_sv" | awk -F'|' -v p="/net/connman/service/$_id" '$1 == p { print $3 }')

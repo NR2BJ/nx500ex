@@ -1,9 +1,5 @@
 back|gui_ini
-checkbox|텔넷 / FTP|telnet.sh
-checkbox|SSH / SFTP|ssh.sh
-checkbox|WiFi 켜기|wifi.sh
-page|WiFi 네트워크 >|gui_wifi
-ip|IP
+page|네트워크 >|gui_net
 button|셔터 횟수|info.sh
 checkbox|진단 기록|debug.sh
 page|키 설정 >|gui_keys
