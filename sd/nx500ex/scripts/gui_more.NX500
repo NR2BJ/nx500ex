@@ -1,5 +1,6 @@
 back|gui_ini
 checkbox|텔넷 / FTP|telnet.sh
+checkbox|SSH / SFTP|ssh.sh
 checkbox|WiFi 켜기|wifi.sh
 page|WiFi 네트워크 >|gui_wifi
 ip|IP

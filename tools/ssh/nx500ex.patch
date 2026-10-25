@@ -1,0 +1,14 @@
+nx500ex: authorized_keys 가 SD 카드 (vfat, 권한 비트가 마운트 옵션으로 정해짐) 에 있으므로
+소유자와 쓰기 권한 검사를 하지 않는다. 카메라는 root 하나뿐이고 카드는 본인 것이다.
+--- a/src/svr-authpubkey.c
++++ b/src/svr-authpubkey.c
+@@ -578,6 +578,9 @@
+ static int checkpubkeyperms() {
+ 	char *path = authorized_keys_filepath(), *sep = NULL;
+ 	int ret = DROPBEAR_SUCCESS;
++#ifdef NX500EX_NO_PERM_CHECK
++	m_free(path); return DROPBEAR_SUCCESS;
++#endif
+ 
+ 	TRACE(("enter checkpubkeyperms"))
+ 

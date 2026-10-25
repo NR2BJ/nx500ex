@@ -1,0 +1,3 @@
+#!/bin/sh
+# dbclient (SSH 클라이언트) 래퍼: vfat 에는 심볼릭 링크가 없어 dropbearmulti 를 이름으로 부른다. scp 가 이 경로를 쓴다 (localoptions.h)
+exec /mnt/mmc/nx500ex/bin/dropbearmulti dbclient "$@"
