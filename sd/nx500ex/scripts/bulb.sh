@@ -2,6 +2,7 @@
 # 벌브: 셔터를 BULB 로 바꾼 뒤 셔터 버튼을 하드웨어 수준 (GPIO) 으로 정한 시간만큼 누르고 있는다. 30초 제한 없음.
 # 시간은 메뉴 벌브 > 노출 (conf/bulb_sec, 초). M 모드에서. 끝나면 셔터 값을 원래대로 돌린다.
 # 중단: 누르고 있는 동안 아무 키나 누르면 그때까지의 노출로 끝 (nxwake). 카메라가 먼저 끝내면 (재생 등) 파일이 생긴 것을 보고 놓는다. EV 두 번 (작업 중단) 도 됨.
+# 시작까지 약 6초 걸린다 (드라이브 단사, BULB 전환 2초, 반셔터 2초). 노출은 셔터를 누른 뒤 약 1~1.5초 뒤에 실제로 시작되며 EXIF 는 표준값으로 반올림된다 (짧은 벌브는 1~2초 적게 찍힘, 긴 벌브는 정확).
 # BULB 전환: 설정값을 30초 (-80) 로 쓰고 앞 다이얼을 한 클릭 (st key jog) 돌리면 바로 BULB (-96). 한 칸씩 27번 돌리는 것보다 빠르다.
 #   설정값으로 BULB 를 바로 쓰면 앱이 30초 장노출로 다루므로 마지막 한 클릭은 꼭 다이얼로. 화면 끄기 (검은 창) 중에는 다이얼 클릭이 안 먹는다.
 # 복귀: BULB 에서 다이얼 한 클릭 (30초) 뒤 설정값을 원래 값으로 (BULB 상태에서는 설정값 쓰기가 안 먹음).
@@ -43,8 +44,9 @@ popup "벌브 ${N}초 (EV 두번=중단)" 2
   if ! lv_moving; then fin; jlog "bulb: 촬영 화면 아님 (라이브 뷰 멈춤)"; popup "촬영 화면에서 시작하세요" 3; exit 0; fi
   N0=$(dcim_count)
   jlog "bulb start ${N}s (shutter $IDX -> $(shutter_idx), gpio)"
-  # 키 감시는 누르기 전에 띄운다 (노출 중에 입력 장치를 새로 열면 드라이버가 GPIO 를 입력으로 되돌려 벌브가 바로 끝난다, 2026-10-26). 우리 반셔터/셔터 (125, 126) 는 무시
-  NXWAKE_IGNORE=125,126 "$D/bin/nxwake" 300 $((N + 20)) < /dev/null > /dev/null 2>&1 & WPID=$!
+  # 키 감시 (nxwake) 는 누르기 전에 띄워 두고 우리 반셔터/셔터 (125, 126) 는 무시한다. 다른 키가 눌리면 그때까지로 끝낸다
+  [ -n "$NXBULBDBG" ] && { echo 1 > /sys/devices/platform/d5-keys/event_log; dmesg -c > /dev/null 2>&1; }
+  NXWAKE_IGNORE=125,126 "$D/bin/nxwake" 300 $((N + 20)) v < /dev/null > /tmp/nx500ex-wake.txt 2>&1 & WPID=$!
   sleep 0.3
   hw_s1 press; sleep 2
   hw_s2 press; T0=$(now_cs); sleep 1
@@ -66,6 +68,7 @@ popup "벌브 ${N}초 (EV 두번=중단)" 2
   done
   kill $WPID 2>/dev/null
   hw_s2 release; sleep 0.5; hw_s1 release
+  [ -n "$NXBULBDBG" ] && { dmesg | grep -E "d5-keys|BTLOG" | grep -v button_press_check > "$D/log/bulb_dmesg.txt"; echo 0 > /sys/devices/platform/d5-keys/event_log; cp /tmp/nx500ex-wake.txt "$D/log/bulb_wake.txt"; echo "END=$END EL=$EL" >> "$D/log/bulb_wake.txt"; }
   case "$END" in 끝) wait_file $N0 $((N + 30)) && R="벌브 ${N}초 완료" || R="사진 없음" ;; *) wait_file $N0 $((EL / 100 + 30)) > /dev/null; R="벌브 $END" ;; esac
   fin; jlog "bulb done: $R"
   popup "$R" 3
