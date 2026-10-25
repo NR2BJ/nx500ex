@@ -14,7 +14,7 @@
  *   /run?s=이름    <scripts>/<이름>.sh 를 뒤에서 실행 (메뉴 동작과 같음)
  *   /status        JSON: 다이얼, 드라이브, 배터리, 동영상, IP, 가동 시간, 부하
  *   /actions       <scripts>/actions.list 그대로 (웹 화면의 동작 버튼 목록)
- *   /dcim          JSON: /mnt/mmc/DCIM 의 최근 파일 (최대 200), 새 것부터
+ *   /dcim          JSON: /mnt/mmc/DCIM 의 파일 (이름 내림차순 = 새 것부터, 최대 200)
  *   /dcim/<폴더>/<파일>          그 파일 (JPG, SRW, MP4). ?thumb=1 이면 JPG 안의 EXIF 미리보기 (작고 빠름)
  *   /tar?f=<폴더/파일>,<폴더/파일>,...   고른 파일들을 tar 하나로 (압축 없음, 브라우저에서 한 번에 내려받기). 최대 64개
  *
@@ -338,10 +338,10 @@ static void handle_status(int fd)
 /* ---------- 사진 ---------- */
 struct ent { char name[64]; long size; long mtime; };
 
+/* 새 것부터: 이름 (폴더 100PHOTO.., 번호 SAM_0001..) 내림차순. 시각은 카메라 시계가 틀리면 순서가 깨져서 쓰지 않는다 (2026-10-26) */
 static int ent_cmp(const void *a, const void *b)
 {
 	const struct ent *x = a, *y = b;
-	if (x->mtime != y->mtime) return x->mtime < y->mtime ? 1 : -1;
 	return strcmp(y->name, x->name);
 }
 
