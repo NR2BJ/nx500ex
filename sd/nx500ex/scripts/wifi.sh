@@ -48,7 +48,9 @@ saved() { for f in $STORE/wifi_*/settings; do [ -f "$f" ] || continue; _id=${f%/
 saved_name() { sed -n 's/^Name=//p' "$STORE/$1/settings" 2>/dev/null | head -1; }
 # 메뉴 (nxmenu) 가 열려 있으면 닫힐 때까지 (최대 60 초) 기다렸다가 팝업
 menu_open() { [ -f /tmp/nx500ex-menu.pid ] && [ -d /proc/$(cat /tmp/nx500ex-menu.pid 2>/dev/null) ]; }
-menu_popup() { _n=0; while menu_open && [ $_n -lt 60 ]; do sleep 1; _n=$((_n + 1)); done; popup "$@"; }
+# 앞 팝업 (nxpopup) 이 떠 있으면 끝날 때까지 (최대 6 초) 기다려 겹치지 않게 한다 (체크를 껐다 켜면 "끔" 과 "켜짐" 이 연달아 뜸)
+popup_busy() { "$D/bin/busybox" pidof nxpopup > /dev/null 2>&1; }
+menu_popup() { _n=0; while { menu_open || popup_busy; } && [ $_n -lt 60 ]; do sleep 1; _n=$((_n + 1)); done; popup "$@"; }
 connected_name() { services | awk -F'|' '$3 == "online" || $3 == "ready" { print $2; exit }'; }
 name_of() { services | awk -F'|' -v p="$1" '$1 == p { print $2 }'; }
 wait_ip() { _n=0; while [ $_n -lt ${1:-20} ] && [ -z "$(wifi_ip)" ]; do sleep 1; _n=$((_n + 1)); done; [ -n "$(wifi_ip)" ]; }
