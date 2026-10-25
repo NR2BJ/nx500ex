@@ -159,3 +159,17 @@ def detect_summary(ranked):
     sure_log = srgb_err - e1 > 0.05
     conf = "높음" if (sure_log and margin > 0.02) else "낮음"
     return best, conf, f"회색 램프 오차 {e1:.3f} (sRGB 로 넣으면 {srgb_err:.3f}), 다음 후보 {second} {e2:.3f}"
+
+def auto_ev(func_of_ev, target=0.97):
+    """func_of_ev(ev) -> 룩 함수. 결과 흰색 밝기가 target 에 닿는 가장 작은 노출 (0 ~ 3 스톱, 1/8 단위). 못 닿으면 가장 밝은 노출"""
+    best, best_y = 0.0, -1.0
+    ev = 0.0
+    while ev <= 3.0001:
+        y = np.clip(func_of_ev(ev)(np.array([[1.0, 1.0, 1.0]]))[0], 0, 1)
+        Y = 0.2126 * y[0] + 0.7152 * y[1] + 0.0722 * y[2]
+        if Y >= target:
+            return ev, float(Y)
+        if Y > best_y:
+            best_y, best = float(Y), ev
+        ev += 0.125
+    return best, best_y

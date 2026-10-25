@@ -324,7 +324,7 @@ def main():
     ap.add_argument("--stock", help="카메라 원래 표 파일 (19652 바이트). 먼저 거친다")
     ap.add_argument("--identity", action="store_true", help=".cube 없이 항등 표")
     ap.add_argument("--space", default=None, help="LUT 의 입력 공간 (" + " ".join(inspace.SPACES) + "). 없으면 파일 이름과 태그로 추정")
-    ap.add_argument("--ev", type=float, default=0.0, help="로그 입력용일 때 노출 보정 (스톱)")
+    ap.add_argument("--ev", default="auto", help="로그 입력용일 때 노출 보정 (스톱). auto 면 결과 흰색이 살아나는 가장 작은 값")
     a = ap.parse_args()
     stock = load_bank(a.stock) if a.stock else None
     if a.identity:
@@ -341,9 +341,15 @@ def main():
                 if best != "srgb":
                     print(f"내용 분석: 입력 공간 {inspace.SPACES[best][0]} 로 보임 (확신 {conf}, {why}). --space 로 바꿀 수 있음")
                     space = best
+        ev = 0.0
         if space != "srgb":
-            print(f"입력 공간: {inspace.SPACES[space][0]}" + (f", 노출 {a.ev:+.2f} 스톱" if a.ev else ""))
-        func = look_func(a.cube, space, a.ev)
+            if a.ev == "auto":
+                c = read_lut(a.cube) if not a.cube.lower().endswith((".png", ".tif", ".tiff")) else None
+                ev, wy = inspace.auto_ev(lambda e: look_func(a.cube, space, e)) if c is None else inspace.auto_ev(lambda e: lut_func(c, space, e))
+                print(f"입력 공간: {inspace.SPACES[space][0]}, 노출 자동 {ev:+.3f} 스톱 (결과 흰색 밝기 {wy * 255:.0f}/255)")
+            else:
+                ev = float(a.ev); print(f"입력 공간: {inspace.SPACES[space][0]}, 노출 {ev:+.2f} 스톱")
+        func = look_func(a.cube, space, ev)
     data = make_bank(func, stock)
     open(a.out, "wb").write(data)
     print(f"{a.out}: {len(data)} 바이트" + (" (원래 표 합성)" if stock is not None else ""))

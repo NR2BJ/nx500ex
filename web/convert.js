@@ -184,6 +184,20 @@
     return { best, conf: (sureLog && margin > 0.02) ? '높음' : '낮음', why: `오차 ${e1.toFixed(3)} (sRGB 로 넣으면 ${srgbErr.toFixed(3)}), 다음 후보 ${second} ${e2.toFixed(3)}` };
   }
 
+  // 흰색 자동 맞춤: 로그 입력용 LUT 는 흰색 1.0 이 로그의 90% 흰색 자리로 가서 결과가 가라앉는다. 결과 흰색의 밝기가 목표 (0.97) 에 닿는
+  // 가장 작은 노출 보정을 0 ~ 3 스톱에서 찾는다 (inspace.py auto_ev 와 같음)
+  function autoEv(lut, space, target) {
+    target = target || 0.97;
+    let best = 0, bestY = -1;
+    for (let ev = 0; ev <= 3.0001; ev += 0.125) {
+      const y = makeLookFunc(lut, space, ev)([1, 1, 1]).map(v => clamp(v, 0, 1));
+      const Y = 0.2126 * y[0] + 0.7152 * y[1] + 0.0722 * y[2];
+      if (Y >= target) return { ev, Y };
+      if (Y > bestY) { bestY = Y; best = ev; }
+    }
+    return { ev: best, Y: bestY };
+  }
+
   // ---- 다른 표 형식 ----
   function numLines(text) {
     const out = [];
@@ -384,6 +398,6 @@
     return out;
   }
 
-  const api = { N, E, TB, BANK, SIZE_A, SIZE_B, parseCube, parseLut, parse3dl, parseVlt, parseCsp, haldFromPixels, makeLookFunc, makeBank, makeRegions, applyBankToPixels, makeZip, rint, yccToRgb, rgbToYcc, SPACES, toSpace, guessSpace, detectSpace, detectSummary };
+  const api = { N, E, TB, BANK, SIZE_A, SIZE_B, parseCube, parseLut, parse3dl, parseVlt, parseCsp, haldFromPixels, makeLookFunc, makeBank, makeRegions, applyBankToPixels, makeZip, rint, yccToRgb, rgbToYcc, SPACES, toSpace, guessSpace, detectSpace, detectSummary, autoEv };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.NXLUT = api;
 })(typeof self !== 'undefined' ? self : this);
