@@ -63,6 +63,16 @@ BULB_IDX=-96
 hw_s1() { "$D/bin/nxgpio" 10020000 3 "$1" > /dev/null 2>&1; }
 hw_s2() { "$D/bin/nxgpio" 10003000 3 "$1" > /dev/null 2>&1; }
 hw_release_all() { hw_s2 release; hw_s1 release; }
+# 라이브 뷰가 움직이는지 (표시용 NV12 버퍼 4곳의 첫 두 줄을 0.4초 간격으로 비교, nxmem). 벌브/장노출이 시작되면 라이브 뷰가 멈춘다.
+# 0 = 움직임 (촬영 화면), 1 = 멈춤 (노출 중, 재생 화면 등). 비교는 busybox md5sum (cmp 는 작업 환경에 없음, 2026-10-26)
+lv_moving() {
+  _B="$D/bin/busybox"
+  _h1=""; for _a in bbaea500 bbb68e00 bbbe7700 bba6bc00; do "$D/bin/nxmem" r 0x$_a 1440 /tmp/nx500ex-lv_$_a > /dev/null 2>&1; _h1="$_h1 $($_B md5sum < /tmp/nx500ex-lv_$_a)"; done
+  sleep 0.4
+  _h2=""; for _a in bbaea500 bbb68e00 bbbe7700 bba6bc00; do "$D/bin/nxmem" r 0x$_a 1440 /tmp/nx500ex-lv_$_a > /dev/null 2>&1; _h2="$_h2 $($_B md5sum < /tmp/nx500ex-lv_$_a)"; done
+  [ -n "$NXLVLOG" ] && echo "$(now_cs) $([ "$_h1" = "$_h2" ] && echo same || echo moving)" >> /tmp/nx500ex-lvlog
+  [ "$_h1" != "$_h2" ]
+}
 # 앞 다이얼 (jog1) 을 돌려 셔터 값을 목표 idx 로 (M 모드). st key jog 는 앱을 거치므로 BULB 까지 앱 상태가 제대로 바뀐다 (prefman 으로 BULB 를 쓰면 30초 장노출로 동작)
 jog_shutter_to() {
   _n=0
