@@ -160,16 +160,37 @@ def detect_summary(ranked):
     conf = "높음" if (sure_log and margin > 0.02) else "낮음"
     return best, conf, f"회색 램프 오차 {e1:.3f} (sRGB 로 넣으면 {srgb_err:.3f}), 다음 후보 {second} {e2:.3f}"
 
-def auto_ev(func_of_ev, target=0.97):
-    """func_of_ev(ev) -> 룩 함수. 결과 흰색 밝기가 target 에 닿는 가장 작은 노출 (0 ~ 3 스톱, 1/8 단위). 못 닿으면 가장 밝은 노출"""
-    best, best_y = 0.0, -1.0
-    ev = 0.0
-    while ev <= 3.0001:
-        y = np.clip(func_of_ev(ev)(np.array([[1.0, 1.0, 1.0]]))[0], 0, 1)
-        Y = 0.2126 * y[0] + 0.7152 * y[1] + 0.0722 * y[2]
-        if Y >= target:
-            return ev, float(Y)
-        if Y > best_y:
-            best_y, best = float(Y), ev
-        ev += 0.125
-    return best, best_y
+def decode(space, code):
+    """로그 곡선의 역함수 (이분법). code 0..1 -> 선형 반사율"""
+    _, _, enc = SPACES[space]
+    if enc is None:
+        return srgb_to_linear(np.array([code]))[0]
+    if enc == "linear":
+        return code
+    lo, hi = 0.0, 64.0
+    for _ in range(60):
+        mid = (lo + hi) / 2
+        if enc(np.array([mid]))[0] < code:
+            lo = mid
+        else:
+            hi = mid
+    return (lo + hi) / 2
+
+def auto_ev(raw_lut_func, space, knee=0.9):
+    """LUT 자체의 회색 응답에서 무릎 (출력이 자기 최대의 knee 배에 처음 닿는 입력 코드) 을 찾아, 우리 흰색 (선형 1.0) 이 그 코드로 가도록
+    노출을 정한다. raw_lut_func: LUT 입력 코드 -> 출력 (입력 공간 변환 없음). 반환 (ev, 무릎 코드, 최대 밝기).
+    흰색을 255 로 밀어붙이면 하이라이트를 일부러 눌러 둔 룩 (예: 파스텔 하이라이트) 이 부서지므로 LUT 의 최대를 기준으로 한다."""
+    xs = np.linspace(0.0, 1.0, 101)
+    y = np.clip(raw_lut_func(np.stack([xs, xs, xs], -1)), 0, 1)
+    Y = 0.2126 * y[:, 0] + 0.7152 * y[:, 1] + 0.0722 * y[:, 2]
+    top = float(Y.max())
+    if top >= 0.95:            # 흰색에 닿는 LUT (순수 변환 등) 는 표준 노출 (0) 이 맞다
+        return 0.0, float(xs[int(np.argmax(Y >= knee * top))]), top
+    idx = int(np.argmax(Y >= knee * top))
+    xk = float(xs[idx])
+    lin = decode(space, xk)
+    if lin <= 0:
+        return 0.0, xk, top
+    ev = float(np.clip(np.log2(lin / 1.0), -1.0, 2.0))
+    ev = round(ev * 8) / 8
+    return ev, xk, top

@@ -186,16 +186,30 @@
 
   // 흰색 자동 맞춤: 로그 입력용 LUT 는 흰색 1.0 이 로그의 90% 흰색 자리로 가서 결과가 가라앉는다. 결과 흰색의 밝기가 목표 (0.97) 에 닿는
   // 가장 작은 노출 보정을 0 ~ 3 스톱에서 찾는다 (inspace.py auto_ev 와 같음)
-  function autoEv(lut, space, target) {
-    target = target || 0.97;
-    let best = 0, bestY = -1;
-    for (let ev = 0; ev <= 3.0001; ev += 0.125) {
-      const y = makeLookFunc(lut, space, ev)([1, 1, 1]).map(v => clamp(v, 0, 1));
-      const Y = 0.2126 * y[0] + 0.7152 * y[1] + 0.0722 * y[2];
-      if (Y >= target) return { ev, Y };
-      if (Y > bestY) { bestY = Y; best = ev; }
-    }
-    return { ev: best, Y: bestY };
+  // 흰색 자동 맞춤 (inspace.auto_ev 와 같음): 흰색을 255 로 밀어붙이면 하이라이트를 일부러 눌러 둔 룩이 부서지므로,
+  // LUT 자체의 회색 응답에서 무릎 (출력이 자기 최대의 90% 에 처음 닿는 입력 코드) 을 찾아 우리 흰색 (선형 1.0) 이 거기로 가는 노출을 고른다
+  function decodeSpace(space, code) {
+    const def = SPACES[space];
+    if (!def[2]) return srgbToLinear(code);
+    if (def[2] === 'linear') return code;
+    const f = ENC[def[2]];
+    let lo = 0, hi = 64;
+    for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; if (f(mid) < code) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
+  function autoEv(lut, space, knee) {
+    knee = knee || 0.9;
+    const raw = makeLookFunc(lut, 'srgb', 0);
+    const ys = [];
+    for (let i = 0; i <= 100; i++) { const x = i / 100; const y = raw([x, x, x]).map(v => clamp(v, 0, 1)); ys.push(0.2126 * y[0] + 0.7152 * y[1] + 0.0722 * y[2]); }
+    const top = Math.max(...ys);
+    let idx = ys.findIndex(v => v >= knee * top); if (idx < 0) idx = 100;
+    const xk = idx / 100;
+    if (top >= 0.95) return { ev: 0, xk, top };   // 흰색에 닿는 LUT (순수 변환 등) 는 표준 노출이 맞다
+    const lin = decodeSpace(space, xk);
+    if (lin <= 0) return { ev: 0, xk, top };
+    let ev = Math.log2(lin / 1.0); ev = Math.min(2, Math.max(-1, ev)); ev = Math.round(ev * 8) / 8;
+    return { ev, xk, top };
   }
 
   // ---- 다른 표 형식 ----

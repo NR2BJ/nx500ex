@@ -344,9 +344,12 @@ def main():
         ev = 0.0
         if space != "srgb":
             if a.ev == "auto":
-                c = read_lut(a.cube) if not a.cube.lower().endswith((".png", ".tif", ".tiff")) else None
-                ev, wy = inspace.auto_ev(lambda e: look_func(a.cube, space, e)) if c is None else inspace.auto_ev(lambda e: lut_func(c, space, e))
-                print(f"입력 공간: {inspace.SPACES[space][0]}, 노출 자동 {ev:+.3f} 스톱 (결과 흰색 밝기 {wy * 255:.0f}/255)")
+                if a.cube.lower().endswith((".png", ".tif", ".tiff")):
+                    raw = hald_func(a.cube)
+                else:
+                    raw = lut_func(read_lut(a.cube), "srgb", 0.0)
+                ev, xk, top = inspace.auto_ev(raw, space)
+                print(f"입력 공간: {inspace.SPACES[space][0]}, 노출 자동 {ev:+.3f} 스톱 (LUT 무릎 입력 {xk:.2f}, LUT 최대 밝기 {top * 255:.0f}/255)")
             else:
                 ev = float(a.ev); print(f"입력 공간: {inspace.SPACES[space][0]}, 노출 {ev:+.2f} 스톱")
         func = look_func(a.cube, space, ev)
