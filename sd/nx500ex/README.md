@@ -40,7 +40,7 @@ EV 두 번만 고정이다: 메뉴 열기 / 닫기, 촬영 작업 중에는 작�
 | HDR 5장 | HDR 시작, 간격 (1~3 EV) |
 | 포커스 스태킹 | 가까운 끝 저장, 먼 끝 저장, 스태킹 시작, 장수, 작업 중단 |
 | 프로필 | UP/DOWN 저장, 불러오기, 전체 백업, 전체 복원 (복원 뒤 전원 꺼짐) |
-| 설정 | 텔넷 / FTP, SSH / SFTP, WiFi 켜기, WiFi 네트워크 >, IP, 셔터 횟수, 진단 기록, 키 설정 > |
+| 설정 | 네트워크 > (WiFi 켜기, WiFi 네트워크 >, 텔넷 / FTP, SSH / SFTP, 웹 원격, IP), 셔터 횟수, 진단 기록, 키 설정 > |
 
 숫자 항목은 "이름: 값" 으로 보이고, 누르면 메뉴 안의 숫자 화면이 뜬다 (키패드 없음, 바로 뜸). 값은 conf 폴더에 저장된다.
 
@@ -73,6 +73,7 @@ EV 두 번만 고정이다: 메뉴 열기 / 닫기, 촬영 작업 중에는 작�
 | 비교 촬영 (목록, 전체) | M 모드, MF, JPEG 에서. 같은 장면을 기준(중립, 5500K) 한 장과 레시피마다 한 장씩 자동으로 찍고 원래대로 되돌린다. 목록은 scripts/film/compare.txt (한 줄에 레시피 이름 하나), 전체는 41개 모두 (42장, 약 4분). 색표를 찍으면 PC 에서 tools/film/recipe_analyze.py 가 레시피마다 회색 기울기(밝은 쪽, 중간, 어두운 쪽), 색 계열별 채도, 피부, 하늘, 잎의 색상 변화, 대비, 날아간 칸을 재고 색 줄표(swatches.png)를 만든다. 실제 장면을 찍으면 --scene 으로 사진을 나란히 놓은 비교 시트(sheet.jpg)만 만든다 |
 | 텔넷 / FTP | 서버를 켜 둔다 (전원 켤 때마다 자동). WiFi 연결 전에도 서버는 떠 있고 연결되면 접속 가능. IP 는 IP 항목이나 EV+WiFi. 인증 없음, 본인 기기만 있는 네트워크에서만 |
 | SSH / SFTP | Dropbear 서버 (포트 22, root). 공개키를 conf/ssh/authorized_keys 에 두면 키로만, 없으면 비밀번호 없이 들어온다. SFTP 와 scp 도 됨 (카드는 /mnt/mmc). 호스트 키는 첫 접속 때 conf/ssh 에 생김 |
+| 웹 원격 | 브라우저에서 http://<카메라 IP>/ : 라이브 뷰 (약 4 fps) 에 카메라 화면 글자를 겹쳐 보이고, 뒷면 키와 다이얼, 반셔터, 촬영 버튼, 사진 보기와 내려받기 (EXIF 미리보기 격자), 키 설정의 동작 실행. 서버는 bin/nxweb (tools/nxweb). 인증 없음 |
 | WiFi 켜기 | 카메라 WiFi 화면 없이 WiFi 를 켜고 저장된 네트워크 중 보이는 것에 붙인다 (마지막에 쓴 것 먼저, conf/wifi_order.txt 로 순서 지정). 켜 두면 전원 켤 때마다. 붙으면 이름과 IP 팝업, 끊기면 알리고 다시 붙임 |
 | WiFi 네트워크 > | 카메라에 저장된 네트워크 목록 (연결됨 *, 안 보임 표시). 누르면 그 네트워크로 바꿔 붙음. 새 네트워크 저장은 순정 WiFi 설정에서 한 번 |
 | 셔터 횟수 | 셔터, 전원, 플래시 횟수. 전원을 끌 때 저장되는 값이라 켜져 있는 동안 찍은 수는 다음 전원 켜기부터 반영 |
@@ -87,7 +88,8 @@ EV 두 번만 고정이다: 메뉴 열기 / 닫기, 촬영 작업 중에는 작�
 ```
 nx500ex/
   boot.sh              내장 래퍼가 부름
-  bin/                 nxkeys, nxmenu, nxpopup, nxgroup, nxmem, popup_*, poker, stapp, blackout, busybox, telnetd, dropbearmulti, dbclient, sftp-server, watch.sh, mon.sh
+  bin/                 nxkeys, nxmenu, nxpopup, nxgroup, nxmem, nxweb, popup_*, poker, stapp, blackout, busybox, telnetd, dropbearmulti, dbclient, sftp-server, watch.sh, mon.sh
+  www/                 웹 원격 화면 (index.html, app.js, style.css)
   scripts/             키 조합(EV_*.sh), 기능, 메뉴(gui_*.NX500), common.sh
   scripts/auto/        켜 둔 기능 (체크박스가 관리)
   lut/                 3D LUT 표 (<id>_a.bin, <id>_b.bin 을 lut.sh 가 쓴다), luts.txt 목록 (id|이름|설명|분류), cal.txt 검증 순서, LICENSE-haldclut.txt (회사별 표의 출처와 라이선스), <id>.bin (표 17 자리 하나, 참고용)
@@ -129,6 +131,7 @@ nx500ex/
 | --- | --- |
 | 텔넷 | PuTTY 등 텔넷 프로그램. 연결 종류 Telnet, 주소 카메라 IP, 포트 23. 사용자 root, 비밀번호 없음 |
 | SSH | ssh root@<카메라 IP>. 공개키를 conf/ssh/authorized_keys 에 넣어 두면 키로, 없으면 비밀번호 없이 (Enter) |
+| 웹 원격 | 브라우저에서 http://<카메라 IP>/ (네트워크 > 웹 원격 체크) |
 | SFTP, scp | sftp root@<카메라 IP> (카드는 /mnt/mmc), scp 파일 root@<IP>:/mnt/mmc/. FileZilla 등은 SFTP, 포트 22 |
 | FTP | 윈도우 탐색기 주소창에 ftp://카메라IP, 또는 FileZilla. SD 카드 내용이 보인다 |
 

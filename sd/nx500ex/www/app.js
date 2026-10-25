@@ -55,6 +55,7 @@ async function lvLoop() {
         await sleep(700);
       }
     } catch (e) { $('#lvinfo').textContent = '연결 끊김'; await sleep(1000); }
+    try { await fetchOsd(); } catch (e) {}
     const now = Date.now();
     if (now - lastFps >= 1000) { fps = frames * 1000 / (now - lastFps); frames = 0; lastFps = now; }
     $('#lvinfo').textContent = `${fps.toFixed(1)} fps, ${now - t0} ms${low ? ', 저화질' : ''}`;
@@ -63,36 +64,31 @@ async function lvLoop() {
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-// 화면 글자 (OSD): /osd 의 RLE ([u32 건너뜀][u32 개수][BGRA...]) 를 투명 캔버스에 그린다
+// 화면 글자 (OSD): /osd 의 RLE ([u32 건너뜀][u32 개수][BGRA...]) 를 투명 캔버스에 그린다. 라이브 뷰 루프가 0.6 초마다 같이 받는다
+// (따로 루프를 돌리면 라이브 뷰가 쉬지 않고 요청해 OSD 차례가 오지 않았다, 2026-10-26)
 const ocv = $('#osd'), octx = ocv.getContext('2d');
 const oimg = octx.createImageData(W, H);
-async function osdLoop() {
-  for (;;) {
-    if (!$('#showosd').checked) { octx.clearRect(0, 0, W, H); ocv.style.display = 'none'; await sleep(500); continue; }
-    ocv.style.display = '';
-    if (busy) { await sleep(50); continue; }
-    busy = true;
-    try {
-      const r = await fetch('/osd', { cache: 'no-store' });
-      if (r.status === 200) {
-        const b = new Uint8Array(await r.arrayBuffer());
-        const dv = new DataView(b.buffer);
-        const d = oimg.data; d.fill(0);
-        let p = 0, pix = 0;
-        while (p + 8 <= b.length) {
-          const skip = dv.getUint32(p, true), run = dv.getUint32(p + 4, true); p += 8;
-          pix += skip;
-          for (let i = 0; i < run && p + 4 <= b.length; i++, pix++, p += 4) {
-            const o = pix * 4;
-            d[o] = b[p + 2]; d[o + 1] = b[p + 1]; d[o + 2] = b[p]; d[o + 3] = b[p + 3];
-          }
-        }
-        octx.putImageData(oimg, 0, 0);
-      }
-    } catch (e) {}
-    busy = false;
-    await sleep(600);
+let lastOsd = 0;
+async function fetchOsd() {
+  if (!$('#showosd').checked) { if (ocv.style.display !== 'none') { octx.clearRect(0, 0, W, H); ocv.style.display = 'none'; } return; }
+  ocv.style.display = '';
+  if (Date.now() - lastOsd < 600) return;
+  lastOsd = Date.now();
+  const r = await fetch('/osd', { cache: 'no-store' });
+  if (r.status !== 200) return;
+  const b = new Uint8Array(await r.arrayBuffer());
+  const dv = new DataView(b.buffer);
+  const d = oimg.data; d.fill(0);
+  let p = 0, pix = 0;
+  while (p + 8 <= b.length) {
+    const skip = dv.getUint32(p, true), run = dv.getUint32(p + 4, true); p += 8;
+    pix += skip;
+    for (let i = 0; i < run && p + 4 <= b.length; i++, pix++, p += 4) {
+      const o = pix * 4;
+      d[o] = b[p + 2]; d[o + 1] = b[p + 1]; d[o + 2] = b[p]; d[o + 3] = b[p + 3];
+    }
   }
+  octx.putImageData(oimg, 0, 0);
 }
 
 // 키
@@ -137,11 +133,11 @@ async function loadActions() {
   for (const line of txt.split('\n')) {
     if (!line || line.startsWith('#')) continue;
     const [name, label] = line.split('|');
-    if (!name) continue;
+    if (!name || name === 'none' || name === 't_web') continue;   // 없음, 웹 원격 끄기 (자기 자신) 는 뺀다
     const b = document.createElement('button'); b.textContent = label || name;
     b.onclick = () => fetch(`/run?s=${name}`);
     a.appendChild(b);
   }
 }
 
-lvLoop(); osdLoop(); statusLoop();
+lvLoop(); statusLoop();
