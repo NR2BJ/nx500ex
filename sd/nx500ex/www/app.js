@@ -65,7 +65,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // 키
 async function key(k, a) { try { await fetch(`/key?k=${k}&a=${a || 'click'}`); } catch (e) {} }
-document.querySelectorAll('#pad button[data-key]').forEach(b => b.onclick = () => key(b.dataset.key));
+document.querySelectorAll('#pad button[data-key]').forEach(b => b.onclick = () => key(b.dataset.key, b.dataset.act || 'click'));
 $('#s1hold').onclick = () => key('s1', 'push');
 $('#s1rel').onclick = () => key('s1', 'release');
 $('#shoot').onclick = async () => { await key('s1', 'push'); await sleep(700); await key('s2', 'click'); await sleep(300); await key('s1', 'release'); };
@@ -76,7 +76,7 @@ async function statusLoop() {
     try {
       const s = await (await fetch('/status', { cache: 'no-store' })).json();
       const up = parseFloat(s.uptime || '0');
-      $('#status').textContent = `${s.ip || ''}  모드 ${s.mode || '?'}  드라이브 ${s.drive || '?'}  배터리 ${s.bat_soc || '?'}${s.charging === '1' ? ' 충전' : ''}  ${s.hevc === 'ON' ? '녹화 중' : ''}  켜진 지 ${Math.floor(up / 60)}분`;
+      $('#status').textContent = `${s.ip || ''}  모드 ${s.mode || '?'}  드라이브 ${s.drive || '?'}  배터리 ${s.bat || '?'}${s.charging === '1' ? ' 충전' : ''}  ${s.hevc === 'ON' ? '녹화 중' : ''}  켜진 지 ${Math.floor(up / 60)}분`;
     } catch (e) { $('#status').textContent = '연결 끊김'; }
     await sleep(2000);
   }

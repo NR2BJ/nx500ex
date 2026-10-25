@@ -105,8 +105,8 @@ static void lv_init(void)
 	close(fd);
 }
 
-/* 방금 바뀐 버퍼를 고른다. 없으면 이전 것 */
-static unsigned char *lv_pick(void)
+/* 방금 바뀐 버퍼를 고른다. 없으면 이전 것. 첫 요청은 두 번 훑어 (40 ms 간격) 바뀐 것을 찾고, 그래도 없으면 첫 버퍼 */
+static void lv_scan(void)
 {
 	int i, j;
 	for (i = 0; i < NLV; i++) {
@@ -116,6 +116,13 @@ static unsigned char *lv_pick(void)
 		if (lv_hash[i] != 0 && h != lv_hash[i]) lv_cur = i;
 		lv_hash[i] = h;
 	}
+}
+
+static unsigned char *lv_pick(void)
+{
+	lv_scan();
+	if (lv_cur < 0) { usleep(40000); lv_scan(); }
+	if (lv_cur < 0 && lv_map[0]) lv_cur = 0;
 	return lv_cur >= 0 ? lv_map[lv_cur] : NULL;
 }
 
@@ -227,25 +234,45 @@ static void json_str(char *out, size_t size, const char *path, const char *key, 
 	*first = 0;
 }
 
+static const char *mode_name(int m)
+{
+	static const char *names[] = { "Scene", "Auto", "P", "A", "S", "M", "C1", "C2", "SAS" };
+	return (m >= 0 && m < 9) ? names[m] : "?";
+}
+
+static const char *drive_name(int d)
+{
+	static const char *names[] = { "1장", "연속", "고속 연속", "타이머", "브라케팅" };
+	return (d >= 0 && d < 5) ? names[d] : "?";
+}
+
 static void handle_status(int fd)
 {
 	static char body[2048];
-	char v[256];
-	int first = 1;
+	char v[256], ip[64] = "";
+	int mode = -1, drive = -1, level = -1, charging = 0;
 	FILE *f;
-	body[0] = 0; strcat(body, "{");
-	json_str(body, sizeof body, "/sys/devices/platform/d5keys-polled/dial_mode", "mode", &first);
-	json_str(body, sizeof body, "/sys/devices/platform/d5keys-polled/dial_drive", "drive", &first);
-	json_str(body, sizeof body, "/sys/devices/platform/micom-ctrl/bat_charging", "charging", &first);
-	json_str(body, sizeof body, "/sys/devices/platform/micom-ctrl/body_bat_soc", "bat_soc", &first);
-	json_str(body, sizeof body, "/sys/kernel/debug/pmu/hevc/state", "hevc", &first);
-	json_str(body, sizeof body, "/proc/uptime", "uptime", &first);
-	json_str(body, sizeof body, "/proc/loadavg", "load", &first);
-	v[0] = 0;
+	unsigned char b[32];
+	int bf;
+	/* NX500: 다이얼은 d5-keys, 배터리 단계는 sysman 의 공유 메모리 파일 (상류 status.c), 충전은 power_supply */
+	if (read_file("/sys/devices/platform/d5-keys/dial_mode", v, sizeof v) > 0) mode = atoi(v);
+	if (read_file("/sys/devices/platform/d5-keys/dial_drive", v, sizeof v) > 0) drive = atoi(v);
+	bf = open("/var/run/memory/sysman/battery_status_low", O_RDONLY);
+	if (bf >= 0) { if (read(bf, b, sizeof b) >= 5) level = b[4]; close(bf); }
+	if (read_file("/sys/devices/platform/d5-adc-battery/power_supply/battery/charge_now", v, sizeof v) > 0) charging = atoi(v) == 1;
 	f = popen("ip addr ls mlan0 2>/dev/null | sed -n 's/.*inet \\([0-9.]*\\).*/\\1/p'", "r");
-	if (f) { if (!fgets(v, sizeof v, f)) v[0] = 0; pclose(f); }
-	v[strcspn(v, "\n")] = 0;
-	snprintf(body + strlen(body), sizeof body - strlen(body), ",\"ip\":\"%s\",\"lv\":%d}", v, lv_cur >= 0);
+	if (f) { if (!fgets(ip, sizeof ip, f)) ip[0] = 0; pclose(f); }
+	ip[strcspn(ip, "\n")] = 0;
+	body[0] = 0;
+	snprintf(body, sizeof body, "{\"mode\":\"%s\",\"mode_n\":%d,\"drive\":\"%s\",\"drive_n\":%d,\"bat\":\"%d단계\",\"bat_level\":%d,\"charging\":\"%d\"",
+		mode_name(mode), mode, drive_name(drive), drive, level, level, charging);
+	{
+		int first = 0;
+		json_str(body, sizeof body, "/sys/kernel/debug/pmu/hevc/state", "hevc", &first);
+		json_str(body, sizeof body, "/proc/uptime", "uptime", &first);
+		json_str(body, sizeof body, "/proc/loadavg", "load", &first);
+	}
+	snprintf(body + strlen(body), sizeof body - strlen(body), ",\"ip\":\"%s\",\"lv\":%d}", ip, lv_cur >= 0);
 	send_text(fd, 200, "application/json", body);
 }
 
