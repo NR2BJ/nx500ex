@@ -4,6 +4,7 @@
 #   time.sh quiet   WiFi 가 붙을 때 wifi.sh 가 뒤에서 부름: 2 초 이상 틀렸을 때만 팝업
 # 서버: conf/ntp.txt 에 한 줄 적으면 그것, 없으면 kr.pool.ntp.org. busybox ntpd -n -q (한 번 맞추고 끝), busybox hwclock -w (RTC).
 # 실기 (2026-10-26): 카메라 시계가 27.6 초 빨랐고 4 번 응답 뒤 맞춰짐 (약 10 초). 카메라 시간대는 /etc/localtime (KST) 로 표시되므로 UTC 로 맞추면 된다.
+# RTC 는 UTC 로 써야 한다 (busybox hwclock 은 /etc/adjtime 이 없으면 지역 시각으로 쓰므로 -u 필수). 카메라의 전원 끄기는 절전 (uptime 유지) 이고 켤 때 RTC 를 다시 읽는다.
 . "${NX500EX:-/mnt/mmc/nx500ex}/scripts/common.sh"
 B="$D/bin/busybox"
 SERVER=$(head -n 1 "$D/conf/ntp.txt" 2>/dev/null | tr -d ' \r'); [ -n "$SERVER" ] || SERVER=kr.pool.ntp.org
@@ -20,7 +21,7 @@ if [ -z "$OFF" ] || [ "$RC" != 0 ]; then
   exit 1
 fi
 OFF=${OFF#+}
-"$B" hwclock -w 2>/dev/null
+"$B" hwclock -w -u 2>/dev/null   # RTC 는 UTC 로 (펌웨어가 켤 때 RTC 를 UTC 로 읽는다. 지역 시각으로 쓰면 다음 전원에서 9 시간 빨라짐, 2026-10-26 실기)
 wl "time: set, offset ${OFF}s via $SERVER, rtc written"
 # 소수 둘째 자리까지, 부호 유지
 SHOW=$(printf '%s' "$OFF" | sed 's/^\(-*[0-9]*\.[0-9][0-9]\).*/\1/')
