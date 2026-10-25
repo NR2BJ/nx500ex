@@ -105,7 +105,7 @@ LUT 다음 작업. 순서대로 하되 1 이 기반이다.
 
 | 순서 | 항목 | 내용 | 완료 |
 | --- | --- | --- | --- |
-| 1 | WiFi 켜기와 유지 | 전원을 켜면 꺼져 있는 WiFi 를 우리 메뉴 체크박스로 켜고 (핫스팟 등 저장된 네트워크에 연결), 촬영 화면에서도 유지. 카메라는 ConnMan (connmand) 으로 네트워크를 관리하므로 connmanctl 또는 D-Bus 로 기술 켜기와 서비스 연결을 시도. 카메라 앱 쪽 통로 (/tmp/var/run/memory/ap_setting/request_type, capdtm WIFIMODE) 도 후보. 먼저 scripts/wifi_probe.sh 로 상태 수집 (1 꺼짐, 2 WiFi 화면에서 연결됨, 3 촬영 화면 복귀 뒤) | |
+| 1 | WiFi 켜기와 유지 | 전원을 켜면 꺼져 있는 WiFi 를 우리 메뉴 체크박스로 켜고 저장된 네트워크에 연결, 촬영 화면에서도 유지. 조사 결과 (2026-10-25, wifi_probe 1~4, netconfig.log): 카메라는 Tizen net-config 가 WiFi 를 켜고 (D-Bus net.netconfig.wifi.LoadDriver: wpa_supplicant 시작, 드라이버 적재, ConnMan Powered), ConnMan 이 저장된 네트워크 (즐겨찾기, AutoConnect) 에 자동 연결. wlan.sh 로 드라이버만 올리면 wpa_supplicant 가 없어 연결 안 됨 (시험판). scripts/wifi.sh 로 구현: 체크박스 WiFi 켜기 (전원 켤 때 auto 에서 뒤에서 켬), WiFi 네트워크 > 화면에서 저장된 네트워크 고르기 (ConnMan Service.Connect), 끄기 = RemoveDriver. 집 WiFi 와 PC 텔넷으로 시험 예정 | 시험 중 |
 | 2 | 텔넷/FTP 를 WiFi 켜기와 묶기 | WiFi 가 붙으면 IP 팝업, 끊기면 알림. 지금 서버는 WiFi 와 무관하게 떠 있음 | |
 | 3 | SSH/SFTP/SCP | 상류 ssh-server (Dropbear 2020.81, MIT) 를 SD 에서 띄우기. 공개키 인증. 텔넷/FTP 대신 쓰는 옵션 | |
 | 4 | 웹 원격 제어 | mewlips nx-remote-controller-mod (AGPL-3.0. 라이브 뷰, 키 입력, 갤러리, 80번). NX-KS 2.56 부터 내장이던 것. 바이너리 재빌드 가능성 확인 뒤 포함. 웹 갤러리 개선 (실시간 목록, 썸네일) 은 그 다음. 폰 쪽은 Katsiy/NXConnectForNX500 (AGPL-3.0, 안드로이드 앱: 사진/RAW 전송, 라이브 뷰, 원격 셔터, 화면 미러링. 카메라의 텔넷 23 과 FTP 21 을 전제) 이 있어 우리 텔넷/FTP 와 바로 맞을 수 있음 (docs/protocol.md 확인) | |

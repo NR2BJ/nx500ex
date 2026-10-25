@@ -28,7 +28,7 @@ sec "dbus 서비스 목록"; ls -la /usr/share/dbus-1/system-services/ 2>&1 | he
 sec "D-Bus 로 connman 기술 상태 (읽기만)"; dbus-send --system --print-reply --dest=net.connman /net/connman/technology/wifi net.connman.Technology.GetProperties 2>&1 | head -30
 sec "D-Bus 로 connman 서비스 목록 (읽기만)"; dbus-send --system --print-reply --dest=net.connman / net.connman.Manager.GetServices 2>&1 | grep -E "object path|Name|State|Favorite|AutoConnect|Strength" | head -40
 sec "wlan.sh 내용"; cat /usr/bin/wlan.sh 2>&1 | head -120
-sec "net-config (Tizen 네트워크 설정 데몬) D-Bus 인터페이스"; for o in /net/netconfig/wifi /net/netconfig/network /net/netconfig/statistics; do echo "--- $o"; dbus-send --system --print-reply --dest=net.netconfig $o org.freedesktop.DBus.Introspectable.Introspect 2>&1 | grep -E "interface name|method name|property name" | head -60; done
+sec "net-config (Tizen 네트워크 설정 데몬) D-Bus 인터페이스"; for o in /net/netconfig/wifi /net/netconfig/network /net/netconfig/statistics; do echo "--- $o"; dbus-send --system --print-reply --dest=net.netconfig $o org.freedesktop.DBus.Introspectable.Introspect 2>&1 | grep -E "interface name|method name|property name|arg " | head -120; done
 sec "connman Manager 인터페이스"; dbus-send --system --print-reply --dest=net.connman / org.freedesktop.DBus.Introspectable.Introspect 2>&1 | grep -E "method name" | head -40
 sec "connman 기술 목록"; dbus-send --system --print-reply --dest=net.connman / net.connman.Manager.GetTechnologies 2>&1 | head -60
 sec "connman 서비스 전체 (값 포함, 앞 200줄)"; dbus-send --system --print-reply --dest=net.connman / net.connman.Manager.GetServices 2>&1 | head -200

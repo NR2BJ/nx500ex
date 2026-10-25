@@ -1,0 +1,4 @@
+# 자동 생성 (wifi.sh list). 처음엔 비어 있음: "목록 새로 고침" 을 누른 뒤 이 화면을 다시 연다
+back|gui_more
+button|목록 새로 고침|wifi.sh list
+button|WiFi 끄기|wifi.sh off

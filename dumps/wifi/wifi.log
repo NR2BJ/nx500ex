@@ -1,0 +1,8 @@
+2026-10-25 23:37:45 wifi_on start: if=no ip= modules=bt8887 exfat_fs exfat_core 
+2026-10-25 23:37:45 step1 LoadDriver via net-config
+2026-10-25 23:37:45   net.netconfig.wifi.LoadDriver -> Error org.freedesktop.DBus.Error.UnknownMethod: Method "LoadDriver" with signature "" on interface "net.netconfig.wifi" doesn't exist  
+2026-10-25 23:37:48   wlan.sh start -> cat: /sdcard/wifi-test.tg: No such file or directory insmod /lib/modules/sd8xxx.ko cfg80211_wext=15 txpwrlimit_cfg=mrvl/txpwrlimit_cfg.bin cal_data_cfg=mrvl/WlanCalData_ext.conf drv_mode=1 mac_addr=18:3F:47:E0:22:FE fw_name=mrvl/sd8887_uapsta.bin reg_alpha2=KR already using urandom for random 
+2026-10-25 23:37:51 step2 connman Powered=true (if=yes)
+2026-10-25 23:37:51   SetProperty Powered -> method return sender=:1.28 -> dest=:1.112 reply_serial=2 
+2026-10-25 23:38:18 step3 no ip after 25s, scan + connect favorites
+2026-10-25 23:38:22 wifi_on end: if=yes ip=none

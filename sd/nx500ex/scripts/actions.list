@@ -19,4 +19,6 @@ lut_off|LUT 끄기
 load_UP|UP 프로필
 load_DOWN|DOWN 프로필
 net_status|텔넷 상태와 IP
+wifi_status|WiFi 상태와 IP
+t_wifi|WiFi 켬/끔
 info|셔터 횟수
