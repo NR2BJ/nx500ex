@@ -98,6 +98,15 @@ $('#s1hold').onclick = () => key('s1', 'push');
 $('#s1rel').onclick = () => key('s1', 'release');
 $('#shoot').onclick = async () => { await key('s1', 'push'); await sleep(700); await key('s2', 'click'); await sleep(300); await key('s1', 'release'); };
 
+// 라이브 뷰를 누르면 그 자리에 터치 (터치 AF 등). 캔버스 표시 크기를 카메라 화면 720x480 으로 환산
+$('#view').onclick = e => {
+  const r = cv.getBoundingClientRect();
+  const x = Math.round((e.clientX - r.left) * W / r.width), y = Math.round((e.clientY - r.top) * H / r.height);
+  if (x < 0 || y < 0 || x >= W || y >= H) return;
+  fetch(`/touch?x=${x}&y=${y}`).catch(() => {});
+  $('#lvinfo').textContent = `터치 ${x}, ${y}`;
+};
+
 // 상태
 async function statusLoop() {
   for (;;) {

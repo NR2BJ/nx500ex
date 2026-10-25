@@ -7,7 +7,7 @@ nav button { background: #333; color: #ddd; border: 0; padding: 6px 12px; margin
 nav button.on { background: #4a7; color: #000; }
 .tab { display: none; padding: 8px; }
 .tab.on { display: block; }
-#view { position: relative; max-width: 960px; margin: 0 auto; }
+#view { position: relative; max-width: 960px; margin: 0 auto; cursor: crosshair; }
 #lv { width: 100%; height: auto; background: #000; display: block; border-radius: 4px; }
 #osd { position: absolute; left: 0; top: 0; width: 100%; height: auto; pointer-events: none; }
 #lvinfo { position: absolute; left: 6px; top: 6px; font-size: 12px; color: #fff; background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 3px; }

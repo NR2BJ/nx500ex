@@ -10,6 +10,7 @@
  *                  헤더 X-Width, X-Height. 카메라 UI 는 투명 바탕 위에 그려져 있어 (실기: 345600 중 불투명 5천~2만) 수십 KB 로 줄어든다.
  *   /fb            /dev/fb0 원본 (64x64 라 OSD 아님, 시험용). 헤더 X-Width, X-Height, X-Bpp, X-Stride
  *   /key?k=이름[&a=click|push|release]   카메라 키 (st key <a> <이름>). 기본 click
+ *   /touch?x=&y=[&a=click|push|release]   화면 터치 (st key touch <a> x y). 좌표는 카메라 화면 720x480 기준
  *   /run?s=이름    <scripts>/<이름>.sh 를 뒤에서 실행 (메뉴 동작과 같음)
  *   /status        JSON: 다이얼, 드라이브, 배터리, 동영상, IP, 가동 시간, 부하
  *   /actions       <scripts>/actions.list 그대로 (웹 화면의 동작 버튼 목록)
@@ -255,6 +256,17 @@ static void handle_key(int fd, const char *k, const char *a)
 	char *argv[5];
 	if (!safe_name(k) || !safe_name(a)) { send_text(fd, 400, "text/plain", "bad key"); return; }
 	argv[0] = "st"; argv[1] = "key"; argv[2] = (char *)a; argv[3] = (char *)k; argv[4] = NULL;
+	run_bg(argv);
+	send_text(fd, 200, "text/plain", "ok");
+}
+
+static void handle_touch(int fd, const char *xs, const char *ys, const char *a)
+{
+	char *argv[7], xb[16], yb[16];
+	int x = atoi(xs), y = atoi(ys);
+	if (!safe_name(a) || x < 0 || y < 0 || x >= 720 || y >= 480) { send_text(fd, 400, "text/plain", "bad touch"); return; }
+	snprintf(xb, sizeof xb, "%d", x); snprintf(yb, sizeof yb, "%d", y);
+	argv[0] = "st"; argv[1] = "key"; argv[2] = "touch"; argv[3] = (char *)a; argv[4] = xb; argv[5] = yb; argv[6] = NULL;
 	run_bg(argv);
 	send_text(fd, 200, "text/plain", "ok");
 }
@@ -530,6 +542,7 @@ static void handle(int fd)
 	else if (!strcmp(path, "/fb")) handle_fb(fd);
 	else if (!strcmp(path, "/osd")) handle_osd(fd);
 	else if (!strcmp(path, "/key")) { query_get(q, "k", v1, sizeof v1); query_get(q, "a", v2, sizeof v2); handle_key(fd, v1, v2[0] ? v2 : "click"); }
+	else if (!strcmp(path, "/touch")) { char vx[16], vy[16]; query_get(q, "x", vx, sizeof vx); query_get(q, "y", vy, sizeof vy); query_get(q, "a", v2, sizeof v2); handle_touch(fd, vx, vy, v2[0] ? v2 : "click"); }
 	else if (!strcmp(path, "/run")) handle_run(fd, query_get(q, "s", v1, sizeof v1));
 	else if (!strcmp(path, "/status")) handle_status(fd);
 	else if (!strcmp(path, "/actions")) { char p2[1024]; snprintf(p2, sizeof p2, "%s/actions.list", scripts); handle_static_path(fd, p2, "text/plain; charset=utf-8"); }
