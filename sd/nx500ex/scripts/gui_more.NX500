@@ -1,5 +1,6 @@
 back|gui_ini
 checkbox|텔넷 / FTP|telnet.sh
+button|WiFi 켜기 (시험)|wifi_on.sh
 ip|IP
 button|셔터 횟수|info.sh
 checkbox|진단 기록|debug.sh
