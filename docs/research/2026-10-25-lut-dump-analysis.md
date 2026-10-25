@@ -177,7 +177,16 @@ BT.601 전범위로 확정. 색상 회전은 행렬(601 과 709)을, 채널 감�
 
 - 파나소닉 LUMIX Lab 의 크리에이터 LUT (Desong, Vintage Summer, 기준 포토 스타일 STD) 를 앱의 공유로 .cube 를 꺼내 웹 변환기로 넣으니 카메라에서 바로 됐다. LUMIX Lab .cube 는 둘째 줄 #LUMIXPHOTOSTYLE 태그로 기준 스타일을 적고, V-Log 기준은 변환기가 거절한다 (STD, NAT 등 완성 영상 기준만 허용). 루믹스 리얼타임 LUT 와 우리 LUT 는 같은 일 (완성 JPEG 와 라이브 뷰에 사용자 .cube) 이라 그 생태계의 비 V-Log LUT 가 그대로 자산이 된다.
 
-## 10. 다음
+## 10. 로그 입력용 LUT 와 다른 형식 (2026-10-26)
+
+원래 "안 됨" 이던 종류를 변환기 쪽 계산만으로 되게 했다 (카메라 쪽 변경 없음).
+
+- 로그 입력용 LUT (V-Log, S-Log3 (S-Gamut3.Cine, S-Gamut3), F-Log, F-Log2, N-Log, Canon Log 3, ARRI LogC3, LogC4) 와 선형 입력용, HLG, PQ: sRGB -> 역감마 -> 선형 -> 노출 (2^ev) -> 색 영역 행렬 -> 로그 곡선 -> LUT. 곡선은 제조사 공개 수식, 행렬은 colour-science 0.4.7 로 sRGB 선형 -> 각 색 영역 (D65, CAT02) 을 유도. tools/lut/inspace.py, inspace_test.py (colour-science 와 전부 일치). 근사인 이유: JPEG 는 톤이 눌리고 255 에서 잘려 로그의 하이라이트 여유가 없음. 흰색 1.0 이 V-Log 0.599 (90% 흰색 자리) 로 가 결과 흰색이 조금 가라앉을 수 있어 노출 보정 (스톱) 을 둠.
+- 형식: .3dl (Autodesk, 빨강이 가장 느림, 정수 비트 깊이 추정 또는 Mesh 줄), .vlt (Panasonic VariCam, 12비트 정수, .cube 순서), .csp (Cinespace, 채널별 프리 LUT 를 선형 보간으로 먼저 적용). 1D cube 와 LUMIX Lab 태그는 앞서.
+- 입력 공간 추정: LUMIX Lab 태그 (VLOG -> vlog, 그 외 -> srgb), 파일 이름 (slog3, vlog, flog2, flog, nlog, clog3, logc4, logc, hlg, pq, linear), DOMAIN 이 0~1 밖이면 linear. 페이지에서 고칠 수 있다.
+- 검증: web/convert.js 와 cube2bank.py 가 vlog, slog3cine, logc4 (노출 +0.5), .3dl, .vlt, .csp 여섯 경우 모두 구간 A, B 바이트 일치 (web_test.js).
+
+## 11. 다음
 
 1. 필름 레시피의 LUT 화 (토닝, 색별 채도, 들뜬 블랙). 레시피 = 화면 마법사 값 + WB + LUT 로 묶기.
 2. .cube 파일을 SD 에 넣으면 카메라에서 바로 쓰는 경로 (지금은 PC 의 add_cube.py 로 변환 필요).

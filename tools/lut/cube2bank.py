@@ -11,11 +11,13 @@
      잘라낸 차이는 그 점에서 룩의 기울기(유한 차분)로 밀어 더한다. 항등이면 그대로, 흑백이면 색차가 0 으로 유지된다.
   3. YCbCr 로 되돌려 0~255 로 자른다.
 
-사용: python3 cube2bank.py in.cube|in.png(HaldCLUT) out.bin [--stock t17.bin]   (.cube 는 1D, 3D, 1D+3D)
+사용: python3 cube2bank.py in.cube|.3dl|.vlt|.csp|.png(HaldCLUT) out.bin [--stock t17.bin] [--space vlog] [--ev 0.5]   (.cube 는 1D, 3D, 1D+3D)
       python3 cube2bank.py --identity out.bin [--stock t17.bin]
 """
-import argparse
+import argparse, os, sys
 import numpy as np
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import inspace
 
 N = 17
 E = N ** 3
@@ -62,9 +64,7 @@ def read_cube(path):
         s = line.strip()
         if s.upper().replace(" ", "").startswith("#LUMIXPHOTOSTYLE"):
             base = s.split()[-1]
-            if "LOG" in base.upper():
-                raise SystemExit(f"LUMIX Lab LUT 의 기준 포토 스타일이 {base} (V-Log): 로그 입력용이라 이 카메라에 맞지 않음")
-            print(f"LUMIX Lab LUT, 기준 포토 스타일 {base}")
+            print(f"LUMIX Lab LUT, 기준 포토 스타일 {base}" + (" (V-Log: --space vlog 로 근사 변환)" if "LOG" in base.upper() else ""))
             continue
         if not s or s.startswith("#"):
             continue
@@ -114,15 +114,131 @@ def trilinear_cube(cube, x):
     return (Cc(0,0,0)*(1-fr)*(1-fg)*(1-fb) + Cc(1,0,0)*fr*(1-fg)*(1-fb) + Cc(0,1,0)*(1-fr)*fg*(1-fb) + Cc(1,1,0)*fr*fg*(1-fb)
           + Cc(0,0,1)*(1-fr)*(1-fg)*fb + Cc(1,0,1)*fr*(1-fg)*fb + Cc(0,1,1)*(1-fr)*fg*fb + Cc(1,1,1)*fr*fg*fb)
 
-def cube_func(path):
-    c = read_cube(path)
+def _scale_of(maxv):
+    """정수 LUT 의 최댓값으로 비트 깊이 추정 (255, 1023, 4095, 16383, 65535)"""
+    for m in (255, 1023, 4095, 16383, 65535):
+        if maxv <= m:
+            return float(m)
+    return float(maxv)
+
+def _num_lines(path):
+    rows = []
+    for line in open(path, encoding="utf-8", errors="replace"):
+        t = line.strip()
+        if not t or t.startswith("#"):
+            continue
+        rows.append(t.split())
+    return rows
+
+def read_3dl(path):
+    """Autodesk / Lustre .3dl: 머리에 입력 격자 값 줄 (또는 "Mesh a b"), 본문 N^3 줄 정수 RGB. 빨강이 가장 느리고 파랑이 가장 빠름."""
+    rows = _num_lines(path)
+    entries = []; size = None; bits = None
+    for t in rows:
+        if t[0].lower() == "mesh" and len(t) >= 3:
+            size = 2 ** int(t[1]) + 1; bits = int(t[2]); continue
+        try:
+            v = [float(a) for a in t]
+        except ValueError:
+            continue
+        if len(v) == 3:
+            entries.append(v)
+        elif len(v) > 3 and size is None:
+            size = len(v)
+    n = len(entries)
+    s = round(n ** (1 / 3))
+    if s ** 3 != n:
+        raise SystemExit(f".3dl 항목 수 {n} 이 정육면체가 아님")
+    size = s
+    arr = np.array(entries, dtype=np.float64)
+    scale = (2.0 ** bits - 1) if bits else _scale_of(arr.max())
+    arr = arr / scale
+    # 빨강이 가장 느림: 색인 (r*S + g)*S + b -> 우리 cube[b, g, r]
+    cube = arr.reshape(size, size, size, 3).transpose(2, 1, 0, 3).copy()
+    return dict(lut1d=None, dmin1=np.zeros(3), dmax1=np.ones(3), cube=cube, dmin=np.zeros(3), dmax=np.ones(3), prelut=None)
+
+def read_vlt(path):
+    """Panasonic VARICAM .vlt: LUT_3D_SIZE 와 N^3 줄의 정수 (보통 12비트) RGB, .cube 와 같은 순서 (빨강이 가장 빠름)."""
+    rows = _num_lines(path)
+    entries = []; size = None
+    for t in rows:
+        if t[0].upper() == "LUT_3D_SIZE":
+            size = int(t[1]); continue
+        try:
+            v = [float(a) for a in t[:3]]
+        except ValueError:
+            continue
+        if len(t) >= 3:
+            entries.append(v)
+    n = len(entries); s = round(n ** (1 / 3))
+    if s ** 3 != n:
+        raise SystemExit(f".vlt 항목 수 {n} 이 정육면체가 아님")
+    arr = np.array(entries, dtype=np.float64)
+    if arr.max() > 1.0:
+        arr = arr / _scale_of(arr.max())
+    return dict(lut1d=None, dmin1=np.zeros(3), dmax1=np.ones(3), cube=arr.reshape(s, s, s, 3), dmin=np.zeros(3), dmax=np.ones(3), prelut=None)
+
+def read_csp(path):
+    """Cinespace .csp: CSPLUTV100, 3D, (METADATA), 채널마다 prelut (점 수, 입력 값들, 출력 값들), 격자 크기, N^3 줄 (빨강이 가장 빠름)."""
+    rows = _num_lines(path)
+    i = 0
+    if rows and rows[0][0].upper().startswith("CSPLUT"):
+        i = 1
+    if i < len(rows) and rows[i][0].upper() == "3D":
+        i += 1
+    elif i < len(rows) and rows[i][0].upper() == "1D":
+        raise SystemExit(".csp 1D 는 지원하지 않음")
+    # METADATA 블록 건너뜀
+    if i < len(rows) and rows[i][0].upper() == "BEGIN":
+        while i < len(rows) and rows[i][0].upper() != "END":
+            i += 1
+        i += 1
+    prelut = []
+    for _ in range(3):
+        n = int(rows[i][0]); i += 1
+        xs = [float(a) for a in rows[i][:n]]; i += 1
+        ys = [float(a) for a in rows[i][:n]]; i += 1
+        prelut.append((np.array(xs), np.array(ys)))
+    sx, sy, sz = (int(a) for a in rows[i][:3]); i += 1
+    entries = [[float(a) for a in t[:3]] for t in rows[i:i + sx * sy * sz]]
+    if len(entries) != sx * sy * sz or sx != sy or sy != sz:
+        raise SystemExit(f".csp 격자 {sx} {sy} {sz} 와 항목 수 {len(entries)} 불일치")
+    cube = np.array(entries, dtype=np.float64).reshape(sz, sy, sx, 3)
+    return dict(lut1d=None, dmin1=np.zeros(3), dmax1=np.ones(3), cube=cube, dmin=np.zeros(3), dmax=np.ones(3), prelut=prelut)
+
+def apply_prelut(prelut, x):
+    out = np.empty_like(x)
+    for c in range(3):
+        xs, ys = prelut[c]
+        out[..., c] = np.interp(x[..., c], xs, ys)
+    return out
+
+def read_lut(path):
+    ext = path.lower().rsplit(".", 1)[-1]
+    if ext == "3dl":
+        return read_3dl(path)
+    if ext == "vlt":
+        return read_vlt(path)
+    if ext == "csp":
+        return read_csp(path)
+    c = read_cube(path); c.setdefault("prelut", None)
+    return c
+
+def lut_func(c, space="srgb", ev=0.0):
+    """읽은 표 c 와 입력 공간으로 룩 함수 (sRGB 0..1 -> RGB 0..1) 를 만든다"""
     def f(x):
+        x = inspace.to_space(x, space, ev)
+        if c.get("prelut") is not None:
+            x = apply_prelut(c["prelut"], x)
         if c["lut1d"] is not None:
             x = apply_1d(c["lut1d"], (x - c["dmin1"]) / (c["dmax1"] - c["dmin1"]))
         if c["cube"] is not None:
             x = trilinear_cube(c["cube"], (x - c["dmin"]) / (c["dmax"] - c["dmin"]))
         return x
     return f
+
+def cube_func(path, space="srgb", ev=0.0):
+    return lut_func(read_lut(path), space, ev)
 
 def read_haldclut(path):
     """HaldCLUT PNG (한 변 = 레벨^3 의 정사각형 또는 레벨^3 x 레벨^3 격자). R 이 가장 빠르게 돌고 G, B 순. 반환 [b, g, r, 3] 0..1"""
@@ -140,9 +256,12 @@ def hald_func(path):
     cube = read_haldclut(path)
     return lambda x: trilinear_cube(cube, x)
 
-def look_func(path):
-    """확장자로 .cube 와 HaldCLUT(.png) 을 가른다"""
-    return hald_func(path) if path.lower().endswith((".png", ".tif", ".tiff")) else cube_func(path)
+def look_func(path, space="srgb", ev=0.0):
+    """확장자로 HaldCLUT(.png) 과 표 파일 (.cube .3dl .vlt .csp) 을 가른다. space 는 inspace.SPACES 의 id (로그 입력용 LUT 는 vlog 등)"""
+    if path.lower().endswith((".png", ".tif", ".tiff")):
+        f = hald_func(path)
+        return (lambda x: f(inspace.to_space(x, space, ev))) if space != "srgb" else f
+    return cube_func(path, space, ev)
 
 def load_bank(data_or_path):
     """19652 바이트 (또는 그 이상) -> [Y, Cb, Cr, (Cr, Cb, Y)] float"""
@@ -204,9 +323,17 @@ def main():
     ap.add_argument("out")
     ap.add_argument("--stock", help="카메라 원래 표 파일 (19652 바이트). 먼저 거친다")
     ap.add_argument("--identity", action="store_true", help=".cube 없이 항등 표")
+    ap.add_argument("--space", default=None, help="LUT 의 입력 공간 (" + " ".join(inspace.SPACES) + "). 없으면 파일 이름과 태그로 추정")
+    ap.add_argument("--ev", type=float, default=0.0, help="로그 입력용일 때 노출 보정 (스톱)")
     a = ap.parse_args()
     stock = load_bank(a.stock) if a.stock else None
-    func = (lambda x: x) if a.identity else look_func(a.cube)
+    if a.identity:
+        func = lambda x: x
+    else:
+        space = a.space or inspace.guess_space(a.cube, open(a.cube, encoding="utf-8", errors="replace").read(4000) if a.cube.lower().endswith(".cube") else None)
+        if space != "srgb":
+            print(f"입력 공간: {inspace.SPACES[space][0]}" + (f", 노출 {a.ev:+.2f} 스톱" if a.ev else ""))
+        func = look_func(a.cube, space, a.ev)
     data = make_bank(func, stock)
     open(a.out, "wb").write(data)
     print(f"{a.out}: {len(data)} 바이트" + (" (원래 표 합성)" if stock is not None else ""))

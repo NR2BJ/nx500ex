@@ -92,10 +92,132 @@
     }
     return out;
   }
-  // 룩 함수 만들기 (RGB 0..1 -> RGB 0..1)
-  function makeLookFunc(lut) {
-    return function (x) {
-      let v = x;
+  // ---- 입력 공간 (tools/lut/inspace.py 와 같은 상수와 식). 카메라는 완성 sRGB 를 LUT 에 넣으므로 로그/선형 입력용 LUT 는 먼저 그 공간으로 바꾼다 ----
+  const MATRICES = {
+    vgamut: [[0.585228754, 0.322656162, 0.092196105], [0.078525921, 0.819662708, 0.101781757], [0.022766089, 0.114221731, 0.862959434]],
+    sgamut3: [[0.566077827, 0.342778099, 0.091220421], [0.076899864, 0.799089495, 0.123980535], [0.022323259, 0.108616808, 0.869007953]],
+    sgamut3cine: [[0.645723475, 0.259125895, 0.095244182], [0.087472175, 0.759732834, 0.152766788], [0.036930429, 0.129286567, 0.833734666]],
+    bt2020: [[0.627441372, 0.32929746, 0.043351458], [0.069027617, 0.919580667, 0.011361423], [0.016364235, 0.088017162, 0.895564973]],
+    cinemagamut: [[0.556185756, 0.329189024, 0.114699106], [0.082354907, 0.75750296, 0.160112721], [0.033071262, 0.22582185, 0.741058963]],
+    awg3: [[0.631362623, 0.270812626, 0.09791522], [0.03675345, 0.793071572, 0.170134952], [0.017338777, 0.148795214, 0.833812095]],
+    awg4: [[0.565865404, 0.340345904, 0.093864957], [0.08856502, 0.809382288, 0.102025411], [0.017721742, 0.109452414, 0.872772816]],
+  };
+  const log10 = (v) => Math.log10(Math.max(v, 1e-12));
+  const ENC = {
+    vlog: (x) => x < 0.01 ? 5.6 * x + 0.125 : 0.241514 * log10(x + 0.00873) + 0.598206,
+    slog3: (x) => x >= 0.01125 ? (420.0 + log10((x + 0.01) / (0.18 + 0.01)) * 261.5) / 1023.0 : (x * (171.2102946929 - 95.0) / 0.01125 + 95.0) / 1023.0,
+    flog: (x) => x >= 0.00089 ? 0.344676 * log10(0.555556 * x + 0.009468) + 0.790453 : 8.735631 * x + 0.092864,
+    flog2: (x) => x >= 0.000889 ? 0.245281 * log10(5.555556 * x + 0.064829) + 0.384316 : 8.799461 * x + 0.092864,
+    nlog: (x) => { const xp = Math.max(x, 0); return xp < 0.328 ? (650.0 / 1023.0) * Math.cbrt(xp + 0.0075) : (150.0 / 1023.0) * Math.log(Math.max(xp, 1e-12)) + 619.0 / 1023.0; },
+    clog3: (x) => { const v = x / 0.9; return v < -0.014 ? -(0.36726845 * log10(1 - 14.98325 * v) + 0.12783901) : (v <= 0.014 ? 1.9754798 * v + 0.12512219 : 0.36726845 * log10(14.98325 * v + 1) + 0.12240537); },
+    logc3: (x) => x > 0.010591 ? 0.247190 * log10(5.555556 * x + 0.052272) + 0.385537 : 5.367655 * x + 0.092809,
+    logc4: (x) => { const a = (Math.pow(2, 18) - 16.0) / 117.45, b = (1023.0 - 95.0) / 1023.0, c = 95.0 / 1023.0; const s = 7.0 * Math.log(2.0) * Math.pow(2.0, 7.0 - 14.0 * c / b) / (a * b); const t = (Math.pow(2.0, 14.0 * (-c / b) + 6.0) - 64.0) / a; return x >= t ? (Math.log2(Math.max(a * x + 64.0, 1e-12)) - 6.0) / 14.0 * b + c : (x - t) / s; },
+    pq: (x) => { const y = Math.max(x, 0) * 100.0 / 10000.0; const m1 = 2610.0 / 16384.0, m2 = 2523.0 / 4096.0 * 128.0, c1 = 3424.0 / 4096.0, c2 = 2413.0 / 4096.0 * 32.0, c3 = 2392.0 / 4096.0 * 32.0; const ym = Math.pow(y, m1); return Math.pow((c1 + c2 * ym) / (1.0 + c3 * ym), m2); },
+    hlg: (x) => { const e = Math.max(x, 0) * 0.1; return e <= 1.0 / 12.0 ? Math.sqrt(3.0 * e) : 0.17883277 * Math.log(Math.max(12.0 * e - 0.28466892, 1e-12)) + 0.55991073; },
+  };
+  // id: [이름, 색 영역, 곡선]
+  const SPACES = {
+    srgb: ['sRGB / Rec.709 완성 영상 (기본)', null, null],
+    linear: ['선형 sRGB (linear)', null, 'linear'],
+    vlog: ['Panasonic V-Log / V-Gamut', 'vgamut', 'vlog'],
+    slog3cine: ['Sony S-Log3 / S-Gamut3.Cine', 'sgamut3cine', 'slog3'],
+    slog3: ['Sony S-Log3 / S-Gamut3', 'sgamut3', 'slog3'],
+    flog: ['Fujifilm F-Log / F-Gamut', 'bt2020', 'flog'],
+    flog2: ['Fujifilm F-Log2 / F-Gamut', 'bt2020', 'flog2'],
+    nlog: ['Nikon N-Log / BT.2020', 'bt2020', 'nlog'],
+    clog3: ['Canon Log 3 / Cinema Gamut', 'cinemagamut', 'clog3'],
+    logc3: ['ARRI LogC3 EI800 / Wide Gamut 3', 'awg3', 'logc3'],
+    logc4: ['ARRI LogC4 / Wide Gamut 4', 'awg4', 'logc4'],
+    hlg: ['HLG / BT.2020 (참고용)', 'bt2020', 'hlg'],
+    pq: ['PQ ST 2084 / BT.2020 (참고용, 흰색 100 nit)', 'bt2020', 'pq'],
+  };
+  const srgbToLinear = (v) => v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  function toSpace(x, space, ev) {
+    if (!space || space === 'srgb') return x;
+    const def = SPACES[space]; if (!def) throw new Error('모르는 입력 공간 ' + space);
+    const gain = Math.pow(2.0, ev || 0);
+    let lin = [srgbToLinear(clamp(x[0], 0, 1)) * gain, srgbToLinear(clamp(x[1], 0, 1)) * gain, srgbToLinear(clamp(x[2], 0, 1)) * gain];
+    if (def[1]) { const m = MATRICES[def[1]]; lin = [m[0][0] * lin[0] + m[0][1] * lin[1] + m[0][2] * lin[2], m[1][0] * lin[0] + m[1][1] * lin[1] + m[1][2] * lin[2], m[2][0] * lin[0] + m[2][1] * lin[1] + m[2][2] * lin[2]]; }
+    if (def[2] === 'linear') return lin;
+    const f = ENC[def[2]];
+    return [f(lin[0]), f(lin[1]), f(lin[2])];
+  }
+  function guessSpace(filename, cubeText) {
+    if (cubeText) { const m = cubeText.match(/^\s*#\s*LUMIXPHOTOSTYLE\s+(\S+)/mi); if (m) return m[1].toUpperCase().includes('LOG') ? 'vlog' : 'srgb'; }
+    const n = (filename || '').toLowerCase();
+    const pats = [[/s-?log3|slog3/, 'slog3cine'], [/s-?log2|slog2/, 'slog3cine'], [/v-?log/, 'vlog'], [/f-?log2/, 'flog2'], [/f-?log/, 'flog'], [/n-?log/, 'nlog'], [/c-?log3|clog3|canon.?log/, 'clog3'], [/logc4|log-?c4/, 'logc4'], [/logc|log-?c|alexa|arri/, 'logc3'], [/hlg/, 'hlg'], [/\bpq\b|st2084|2084/, 'pq'], [/linear|_lin[_.]|acescg/, 'linear']];
+    for (const [re, sp] of pats) if (re.test(n)) return sp;
+    return 'srgb';
+  }
+
+  // ---- 다른 표 형식 ----
+  function numLines(text) {
+    const out = [];
+    for (const line of text.split(/\r?\n/)) { const t = line.trim(); if (!t || t[0] === '#') continue; out.push(t.split(/\s+/)); }
+    return out;
+  }
+  function scaleOf(maxv) { for (const m of [255, 1023, 4095, 16383, 65535]) if (maxv <= m) return m; return maxv; }
+  function parse3dl(text) {
+    const rows = numLines(text); const entries = []; let bits = null;
+    for (const t of rows) {
+      if (t[0].toLowerCase() === 'mesh' && t.length >= 3) { bits = parseInt(t[2], 10); continue; }
+      const v = t.map(parseFloat); if (v.some(a => !Number.isFinite(a))) continue;
+      if (v.length === 3) entries.push(v);
+    }
+    const n = entries.length, S = Math.round(Math.cbrt(n));
+    if (S * S * S !== n) throw new Error(`.3dl 항목 수 ${n} 이 정육면체가 아님`);
+    let maxv = 0; for (const e of entries) for (const a of e) if (a > maxv) maxv = a;
+    const scale = bits ? Math.pow(2, bits) - 1 : scaleOf(maxv);
+    const cube = new Array(n);
+    // 빨강이 가장 느림: 항목 (r*S + g)*S + b -> 우리 색인 r + S*g + S*S*b
+    for (let r = 0; r < S; r++) for (let g = 0; g < S; g++) for (let b = 0; b < S; b++) { const e = entries[(r * S + g) * S + b]; cube[r + S * g + S * S * b] = [e[0] / scale, e[1] / scale, e[2] / scale]; }
+    return { lut1d: null, cube, size3: S, dmin: [0, 0, 0], dmax: [1, 1, 1], prelut: null };
+  }
+  function parseVlt(text) {
+    const rows = numLines(text); const entries = [];
+    for (const t of rows) { if (t[0].toUpperCase() === 'LUT_3D_SIZE') continue; if (t.length < 3) continue; const v = [parseFloat(t[0]), parseFloat(t[1]), parseFloat(t[2])]; if (v.every(Number.isFinite)) entries.push(v); }
+    const n = entries.length, S = Math.round(Math.cbrt(n));
+    if (S * S * S !== n) throw new Error(`.vlt 항목 수 ${n} 이 정육면체가 아님`);
+    let maxv = 0; for (const e of entries) for (const a of e) if (a > maxv) maxv = a;
+    const scale = maxv > 1.0 ? scaleOf(maxv) : 1.0;
+    return { lut1d: null, cube: entries.map(e => [e[0] / scale, e[1] / scale, e[2] / scale]), size3: S, dmin: [0, 0, 0], dmax: [1, 1, 1], prelut: null };
+  }
+  function parseCsp(text) {
+    const rows = numLines(text); let i = 0;
+    if (rows.length && rows[0][0].toUpperCase().startsWith('CSPLUT')) i = 1;
+    if (i < rows.length && rows[i][0].toUpperCase() === '3D') i++;
+    else if (i < rows.length && rows[i][0].toUpperCase() === '1D') throw new Error('.csp 1D 는 지원하지 않음');
+    if (i < rows.length && rows[i][0].toUpperCase() === 'BEGIN') { while (i < rows.length && rows[i][0].toUpperCase() !== 'END') i++; i++; }
+    const prelut = [];
+    for (let c = 0; c < 3; c++) { const n = parseInt(rows[i][0], 10); i++; const xs = rows[i].slice(0, n).map(parseFloat); i++; const ys = rows[i].slice(0, n).map(parseFloat); i++; prelut.push([xs, ys]); }
+    const sx = parseInt(rows[i][0], 10), sy = parseInt(rows[i][1], 10), sz = parseInt(rows[i][2], 10); i++;
+    const cube = [];
+    for (let k = 0; k < sx * sy * sz && i + k < rows.length; k++) cube.push([parseFloat(rows[i + k][0]), parseFloat(rows[i + k][1]), parseFloat(rows[i + k][2])]);
+    if (cube.length !== sx * sy * sz || sx !== sy || sy !== sz) throw new Error(`.csp 격자 ${sx} ${sy} ${sz} 와 항목 수 ${cube.length} 불일치`);
+    return { lut1d: null, cube, size3: sx, dmin: [0, 0, 0], dmax: [1, 1, 1], prelut };
+  }
+  function interp(xs, ys, v) {   // numpy.interp 와 같음 (범위 밖은 끝값)
+    const n = xs.length;
+    if (v <= xs[0]) return ys[0];
+    if (v >= xs[n - 1]) return ys[n - 1];
+    let lo = 0, hi = n - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (xs[mid] <= v) lo = mid; else hi = mid; }
+    const t = (v - xs[lo]) / (xs[hi] - xs[lo]);
+    return ys[lo] + t * (ys[hi] - ys[lo]);
+  }
+  function parseLut(name, text) {
+    const ext = (name || '').toLowerCase().split('.').pop();
+    if (ext === '3dl') return parse3dl(text);
+    if (ext === 'vlt') return parseVlt(text);
+    if (ext === 'csp') return parseCsp(text);
+    const c = parseCube(text); c.prelut = null; return c;
+  }
+
+  // 룩 함수 만들기 (sRGB 0..1 -> RGB 0..1). space 는 SPACES 의 id, ev 는 노출 보정 (스톱)
+  function makeLookFunc(lut, space, ev) {
+    return function (x0) {
+      let v = toSpace(x0, space, ev);
+      if (lut.prelut) v = [interp(lut.prelut[0][0], lut.prelut[0][1], v[0]), interp(lut.prelut[1][0], lut.prelut[1][1], v[1]), interp(lut.prelut[2][0], lut.prelut[2][1], v[2])];
       if (lut.lut1d) {
         const dmin = lut.dmin1, dmax = lut.dmax1;
         v = apply1d(lut.lut1d, lut.size1, [(v[0] - dmin[0]) / (dmax[0] - dmin[0]), (v[1] - dmin[1]) / (dmax[1] - dmin[1]), (v[2] - dmin[2]) / (dmax[2] - dmin[2])]);
@@ -228,6 +350,6 @@
     return out;
   }
 
-  const api = { N, E, TB, BANK, SIZE_A, SIZE_B, parseCube, haldFromPixels, makeLookFunc, makeBank, makeRegions, applyBankToPixels, makeZip, rint, yccToRgb, rgbToYcc };
+  const api = { N, E, TB, BANK, SIZE_A, SIZE_B, parseCube, parseLut, parse3dl, parseVlt, parseCsp, haldFromPixels, makeLookFunc, makeBank, makeRegions, applyBankToPixels, makeZip, rint, yccToRgb, rgbToYcc, SPACES, toSpace, guessSpace };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.NXLUT = api;
 })(typeof self !== 'undefined' ? self : this);

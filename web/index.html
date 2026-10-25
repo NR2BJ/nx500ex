@@ -40,24 +40,26 @@
   <div class="box">
     <p>카메라의 LUT 는 사진이 완성된 뒤 마지막 단계에서, JPEG 가 되기 직전의 sRGB 영상에 걸립니다. 그래서 <b>완성된 sRGB 또는 Rec.709 영상에 쓰라고 만든 룩 LUT</b> 만 의도대로 나옵니다. LUT 자체는 바르게 변환되더라도 입력 공간이 다르면 색이 틀어집니다.</p>
     <table>
-      <tr><th>됨</th><td>
-        .cube 3D (크기 제한 없음, 17, 33, 65 등), .cube 1D (톤 커브), .cube 1D + 3D (셰이퍼 + 3D)<br>
+      <tr><th>그대로 됨</th><td>
+        .cube 3D (크기 제한 없음), .cube 1D (톤 커브), .cube 1D + 3D (셰이퍼 + 3D), .3dl (Autodesk, Lustre), .vlt (Panasonic VariCam), .csp (Cinespace, 프리 LUT 포함)<br>
         HaldCLUT PNG (한 변이 레벨³ 인 정사각형, 예 512x512 = 레벨 8)<br>
-        용도가 "sRGB / Rec.709 영상용 룩", "JPEG 에 적용", "Instagram, Lightroom 스타일" 인 것<br>
-        파나소닉 LUMIX Lab 의 .cube 중 기준 포토 스타일이 Standard, Natural 등인 것 (파일 안 #LUMIXPHOTOSTYLE 태그로 자동 판별. V-Log 기준은 거절)
+        용도가 "sRGB / Rec.709 영상용 룩", "JPEG 에 적용", "Instagram, Lightroom 스타일" 인 것. 파나소닉 LUMIX Lab 의 .cube 는 기준 포토 스타일이 Standard, Natural 등이면 이쪽 (파일 안 #LUMIXPHOTOSTYLE 태그로 자동 판별)
+      </td></tr>
+      <tr><th>근사 변환으로 됨</th><td>
+        로그 영상 입력용 LUT: Panasonic V-Log, Sony S-Log3 (S-Gamut3.Cine / S-Gamut3), Fujifilm F-Log, F-Log2, Nikon N-Log, Canon Log 3, ARRI LogC3, LogC4, 그리고 선형(linear) 입력용, HLG, PQ (참고용).<br>
+        카메라의 sRGB 영상을 그 LUT 가 기대하는 공간으로 먼저 바꿔 넣습니다 (영상 편집의 "709 to LOG" 변환과 같은 일. 곡선은 제조사 공개 수식, 색 영역 행렬은 colour-science 로 유도). 입력 공간은 파일 이름과 태그로 자동 추정하고 아래 2 에서 고칠 수 있습니다.<br>
+        <span class="dim">근사인 이유: JPEG 는 이미 톤이 눌리고 255 에서 잘린 8비트라 로그 영상의 하이라이트 여유가 없습니다. 흰색이 로그의 "90% 흰색" 자리로 가서 결과 흰색이 조금 가라앉을 수 있고 (노출 보정 +0.5 ~ +1 스톱으로 밝힘), 그림자 계조가 거칠어질 수 있습니다. 룩의 색 성격은 거의 그대로 옵니다.</span>
       </td></tr>
       <tr><th>안 됨</th><td>
-        로그 영상 입력용: F-Log, F-Log2, V-Log, S-Log2/3, N-Log, C-Log, Log-C, HLG 를 Rec.709 로 펴는 변환 LUT (제조사 공식 LUT 대부분이 이것)<br>
-        선형(linear) 입력용, 카메라 RAW 프로파일용 (DCP, ICC), Lightroom 프리셋 (.xmp), .3dl, .look, .mga, .lut<br>
-        DOMAIN 이 0 ~ 1 을 벗어나는 .cube (HDR 이나 장면 참조용)
+        카메라 RAW 프로파일 (DCP, ICC), Lightroom 프리셋 (.xmp), 이진 형식 (.look, .mga, .lut). 이것들은 3D LUT 파일이 아니거나 열 수 없는 형식입니다.
       </td></tr>
     </table>
     <p class="dim">한계: 카메라 하드웨어 격자가 17 x 17 x 17 이라 아주 급한 LUT 는 보간 오차가 조금 남습니다 (색상 30도 회전 룩에서 RGB 평균 1.5, 최대 8). 변환 계수는 실기 색표로 확인한 BT.601 전범위이고 평균 ΔE 1.3 안에서 재현됩니다. 카메라의 원래 표 (밝은 곳 채도 억제 등) 위에 LUT 를 얹어 순정 처리는 그대로 남습니다.</p>
   </div>
 
   <h2>1. 파일 고르기</h2>
-  <div id="drop" class="drop">여기에 .cube 또는 HaldCLUT .png 를 끌어다 놓거나 눌러서 고르세요<br><span class="dim">파일은 이 기기 안에서만 읽습니다</span>
-    <input id="file" type="file" accept=".cube,.png,.CUBE,.PNG" style="display:none"></div>
+  <div id="drop" class="drop">여기에 .cube, .3dl, .vlt, .csp 또는 HaldCLUT .png 를 끌어다 놓거나 눌러서 고르세요<br><span class="dim">파일은 이 기기 안에서만 읽습니다</span>
+    <input id="file" type="file" accept=".cube,.3dl,.vlt,.csp,.png,.CUBE,.3DL,.VLT,.CSP,.PNG" style="display:none"></div>
   <p class="dim" style="margin:8px 0 0">먼저 써 보려면 <a href="#" id="sample" style="color:var(--accent)">예시 세피아 .cube 로 해 보기</a></p>
   <div id="check" class="box" style="display:none"></div>
 
@@ -67,6 +69,12 @@
     <input id="id" type="text" placeholder="예: my_portra" maxlength="24">
     <label for="name">메뉴에 보일 이름 (한글 12자 안팎)</label>
     <input id="name" type="text" placeholder="예: 내 포트라" maxlength="24">
+    <label for="space">LUT 의 입력 공간 (파일 이름과 태그로 자동 추정. 틀리면 고르세요)</label>
+    <select id="space" style="width:100%;padding:8px;background:#0d0d0d;color:var(--fg);border:1px solid #444;border-radius:6px;font-size:15px"></select>
+    <div id="evrow" style="display:none">
+      <label for="ev">노출 보정 (스톱). 로그 변환 뒤 흰색이 가라앉으면 +0.5 ~ +1</label>
+      <input id="ev" type="number" min="-2" max="3" step="0.25" value="0" style="width:120px;padding:8px;background:#0d0d0d;color:var(--fg);border:1px solid #444;border-radius:6px;font-size:15px">
+    </div>
   </div>
 
   <h2>3. 변환</h2>
@@ -75,7 +83,7 @@
     <div id="log"></div>
     <div class="row" style="margin-top:12px">
       <div><div class="dim">원본</div><canvas id="before" width="680" height="260"></canvas></div>
-      <div><div class="dim">변환한 표를 거친 결과 (카메라와 같은 계산)</div><canvas id="after" width="680" height="260"></canvas></div>
+      <div><div class="dim">변환한 표를 거친 결과 (카메라와 같은 계산. 로그 입력용이면 흰색이 가라앉는지 보고 노출 보정)</div><canvas id="after" width="680" height="260"></canvas></div>
     </div>
     <p style="margin-top:12px"><button id="dl" disabled>SD 카드용 zip 저장</button></p>
   </div>
@@ -96,7 +104,12 @@
   const $ = (s) => document.querySelector(s);
   const drop = $('#drop'), fileIn = $('#file'), check = $('#check'), idIn = $('#id'), nameIn = $('#name');
   const go = $('#go'), prog = $('#prog'), log = $('#log'), dl = $('#dl');
+  const spaceSel = $('#space'), evIn = $('#ev'), evRow = $('#evrow');
   let stock = null, lut = null, srcName = '', result = null;
+  for (const [id, def] of Object.entries(NXLUT.SPACES)) { const o = document.createElement('option'); o.value = id; o.textContent = def[0]; spaceSel.appendChild(o); }
+  function setSpace(id, why) { spaceSel.value = id; evRow.style.display = id === 'srgb' ? 'none' : 'block'; return why ? ` 입력 공간: ${NXLUT.SPACES[id][0]} (${why}).` : ''; }
+  spaceSel.addEventListener('change', () => { evRow.style.display = spaceSel.value === 'srgb' ? 'none' : 'block'; result = null; dl.disabled = true; });
+  evIn.addEventListener('change', () => { result = null; dl.disabled = true; });
 
   fetch('stock.bin').then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
     .then(b => { stock = new Uint8Array(b); if (stock.length !== NXLUT.SIZE_A + NXLUT.SIZE_B) throw new Error('크기'); update(); })
@@ -121,7 +134,6 @@
   idIn.addEventListener('input', update); nameIn.addEventListener('input', update);
   $('#sample').addEventListener('click', (e) => { e.preventDefault(); fetch('sample_sepia.cube').then(r => r.text()).then(t => { idIn.value = ''; nameIn.value = ''; load(new File([t], 'sample_sepia.cube', { type: 'text/plain' })); }); });
 
-  const LOG_PAT = /(^|[^a-z])(s-?log[23]?|v-?log|f-?log2?c?|n-?log|c-?log[23]?|log-?c|logc|d-?log|hlg|pq|rec2020|bt2020|linear|_lin[_.]|aces|acescg|slog)([^a-z]|$)/i;
   function reject(msg) { lut = null; result = null; check.style.display = 'block'; check.innerHTML = `<span class="bad">받을 수 없음</span> ${msg}`; update(); }
   function accept(msg) { check.style.display = 'block'; check.innerHTML = `<span class="ok">확인</span> ${msg}`; update(); }
 
@@ -129,31 +141,28 @@
     result = null; dl.disabled = true; log.textContent = '';
     srcName = file.name;
     const ext = (file.name.split('.').pop() || '').toLowerCase();
-    if (ext !== 'cube' && ext !== 'png') return reject(`.${ext} 는 지원하지 않는 형식입니다. .cube (1D, 3D, 1D+3D) 또는 HaldCLUT .png 만 됩니다. .3dl, .look, .xmp, .icc, .dcp 는 변환 대상이 아닙니다.`);
-    if (LOG_PAT.test(file.name)) return reject(`파일 이름 "${file.name}" 이 로그, 선형, HDR 입력용 LUT 로 보입니다. 이런 LUT 는 카메라의 sRGB 영상에 쓰면 색이 틀어집니다. 정말 sRGB/Rec.709 영상용 룩이라면 이름에서 해당 단어를 빼고 다시 고르세요.`);
+    if (!['cube', '3dl', 'vlt', 'csp', 'png'].includes(ext)) return reject(`.${ext} 는 지원하지 않는 형식입니다. .cube (1D, 3D, 1D+3D), .3dl, .vlt, .csp 또는 HaldCLUT .png 만 됩니다. .look, .mga, .xmp, .icc, .dcp 는 3D LUT 파일이 아니거나 열 수 없는 형식입니다.`);
     const base = file.name.replace(/\.[^.]+$/, '');
     if (!idIn.value) idIn.value = base.toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 24) || 'user_lut';
     if (!nameIn.value) nameIn.value = base.slice(0, 24);
-    if (ext === 'cube') {
+    if (ext !== 'png') {
       file.text().then(text => {
-        try { lut = NXLUT.parseCube(text); } catch (e) { return reject(`.cube 를 읽지 못함: ${e.message}`); }
+        try { lut = NXLUT.parseLut(file.name, text); } catch (e) { return reject(`.${ext} 를 읽지 못함: ${e.message}`); }
         const m = text.match(/^\s*TITLE\s+"?([^"\n]+)"?/m);
         if (m && nameIn.value === base.slice(0, 24)) nameIn.value = m[1].trim().slice(0, 24);
-        const out = [];
-        for (const [k, dmin, dmax] of [['1D', lut.dmin1, lut.dmax1], ['3D', lut.dmin, lut.dmax]]) {
-          if ((k === '1D' && !lut.lut1d) || (k === '3D' && !lut.cube)) continue;
-          if (dmin.some(v => v < 0) || dmax.some(v => v > 1)) return reject(`${k} 표의 DOMAIN 이 ${dmin.join(' ')} ~ ${dmax.join(' ')} 로 0 ~ 1 을 벗어납니다. 장면 참조 또는 HDR 용 LUT 라 카메라의 sRGB 영상에는 맞지 않습니다.`);
-        }
-        const what = [lut.lut1d ? `1D ${lut.size1}점` : null, lut.cube ? `3D ${lut.size3}x${lut.size3}x${lut.size3}` : null].filter(Boolean).join(' + ');
-        // 파나소닉 LUMIX Lab .cube: 기준 포토 스타일 태그. V-Log 기준이면 로그 입력용이라 안 맞고, Standard/Natural 등은 완성 영상용이라 맞는다
-        const ps = text.match(/^\s*#\s*LUMIXPHOTOSTYLE\s+(\S+)/mi);
+        const what = ext !== 'cube' ? `.${ext} 3D ${lut.size3}x${lut.size3}x${lut.size3}${lut.prelut ? ' + 프리 LUT' : ''}` :
+          '.cube ' + [lut.lut1d ? `1D ${lut.size1}점` : null, lut.cube ? `3D ${lut.size3}x${lut.size3}x${lut.size3}` : null].filter(Boolean).join(' + ') + (lut.lut1d && lut.cube ? ' (1D 를 먼저 적용하고 3D)' : '');
+        // 입력 공간 추정: LUMIX Lab 태그 (STD/NAT = 완성 영상, VLOG = 로그), 파일 이름의 로그 표시, DOMAIN 범위
         let note = '';
-        if (ps) {
-          const base = ps[1].toUpperCase();
-          if (base.includes('LOG')) return reject(`LUMIX Lab LUT 인데 기준 포토 스타일이 ${ps[1]} (V-Log) 입니다. 로그 영상 입력용이라 이 카메라의 sRGB 영상에는 맞지 않습니다. 같은 룩의 Standard 또는 Natural 기준 판이 있으면 그것을 쓰세요.`);
-          note = ` LUMIX Lab LUT, 기준 포토 스타일 ${ps[1]} (완성 영상용이라 맞음. 파나소닉 ${ps[1]} 과 이 카메라의 표준 톤이 조금 달라 대비가 약간 다를 수 있음).`;
-        }
-        accept(`.cube ${what}${lut.lut1d && lut.cube ? ' (1D 를 먼저 적용하고 3D)' : ''}.${note} 변환을 누르세요.`);
+        const ps = text.match(/^\s*#\s*LUMIXPHOTOSTYLE\s+(\S+)/mi);
+        let guess = NXLUT.guessSpace(file.name, ext === 'cube' ? text : null), why = '';
+        if (ps) { why = `LUMIX Lab 기준 포토 스타일 ${ps[1]}`; if (guess === 'srgb') note += ` LUMIX Lab LUT (${ps[1]} 기준, 완성 영상용이라 그대로 맞음).`; }
+        else if (guess !== 'srgb') why = '파일 이름으로 추정';
+        const domOut = (lut.cube && (lut.dmin.some(v => v < 0) || lut.dmax.some(v => v > 1))) || (lut.lut1d && (lut.dmin1.some(v => v < 0) || lut.dmax1.some(v => v > 1)));
+        if (domOut && guess === 'srgb') { guess = 'linear'; why = 'DOMAIN 이 0 ~ 1 밖이라 선형 입력으로 추정'; }
+        note += setSpace(guess, guess === 'srgb' ? '' : why);
+        if (guess !== 'srgb') note += ' 로그/선형 입력용은 근사 변환입니다. 미리보기로 톤을 보고 노출 보정을 조절하세요.';
+        accept(`${what}.${note} 변환을 누르세요.`);
       });
     } else {
       const url = URL.createObjectURL(file), img = new Image();
@@ -167,7 +176,9 @@
         const rgb = new Uint8Array(n * 3);
         for (let i = 0; i < n; i++) { rgb[i * 3] = d[i * 4]; rgb[i * 3 + 1] = d[i * 4 + 1]; rgb[i * 3 + 2] = d[i * 4 + 2]; }
         try { lut = NXLUT.haldFromPixels(rgb, n); } catch (e) { return reject(e.message); }
-        accept(`HaldCLUT 레벨 ${Math.round(Math.cbrt(size))} (${size}x${size}x${size}). 변환을 누르세요.`);
+        const g = NXLUT.guessSpace(file.name, null);
+        const note = setSpace(g, g === 'srgb' ? '' : '파일 이름으로 추정');
+        accept(`HaldCLUT 레벨 ${Math.round(Math.cbrt(size))} (${size}x${size}x${size}).${note} 변환을 누르세요.`);
       };
       img.onerror = () => reject('PNG 를 읽지 못했습니다.');
       img.src = url;
@@ -182,7 +193,8 @@
 
   go.addEventListener('click', () => {
     go.disabled = true; dl.disabled = true; log.textContent = '';
-    const func = NXLUT.makeLookFunc(lut);
+    const space = spaceSel.value, ev = parseFloat(evIn.value) || 0;
+    const func = NXLUT.makeLookFunc(lut, space, space === 'srgb' ? 0 : ev);
     const t0 = performance.now();
     setTimeout(() => {
       try {
@@ -195,7 +207,7 @@
       const src = before.getContext('2d').getImageData(0, 0, before.width, before.height);
       const out = NXLUT.applyBankToPixels(bank, src.data);
       after.getContext('2d').putImageData(new ImageData(out, before.width, before.height), 0, 0);
-      log.innerHTML = `<span class="ok">변환 끝</span> (${Math.round(performance.now() - t0)} ms). 표 42개, ${result.a.length + result.b.length} 바이트. 아래 버튼으로 zip 을 저장하세요.`;
+      log.innerHTML = `<span class="ok">변환 끝</span> (${Math.round(performance.now() - t0)} ms). 표 42개, ${result.a.length + result.b.length} 바이트.${space !== 'srgb' ? ` 입력 공간 ${NXLUT.SPACES[space][0]}, 노출 ${ev >= 0 ? '+' : ''}${ev} 스톱.` : ''} 아래 버튼으로 zip 을 저장하세요.`;
       dl.disabled = false; go.disabled = false;
     }, 20);
   });
@@ -207,6 +219,7 @@
     const readme = enc.encode(
 `nx500ex 사용자 LUT: ${name} (${id})
 원본 파일: ${srcName}
+입력 공간: ${NXLUT.SPACES[spaceSel.value][0]}${spaceSel.value !== 'srgb' ? `, 노출 보정 ${parseFloat(evIn.value) || 0} 스톱 (근사 변환)` : ''}
 만든 곳: nx500ex LUT 변환기 (브라우저 안에서 변환, 전송 없음)
 
 넣는 법

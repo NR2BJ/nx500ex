@@ -13,7 +13,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | 설정 | UP/DOWN 프로필, 전체 설정 백업/복원, 셔터 횟수, 텔넷/FTP |
 | 조작 | 한글 메뉴 (EV 두 번), 키 설정 (EV 조합, 두 번 누르기, 길게 누르기) |
 
-사용법은 sd/nx500ex/README.md 에 있다. 타사 .cube, HaldCLUT 를 카메라용 표로 바꾸는 웹 변환기는 https://nr2bj.github.io/nx500ex/ (설치 없이 브라우저 안에서 변환, 전송 없음. 소스는 web/).
+사용법은 sd/nx500ex/README.md 에 있다. 타사 LUT (.cube 1D/3D, .3dl, .vlt, .csp, HaldCLUT. 로그 입력용은 근사 변환) 를 카메라용 표로 바꾸는 웹 변환기는 https://nr2bj.github.io/nx500ex/ (설치 없이 브라우저 안에서 변환, 전송 없음. 소스는 web/).
 
 ## 폴더
 
@@ -24,7 +24,7 @@ Samsung NX500 (펌웨어 1.12) 기능 확장. 기능은 모두 SD 카드에서 �
 | sd/stage0-probe/, sd/stage1-test/ | 진단, 검증용 SD 구성 |
 | tools/nxmenu/ | nxmenu (메뉴), nxpopup (알림), nxkeys (키 감지), nxgroup (재생 화면 묶기), nxmem (메모리 조사) 소스와 빌드 스크립트 |
 | tools/film/ | 필름 레시피 메뉴 화면 생성기, 보정 색표, 보정 촬영과 비교 촬영 분석 도구 |
-| tools/lut/ | 3D LUT 덤프 분석기, .cube 와 HaldCLUT -> 뱅크 변환기 (cube2bank), 룩 정의와 생성기 (looks, make_luts), 타사 .cube 추가 (add_cube), 공개 필름 에뮬레이션 모음 들여오기 (import_haldclut), 검증 촬영 분석 (lut_verify), 미리보기 (apply_lut) |
+| tools/lut/ | 3D LUT 덤프 분석기, .cube .3dl .vlt .csp 와 HaldCLUT -> 뱅크 변환기 (cube2bank), 로그/선형 입력 공간 변환 (inspace, colour-science 와 대조하는 inspace_test), 룩 정의와 생성기 (looks, make_luts), 타사 LUT 추가 (add_cube), 공개 필름 에뮬레이션 모음 들여오기 (import_haldclut), 검증 촬영 분석 (lut_verify), 미리보기 (apply_lut) |
 | dumps/lut/ | 카메라에서 뜬 LUT 뱅크 덤프와 분석 결과 |
 | docs/plan/ | 로드맵, 설계 |
 | docs/research/ | 조사와 실기 검증 기록 |
