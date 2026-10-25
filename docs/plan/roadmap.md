@@ -108,7 +108,7 @@ LUT 다음 작업. 순서대로 하되 1 이 기반이다.
 | 1 | WiFi 켜기와 유지 | 전원을 켜면 꺼져 있는 WiFi 를 우리 메뉴 체크박스로 켜고 (핫스팟 등 저장된 네트워크에 연결), 촬영 화면에서도 유지. 카메라는 ConnMan (connmand) 으로 네트워크를 관리하므로 connmanctl 또는 D-Bus 로 기술 켜기와 서비스 연결을 시도. 카메라 앱 쪽 통로 (/tmp/var/run/memory/ap_setting/request_type, capdtm WIFIMODE) 도 후보. 먼저 scripts/wifi_probe.sh 로 상태 수집 (1 꺼짐, 2 WiFi 화면에서 연결됨, 3 촬영 화면 복귀 뒤) | |
 | 2 | 텔넷/FTP 를 WiFi 켜기와 묶기 | WiFi 가 붙으면 IP 팝업, 끊기면 알림. 지금 서버는 WiFi 와 무관하게 떠 있음 | |
 | 3 | SSH/SFTP/SCP | 상류 ssh-server (Dropbear 2020.81, MIT) 를 SD 에서 띄우기. 공개키 인증. 텔넷/FTP 대신 쓰는 옵션 | |
-| 4 | 웹 원격 제어 | mewlips nx-remote-controller-mod (라이브 뷰, 키 입력, 갤러리, 80번). NX-KS 2.56 부터 내장이던 것. 라이선스와 바이너리 재빌드 가능성 확인 뒤 포함. 웹 갤러리 개선 (실시간 목록, 썸네일) 은 그 다음 | |
+| 4 | 웹 원격 제어 | mewlips nx-remote-controller-mod (AGPL-3.0. 라이브 뷰, 키 입력, 갤러리, 80번). NX-KS 2.56 부터 내장이던 것. 바이너리 재빌드 가능성 확인 뒤 포함. 웹 갤러리 개선 (실시간 목록, 썸네일) 은 그 다음. 폰 쪽은 Katsiy/NXConnectForNX500 (AGPL-3.0, 안드로이드 앱: 사진/RAW 전송, 라이브 뷰, 원격 셔터, 화면 미러링. 카메라의 텔넷 23 과 FTP 21 을 전제) 이 있어 우리 텔넷/FTP 와 바로 맞을 수 있음 (docs/protocol.md 확인) | |
 | 5 | 사진 자동 전송 | WiFi 가 붙어 있을 때 새 사진을 PC/폰으로 (FTP 클라이언트 push, 또는 PC 쪽 rsync/SFTP pull). ge0rg 의 "촬영 중 SSH 로 rsync" 방식 | |
 | 6 | 시각 맞추기 | WiFi 가 붙으면 NTP 로 카메라 시계 맞춤 (busybox ntpd 또는 rdate). 사진 EXIF 시각 정확도 | |
 | 7 | AP 모드 | 핫스팟 없이 카메라가 공유기 역할 (상류 PR 의 hostapd/udhcpd). 밖에서 폰으로 바로 붙을 때 | |
