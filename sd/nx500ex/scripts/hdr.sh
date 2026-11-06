@@ -35,7 +35,7 @@ popup "HDR ±$((2*E))EV (EV 두번=중단)" 2
     shutter_set $v
     sleep 0.3
     # 기다릴 시간: 8초 + 노출 시간(1초 이상일 때)
-    w=8; if [ $v -le 0 ]; then e2=1; n=$((-v)); while [ $n -ge 16 ]; do e2=$((e2 * 2)); n=$((n - 16)); done; w=$((8 + e2)); fi
+    w=8; if [ $v -le 0 ]; then e2=1; n=$((-v)); while [ $n -ge 16 ]; do e2=$((e2 * 2)); n=$((n - 16)); done; w=$((10 + e2 * 2)); fi   # 장노출 노이즈 제거가 노출만큼 더 걸림 (2026-11-06)
     n0=$(dcim_count)
     s1_hold; sleep 0.5; s2_click; key release s1
     if ! wait_file $n0 $w; then

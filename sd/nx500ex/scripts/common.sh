@@ -57,6 +57,10 @@ now_cs() { read _u _r < /proc/uptime; echo "${_u%.*}${_u#*.}"; }
 shutter_idx() { _s=$(prefman get 0 0xa340 l 2>/dev/null | sed -n 's/.*value = \([0-9-]*\).*/\1/p'); [ -n "$_s" ] && [ "$_s" -gt 32767 ] && _s=$((_s - 65536)); echo "$_s"; }
 shutter_set() { _s=$1; [ "$_s" -lt 0 ] && _s=$((_s + 65536)); prefman set 0 0xa340 l $_s > /dev/null 2>&1; st app mode m > /dev/null 2>&1; }
 BULB_IDX=-96
+# 지금 셔터 속도를 초로 (올림). idx 0 = 1초, 음수는 더 긴 값 (-16 = 2초, -53 = 10초, -80 = 30초), 양수는 1초 미만 -> 1. BULB 는 0 (모름)
+shutter_sec() { _i=$(shutter_idx); case "$_i" in ''|*[!0-9-]*) echo 1; return ;; esac; [ "$_i" = "$BULB_IDX" ] && { echo 0; return; }; [ "$_i" -gt 0 ] && { echo 1; return; }; awk -v i="$_i" 'BEGIN { s = exp(-i / 16 * log(2)); printf "%d\n", (s == int(s)) ? s : int(s) + 1 }'; }
+# 사진 한 장이 파일로 나올 때까지 기다릴 초: 노출 + 장노출 노이즈 제거 (노출만큼 더) + 여유 10초
+shot_wait() { _s=$(shutter_sec); echo $(( _s * 2 + 10 )); }
 # 셔터 버튼을 하드웨어 수준에서 누르기 (bin/nxgpio, tools/nxgpio): 버튼이 연결된 GPIO 선을 출력 0 으로 (= 버튼이 GND 로 당김), 뗌은 입력으로.
 # st key 와 evdev 주입은 카메라 앱의 벌브 종료 판정 (드라이버에 버튼 상태를 묻는 폴링) 을 못 속이지만 이 방법은 물리 버튼과 같다 (2026-10-26 실기).
 # 반셔터 = gpio-59 (gpio7 블록 0x10020000 선 3), 셔터 = gpio-27 (gpio3 블록 0x10003000 선 3). 켜져 있는 동안 반드시 뗀다 (trap).

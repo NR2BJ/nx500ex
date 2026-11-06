@@ -24,7 +24,9 @@ fi
   drive_save; drive_single
   group_mark
   s1_hold; sleep 1
-  if ! first_shot 8; then
+  W=$(shot_wait); SEC=$(shutter_sec)   # 긴 노출 (밤) 이면 파일이 늦게 나온다: 8초 고정이라 10초 노출에서 "초점 실패" 로 오판했음 (2026-11-06)
+  jlog "interval shutter ${SEC}s, wait up to ${W}s per shot"
+  if ! first_shot $W; then
     keys_release; drive_restore; rm -f $JOBPID; jlog "interval stopped: no photo on first shot (focus failed?)"
     popup "첫 장 초점 실패로 중단" 3; exit 0
   fi
@@ -38,9 +40,13 @@ fi
     NOW=$(now_cs)
     # 1초 넘게 밀렸으면 이번 장부터 기준을 다시 잡는다
     [ $NOW -gt $((NEXT + 100)) ] && { jlog "interval late $(( (NOW - NEXT) / 100 ))s, rebase"; T0=$((NOW - k * G * 100)); }
+    _n=$(dcim_count)
     s2_click; k=$((k + 1))
     jlog "interval shot $k t=$(printf '%d.%02d' $(( (NOW - T0) / 100 )) $(( (NOW - T0) % 100 )))s"
+    # 노출이 간격보다 길면 다음 셔터 입력이 무시되므로 파일이 나올 때까지 기다린 뒤 다음 장을 센다 (간격은 "찍고 나서" 기준이 됨)
+    if [ "$SEC" -ge "$G" ]; then wait_file $_n $W > /dev/null; T0=$(( $(now_cs) - k * G * 100 )); fi
   done
+  [ "$SEC" -ge "$G" ] || { _n=$(dcim_count); [ "$SEC" -ge 2 ] && wait_file $((_n - 1)) $W > /dev/null; }   # 마지막 장이 긴 노출이면 끝날 때까지 기다렸다가 정리
   keys_release; lcd_restore; drive_restore; jlog "interval done $k"
   popup "인터벌 완료 ${k}장" 3
   group_done; rm -f $JOBPID
